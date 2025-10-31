@@ -50,12 +50,12 @@
 <h1 class="text-[#333333] dark:text-white text-2xl font-bold leading-tight tracking-tight">VozDoc</h1>
 </div>
 <div class="flex items-center gap-2">
-<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-gray-200 dark:bg-background-dark dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold leading-normal tracking-[0.015em]">
+<button aria-label="Ayuda" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-gray-200 dark:bg-background-dark dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold leading-normal tracking-[0.015em]">
 <span class="material-symbols-outlined text-xl">
                   help
                 </span>
 </button>
-<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-gray-200 dark:bg-background-dark dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold leading-normal tracking-[0.015em]">
+<button aria-label="Configuración" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-gray-200 dark:bg-background-dark dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold leading-normal tracking-[0.015em]">
 <span class="material-symbols-outlined text-xl">
                   settings
                 </span>
@@ -65,7 +65,7 @@
 <main class="flex flex-col gap-10">
 <div class="flex flex-wrap justify-between gap-3">
 <div class="flex min-w-72 flex-col gap-2">
-<p class="text-[#333333] dark:text-white text-4xl font-black leading-tight tracking-tight">Hola, ¿qué te gustaría hacer?</p>
+<h2 class="text-[#333333] dark:text-white text-4xl font-black leading-tight tracking-tight">Hola, ¿qué te gustaría hacer?</h2>
 <p class="text-gray-500 dark:text-gray-400 text-lg font-normal leading-normal">Di 'crear documento' o 'crear correo' para empezar.</p>
 </div>
 </div>
@@ -134,11 +134,11 @@
 <div class="flex items-center justify-center h-16 gap-3">
 <div class="relative flex items-center justify-center">
 <div class="absolute h-10 w-10 animate-ping rounded-full bg-green-400 opacity-50"></div>
-<div class="relative flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white">
+<button aria-label="Activar o desactivar micrófono" class="relative flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white">
 <span class="material-symbols-outlined">mic</span>
+</button>
 </div>
-</div>
-<p class="text-base font-medium text-green-700 dark:text-green-300">Escuchando...</p>
+<p class="text-base font-medium text-green-700 dark:text-green-300" aria-live="polite" aria-atomic="true">Escuchando...</p>
 </div>
 </div>
 </div>
@@ -156,7 +156,7 @@
     let isManuallyStopped = false; // Para evitar que se reinicie si el usuario lo detuvo
 
     // 2. Encontrar los elementos de la UI
-    const micButton = document.querySelector('.sticky.bottom-0 .bg-green-500');
+    const micButton = document.querySelector('.sticky.bottom-0 button[aria-label="Activar o desactivar micrófono"]');
     const statusText = document.querySelector('.sticky.bottom-0 p');
     const pingAnimation = document.querySelector('.sticky.bottom-0 .animate-ping');
     
@@ -194,6 +194,7 @@
         pingAnimation.classList.remove('hidden');
         micButton.classList.remove('bg-gray-500'); // Quita gris
         micButton.classList.add('bg-green-500'); // Pone verde
+        micButton.setAttribute('aria-label', 'Desactivar micrófono');
       };
 
       // 5. Qué hacer cuando se obtiene un resultado
@@ -240,6 +241,7 @@
             pingAnimation.classList.add('hidden');
             micButton.classList.add('bg-gray-500'); // Pone gris
             micButton.classList.remove('bg-green-500'); // Quita verde
+            micButton.setAttribute('aria-label', 'Activar micrófono');
         }
 
         // --- NUEVO: Auto-reinicio ---

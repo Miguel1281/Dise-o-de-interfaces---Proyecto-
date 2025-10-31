@@ -5,7 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Configuración de Voz</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 <script>
       tailwind.config = {
@@ -37,13 +37,23 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
 <div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
 <div class="layout-container flex h-full grow flex-col">
 <div class="flex flex-1">
-<!-- SideNavBar -->
 <aside class="flex flex-col w-64 bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark p-4">
 <div class="flex flex-col gap-4">
 <div class="flex gap-3 items-center">
@@ -62,7 +72,7 @@
 <span class="material-symbols-outlined text-text-light dark:text-text-dark">description</span>
 <p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Documentos</p>
 </a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-primary" href="#">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-primary" href="#" aria-current="page">
 <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">settings_voice</span>
 <p class="text-sm font-medium leading-normal">Configuración de Voz</p>
 </a>
@@ -83,10 +93,8 @@
 </a>
 </div>
 </aside>
-<!-- Main Content -->
 <main class="flex-1 p-8 md:p-12">
 <div class="max-w-4xl mx-auto">
-<!-- PageHeading -->
 <div class="flex flex-wrap justify-between gap-3 mb-8">
 <div class="flex min-w-72 flex-col gap-2">
 <p class="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]">Configuración de Voz</p>
@@ -94,64 +102,54 @@
 </div>
 </div>
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-<!-- Left Column: Custom Commands -->
 <div class="lg:col-span-2 flex flex-col gap-6">
 <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-border-light dark:border-border-dark">
-<!-- SectionHeader -->
 <h2 class="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em]">Mis Comandos Personalizados</h2>
-<!-- BodyText -->
 <p class="text-subtext-light dark:text-subtext-dark text-base font-normal leading-normal mt-2 mb-6">Crea atajos de voz para insertar texto o ejecutar acciones rápidamente.</p>
-<!-- Command List -->
 <div class="flex flex-col border border-border-light dark:border-border-dark rounded-lg">
-<!-- Command Item -->
 <div class="flex justify-between items-center p-4 border-b border-border-light dark:border-border-dark">
 <div>
 <p class="font-medium text-text-light dark:text-text-dark">Insertar firma</p>
 <p class="text-sm text-subtext-light dark:text-subtext-dark">"Atentamente, Elena García..."</p>
 </div>
 <div class="flex items-center gap-2">
-<button class="p-2 rounded-lg hover:bg-primary/10 text-subtext-light dark:text-subtext-dark hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
-<button class="p-2 rounded-lg hover:bg-red-500/10 text-subtext-light dark:text-subtext-dark hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
+<button aria-label="Editar comando: Insertar firma" class="p-2 rounded-lg hover:bg-primary/10 text-subtext-light dark:text-subtext-dark hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
+<button aria-label="Eliminar comando: Insertar firma" class="p-2 rounded-lg hover:bg-red-500/10 text-subtext-light dark:text-subtext-dark hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
 </div>
 </div>
-<!-- Command Item -->
 <div class="flex justify-between items-center p-4 border-b border-border-light dark:border-border-dark">
 <div>
 <p class="font-medium text-text-light dark:text-text-dark">Nuevo párrafo</p>
 <p class="text-sm text-subtext-light dark:text-subtext-dark">[Acción: Salto de línea doble]</p>
 </div>
 <div class="flex items-center gap-2">
-<button class="p-2 rounded-lg hover:bg-primary/10 text-subtext-light dark:text-subtext-dark hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
-<button class="p-2 rounded-lg hover:bg-red-500/10 text-subtext-light dark:text-subtext-dark hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
+<button aria-label="Editar comando: Nuevo párrafo" class="p-2 rounded-lg hover:bg-primary/10 text-subtext-light dark:text-subtext-dark hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
+<button aria-label="Eliminar comando: Nuevo párrafo" class="p-2 rounded-lg hover:bg-red-500/10 text-subtext-light dark:text-subtext-dark hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
 </div>
 </div>
-<!-- Command Item -->
 <div class="flex justify-between items-center p-4">
 <div>
 <p class="font-medium text-text-light dark:text-text-dark">Enviar correo</p>
 <p class="text-sm text-subtext-light dark:text-subtext-dark">[Acción: Enviar el correo actual]</p>
 </div>
 <div class="flex items-center gap-2">
-<button class="p-2 rounded-lg hover:bg-primary/10 text-subtext-light dark:text-subtext-dark hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
-<button class="p-2 rounded-lg hover:bg-red-500/10 text-subtext-light dark:text-subtext-dark hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
+<button aria-label="Editar comando: Enviar correo" class="p-2 rounded-lg hover:bg-primary/10 text-subtext-light dark:text-subtext-dark hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
+<button aria-label="Eliminar comando: Enviar correo" class="p-2 rounded-lg hover:bg-red-500/10 text-subtext-light dark:text-subtext-dark hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
 </div>
 </div>
 </div>
-<!-- SingleButton -->
 <div class="mt-6">
-<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em]">
+<button aria-label="Añadir nuevo comando personalizado" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em]">
 <span class="material-symbols-outlined text-white text-base">add</span>
 <span class="truncate">Añadir Nuevo Comando</span>
 </button>
 </div>
 </div>
 </div>
-<!-- Right Column: Recognition Preferences -->
 <div class="lg:col-span-1 flex flex-col gap-6">
 <div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-border-light dark:border-border-dark">
 <h2 class="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em]">Ajustes de Reconocimiento</h2>
 <div class="flex flex-col gap-6 mt-6">
-<!-- Language Selector -->
 <div>
 <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-2" for="language-select">Idioma</label>
 <select class="w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary focus:ring-primary text-text-light dark:text-text-dark" id="language-select">
@@ -160,7 +158,6 @@
 <option>Français (France)</option>
 </select>
 </div>
-<!-- Sensitivity Slider -->
 <div>
 <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-2" for="sensitivity-slider">Sensibilidad del micrófono</label>
 <input class="w-full h-2 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary" id="sensitivity-slider" max="100" min="0" type="range" value="75"/>
@@ -169,7 +166,6 @@
 <span>Más sensible</span>
 </div>
 </div>
-<!-- Auto-punctuation Toggle -->
 <div class="flex items-center justify-between">
 <div>
 <label class="text-sm font-medium text-text-light dark:text-text-dark" for="auto-punctuation">Puntuación automática</label>
@@ -180,8 +176,7 @@
 <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 dark:peer-focus:ring-primary rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
 </label>
 </div>
-<!-- Test Microphone Button -->
-<button class="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary/20 text-primary gap-2 text-sm font-bold leading-normal tracking-[0.015em]">
+<button aria-label="Probar micrófono" class="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary/20 text-primary gap-2 text-sm font-bold leading-normal tracking-[0.015em]">
 <span class="material-symbols-outlined text-primary text-base">mic</span>
 <span class="truncate">Probar Micrófono</span>
 </button>
@@ -189,12 +184,11 @@
 </div>
 </div>
 </div>
-<!-- Global Action Buttons -->
 <div class="mt-8 pt-6 border-t border-border-light dark:border-border-dark flex justify-end gap-3">
-<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-transparent text-text-light dark:text-text-dark hover:bg-primary/10 text-sm font-bold leading-normal tracking-[0.015em]">
+<button aria-label="Restablecer configuración a valores predeterminados" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-transparent text-text-light dark:text-text-dark hover:bg-primary/10 text-sm font-bold leading-normal tracking-[0.015em]">
 <span class="truncate">Restablecer</span>
 </button>
-<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<button aria-label="Guardar cambios de configuración" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
 <span class="truncate">Guardar Cambios</span>
 </button>
 </div>
