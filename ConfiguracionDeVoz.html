@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Configuración de Voz</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#137fec",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101922",
+              "text-light": "#0d141b",
+              "text-dark": "#e3e9f0",
+              "subtext-light": "#4c739a",
+              "subtext-dark": "#8c9fb4",
+              "border-light": "#e7edf3",
+              "border-dark": "#2a3b4c",
+              "surface-light": "#ffffff",
+              "surface-dark": "#182635"
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<div class="flex flex-1">
+<!-- SideNavBar -->
+<aside class="flex flex-col w-64 bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark p-4">
+<div class="flex flex-col gap-4">
+<div class="flex gap-3 items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBiTffgd0HClNfCEPMcbiOyv_Yfe4X1uIk2tMvfOK6UtTe9Ucl_zI0G19tFr9q0ahDUHbRyasG61T0veyoxi0yus9IPSiRAtgS7Xd-7fkOsQYRiayI0ppQ4i_TiwpJqrh_Wz9sbvBb7kmt9TctA-lrErO8hp5DH7jw77w-KFqt9aAkTlmM3Id5eG7wdjeg2WxMT7ig5JAMNNk6_zK0F6Gk8W7YpPFGanHxE38XMYJSGSCEqk47gmN-TmjO9LjmWMya-0A7M53gmh0OL");'></div>
+<div class="flex flex-col">
+<h1 class="text-text-light dark:text-text-dark text-base font-medium leading-normal">Elena García</h1>
+<p class="text-subtext-light dark:text-subtext-dark text-sm font-normal leading-normal">elena.garcia@email.com</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10" href="#">
+<span class="material-symbols-outlined text-text-light dark:text-text-dark">home</span>
+<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Inicio</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10" href="#">
+<span class="material-symbols-outlined text-text-light dark:text-text-dark">description</span>
+<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Documentos</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/20 text-primary" href="#">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">settings_voice</span>
+<p class="text-sm font-medium leading-normal">Configuración de Voz</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10" href="#">
+<span class="material-symbols-outlined text-text-light dark:text-text-dark">help</span>
+<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Ayuda</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10" href="#">
+<span class="material-symbols-outlined text-text-light dark:text-text-dark">person</span>
+<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Perfil</p>
+</a>
+</nav>
+</div>
+<div class="mt-auto">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10" href="#">
+<span class="material-symbols-outlined text-text-light dark:text-text-dark">logout</span>
+<p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">Cerrar sesión</p>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-8 md:p-12">
+<div class="max-w-4xl mx-auto">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-3 mb-8">
+<div class="flex min-w-72 flex-col gap-2">
+<p class="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]">Configuración de Voz</p>
+<p class="text-subtext-light dark:text-subtext-dark text-base font-normal leading-normal">Personaliza tus comandos de voz y ajusta las preferencias de reconocimiento.</p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Left Column: Custom Commands -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-border-light dark:border-border-dark">
+<!-- SectionHeader -->
+<h2 class="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em]">Mis Comandos Personalizados</h2>
+<!-- BodyText -->
+<p class="text-subtext-light dark:text-subtext-dark text-base font-normal leading-normal mt-2 mb-6">Crea atajos de voz para insertar texto o ejecutar acciones rápidamente.</p>
+<!-- Command List -->
+<div class="flex flex-col border border-border-light dark:border-border-dark rounded-lg">
+<!-- Command Item -->
+<div class="flex justify-between items-center p-4 border-b border-border-light dark:border-border-dark">
+<div>
+<p class="font-medium text-text-light dark:text-text-dark">Insertar firma</p>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">"Atentamente, Elena García..."</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-lg hover:bg-primary/10 text-subtext-light dark:text-subtext-dark hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
+<button class="p-2 rounded-lg hover:bg-red-500/10 text-subtext-light dark:text-subtext-dark hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</div>
+<!-- Command Item -->
+<div class="flex justify-between items-center p-4 border-b border-border-light dark:border-border-dark">
+<div>
+<p class="font-medium text-text-light dark:text-text-dark">Nuevo párrafo</p>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">[Acción: Salto de línea doble]</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-lg hover:bg-primary/10 text-subtext-light dark:text-subtext-dark hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
+<button class="p-2 rounded-lg hover:bg-red-500/10 text-subtext-light dark:text-subtext-dark hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</div>
+<!-- Command Item -->
+<div class="flex justify-between items-center p-4">
+<div>
+<p class="font-medium text-text-light dark:text-text-dark">Enviar correo</p>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">[Acción: Enviar el correo actual]</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-lg hover:bg-primary/10 text-subtext-light dark:text-subtext-dark hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
+<button class="p-2 rounded-lg hover:bg-red-500/10 text-subtext-light dark:text-subtext-dark hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</div>
+</div>
+<!-- SingleButton -->
+<div class="mt-6">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="material-symbols-outlined text-white text-base">add</span>
+<span class="truncate">Añadir Nuevo Comando</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Column: Recognition Preferences -->
+<div class="lg:col-span-1 flex flex-col gap-6">
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-border-light dark:border-border-dark">
+<h2 class="text-text-light dark:text-text-dark text-[22px] font-bold leading-tight tracking-[-0.015em]">Ajustes de Reconocimiento</h2>
+<div class="flex flex-col gap-6 mt-6">
+<!-- Language Selector -->
+<div>
+<label class="block text-sm font-medium text-text-light dark:text-text-dark mb-2" for="language-select">Idioma</label>
+<select class="w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary focus:ring-primary text-text-light dark:text-text-dark" id="language-select">
+<option>Español (España)</option>
+<option>English (United States)</option>
+<option>Français (France)</option>
+</select>
+</div>
+<!-- Sensitivity Slider -->
+<div>
+<label class="block text-sm font-medium text-text-light dark:text-text-dark mb-2" for="sensitivity-slider">Sensibilidad del micrófono</label>
+<input class="w-full h-2 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary" id="sensitivity-slider" max="100" min="0" type="range" value="75"/>
+<div class="flex justify-between text-xs text-subtext-light dark:text-subtext-dark mt-1">
+<span>Menos sensible</span>
+<span>Más sensible</span>
+</div>
+</div>
+<!-- Auto-punctuation Toggle -->
+<div class="flex items-center justify-between">
+<div>
+<label class="text-sm font-medium text-text-light dark:text-text-dark" for="auto-punctuation">Puntuación automática</label>
+<p class="text-xs text-subtext-light dark:text-subtext-dark">Inserta puntos y comas mientras hablas.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="auto-punctuation" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 dark:peer-focus:ring-primary rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Test Microphone Button -->
+<button class="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary/20 text-primary gap-2 text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="material-symbols-outlined text-primary text-base">mic</span>
+<span class="truncate">Probar Micrófono</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Global Action Buttons -->
+<div class="mt-8 pt-6 border-t border-border-light dark:border-border-dark flex justify-end gap-3">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-transparent text-text-light dark:text-text-dark hover:bg-primary/10 text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Restablecer</span>
+</button>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Guardar Cambios</span>
+</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+</div>
+</body></html>
