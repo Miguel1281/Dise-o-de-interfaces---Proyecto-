@@ -1,302 +1,365 @@
 <!DOCTYPE html>
-
-<html class="light" lang="es"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>VoiceCompose - Componer Correo</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-        }
-    </style>
-<script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "primary": "#137fec",
-              "background-light": "#f6f7f8",
-              "background-dark": "#101922",
-              "danger": "#DC3545",
-              "success": "#28A745",
-              "warning": "#ffc107",
-              "neutral-inactive": "#6C757D"
-            },
-            fontFamily: {
-              "display": ["Inter", "sans-serif"]
-            },
-            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>VoiceCompose - Componer Correo</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  </style>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#005A9C",
+            "background-light": "#f6f7f8",
+            "background-dark": "#101922",
+            "danger": "#DC3545",
+            "success": "#28A745",
+            "warning": "#ffc107",
+            "neutral-inactive": "#6C757D"
           },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
         },
-      }
-    </script>
+      },
+    }
+  </script>
 </head>
 <body class="font-display">
-<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
-<div class="layout-container flex h-full grow flex-col">
-<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 px-6 md:px-10 py-3">
-<div class="flex items-center gap-4 text-slate-900 dark:text-white">
-<div class="size-6 text-primary">
-<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-<path d="M13.8261 17.4264C16.7203 18.1174 20.2244 18.5217 24 18.5217C27.7756 18.5217 31.2797 18.1174 34.1739 17.4264C36.9144 16.7722 39.9967 15.2331 41.3563 14.1648L24.8486 40.6391C24.4571 41.267 23.5429 41.267 23.1514 40.6391L6.64374 14.1648C8.00331 15.2331 11.0856 16.7722 13.8261 17.4264Z" fill="currentColor"></path>
-<path clip-rule="evenodd" d="M39.998 12.236C39.9944 12.2537 39.9875 12.2845 39.9748 12.3294C39.9436 12.4399 39.8949 12.5741 39.8346 12.7175C39.8168 12.7597 39.7989 12.8007 39.7813 12.8398C38.5103 13.7113 35.9788 14.9393 33.7095 15.4811C30.9875 16.131 27.6413 16.5217 24 16.5217C20.3587 16.5217 17.0125 16.131 14.2905 15.4811C12.0012 14.9346 9.44505 13.6897 8.18538 12.8168C8.17384 12.7925 8.16216 12.767 8.15052 12.7408C8.09919 12.6249 8.05721 12.5114 8.02977 12.411C8.00356 12.3152 8.00039 12.2667 8.00004 12.2612C8.00004 12.261 8 12.2607 8.00004 12.2612C8.00004 12.2359 8.0104 11.9233 8.68485 11.3686C9.34546 10.8254 10.4222 10.2469 11.9291 9.72276C14.9242 8.68098 19.1919 8 24 8C28.8081 8 33.0758 8.68098 36.0709 9.72276C37.5778 10.2469 38.6545 10.8254 39.3151 11.3686C39.9006 11.8501 39.9857 12.1489 39.998 12.236ZM4.95178 15.2312L21.4543 41.6973C22.6288 43.5809 25.3712 43.5809 26.5457 41.6973L43.0534 15.223C43.0709 15.1948 43.0878 15.1662 43.104 15.1371L41.3563 14.1648C43.104 15.1371 43.1038 15.1374 43.104 15.1371L43.1051 15.135L43.1065 15.1325L43.1101 15.1261L43.1199 15.1082C43.1276 15.094 43.1377 15.0754 43.1497 15.0527C43.1738 15.0075 43.2062 14.9455 43.244 14.8701C43.319 14.7208 43.4196 14.511 43.5217 14.2683C43.6901 13.8679 44 13.0689 44 12.2609C44 10.5573 43.003 9.22254 41.8558 8.2791C40.6947 7.32427 39.1354 6.55361 37.385 5.94477C33.8654 4.72057 29.133 4 24 4C18.867 4 14.1346 4.72057 10.615 5.94478C8.86463 6.55361 7.30529 7.32428 6.14419 8.27911C4.99695 9.22255 3.99999 10.5573 3.99999 12.2609C3.99999 13.1275 4.29264 13.9078 4.49321 14.3607C4.60375 14.6102 4.71348 14.8196 4.79687 14.9689C4.83898 15.0444 4.87547 15.1065 4.9035 15.1529C4.91754 15.1762 4.92954 15.1957 4.93916 15.2111L4.94662 15.223L4.95178 15.2312ZM35.9868 18.996L24 38.22L12.0131 18.996C12.4661 19.1391 12.9179 19.2658 13.3617 19.3718C16.4281 20.1039 20.0901 20.5217 24 20.5217C27.9099 20.5217 31.5719 20.1039 34.6383 19.3718C35.082 19.2658 35.5339 19.1391 35.9868 18.996Z" fill="currentColor" fill-rule="evenodd"></path>
-</svg>
-</div>
-<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">VoiceCompose</h2>
-</div>
-<div class="flex flex-1 justify-end items-center gap-4">
-<button aria-label="Ayuda" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
-<span class="material-symbols-outlined">help</span>
-</button>
-<button aria-label="Configuración" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
-<span class="material-symbols-outlined">settings</span>
-</button>
-<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Avatar de usuario" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCm-Dq-u4wtDCndVnk147L2XWtVWfc82cz5kF17tIm23fVSs9KdywGUvT25ppfjX6CQK1hsZ-8_5IhhtwTNvrqn7Oete1CfwBtZyHYNz3fFqOAPyHt4Pk4kDxYaq9Gvq1Vc3k-PWIqLrn4RjUk6XBY8wW355gVq7o2o3Au6AhM9SLy4aPYbW5soM0Pb0K5Ii4d4W5nu8xzFavp3fw4tQSSw0kBqmjY1Lk99nSW6nE1vx0vNdKf0WHoDyKoOn4QxjXN_pON3Y2BIKmOk");'></div>
-</div>
-</header>
-<main class="flex flex-1 justify-center py-5 px-4 sm:px-6 lg:px-8">
-<div class="layout-content-container flex flex-col w-full max-w-5xl flex-1">
-<div class="flex flex-wrap justify-between items-center gap-3 p-4">
-<p class="text-slate-900 dark:text-white tracking-tight text-[32px] font-bold leading-tight min-w-72">Componer nuevo correo</p>
-</div>
-<div class="flex flex-col lg:flex-row gap-8 p-4">
-<div class="flex-1 flex flex-col gap-6">
-<div class="flex flex-col sm:flex-row gap-4">
-<div class="flex flex-col min-w-40 flex-1">
-<label for="email-to" class="text-slate-900 dark:text-slate-200 text-base font-medium leading-normal pb-2">Para:</label>
-<input id="email-to" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-slate-500 p-[15px] text-base font-normal leading-normal" placeholder="Diga 'Añadir destinatario' seguido de un email" value="equipo.diseno@email.com"/>
-</div>
-<div class="flex items-end gap-2">
-<button class="text-primary font-semibold text-sm h-14">Cc</button>
-<button class="text-primary font-semibold text-sm h-14">Cco</button>
-</div>
-</div>
-<div class="flex flex-col min-w-40 flex-1">
-<label for="email-subject" class="text-slate-900 dark:text-slate-200 text-base font-medium leading-normal pb-2">Asunto:</label>
-<input id="email-subject" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary h-14 placeholder:text-slate-400 dark:placeholder:text-slate-500 p-[15px] text-base font-normal leading-normal" placeholder="Diga 'Escribir asunto' seguido del asunto" value="Propuesta de Diseño para la Nueva Interfaz"/>
-</div>
-<div class="flex flex-col min-w-40 flex-1">
-<label for="email-body" class="sr-only">Cuerpo del correo</label>
-<textarea id="email-body" class="form-input flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary min-h-72 placeholder:text-slate-400 dark:placeholder:text-slate-500 p-[15px] text-base font-normal leading-normal" placeholder="Empiece a dictar su mensaje..."></textarea>
-</div>
-<div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-<div class="flex gap-2">
-<button aria-label="Enviar correo" class="flex items-center justify-center gap-2 h-11 px-4 rounded-lg bg-primary text-white font-semibold text-sm">
-<span class="material-symbols-outlined">send</span>
-<span>Enviar</span>
-</button>
-<button aria-label="Guardar borrador" class="flex items-center justify-center gap-2 h-11 px-4 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white font-semibold text-sm">
-<span class="material-symbols-outlined">draft</span>
-<span>Guardar Borrador</span>
-</button>
-<button aria-label="Adjuntar archivo" class="flex items-center justify-center gap-2 h-11 px-4 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white font-semibold text-sm">
-<span class="material-symbols-outlined">attach_file</span>
-<span>Adjuntar</span>
-</button>
-</div>
-<button aria-label="Descartar correo" class="flex items-center justify-center h-11 px-4 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-sm">
-<span class="material-symbols-outlined">delete</span>
-</button>
-</div>
-</div>
-<aside class="w-full lg:w-72 flex flex-col gap-6">
-<div class="p-6 rounded-xl bg-slate-100 dark:bg-slate-800 flex flex-col items-center text-center">
-<p class="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase">Estado de Voz</p>
-<button aria-label="Activar dictado" class="w-24 h-24 rounded-full flex items-center justify-center bg-danger/10 text-danger mb-3">
-<span class="material-symbols-outlined !text-5xl animate-pulse">mic</span>
-</button>
-<p class="text-lg font-bold text-danger" aria-live="polite" aria-atomic="true">Escuchando...</p>
-<p class="text-sm text-slate-500 dark:text-slate-400">Diga "Pausar dictado" para detener</p>
-</div>
-<div class="p-6 rounded-xl bg-slate-100 dark:bg-slate-800">
-<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Comandos de Voz</h3>
-<ul class="space-y-3 text-slate-700 dark:text-slate-300 text-sm">
-<li class="flex items-start gap-2">
-<span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
-<div>
-<p class="font-semibold">Puntuación:</p>
-<p class="text-slate-500 dark:text-slate-400">"coma", "punto", "signo de interrogación"</p>
-</div>
-</li>
-<li class="flex items-start gap-2">
-<span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
-<div>
-<p class="font-semibold">Formato:</p>
-<p class="text-slate-500 dark:text-slate-400">"nuevo párrafo", "nueva línea"</p>
-</div>
-</li>
-<li class="flex items-start gap-2">
-<span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
-<div>
-<p class="font-semibold">Edición:</p>
-<p class="text-slate-500 dark:text-slate-400">"borrar última palabra", "deshacer"</p>
-</div>
-</li>
-<li class="flex items-start gap-2">
-<span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
-<div>
-<p class="font-semibold">Acciones:</p>
-<p class="text-slate-500 dark:text-slate-400">"enviar correo", "guardar borrador"</p>
-</div>
-</li>
-</ul>
-</div>
-</aside>
-</div>
-</div>
-</main>
-</div>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    alert("Tu navegador no soporta la API de Voz.");
-    return;
-  }
-
-  const recognition = new SpeechRecognition();
-  recognition.lang = 'es-ES';
-
-  // --- Elementos de la UI ---
-  const emailBody = document.querySelector('textarea.form-input');
-  const micContainer = document.querySelector('.p-6.rounded-xl.bg-slate-100');
-  const statusText = micContainer.querySelector('.text-lg.font-bold');
-  const statusSubtext = micContainer.querySelector('.text-sm.text-slate-500');
-  const micButton = micContainer.querySelector('button[aria-label="Activar dictado"]');
-  const micIcon = micButton.querySelector('span');
-
-  let isDictating = false;
-  let finalDictatedText = '';
-
-  // --- Lógica de Manejo de Voz ---
-
-  // Modo 1: Escuchando Comandos
-  const handleCommand = (event) => {
-    const command = event.results[0][0].transcript.toLowerCase().trim();
-    console.log('Comando recibido:', command);
-
-    if (command.includes('comenzar redacción')) {
-      startDictationMode();
-    } else if (command.includes('enviar correo')) {
-      statusText.textContent = 'Enviando...';
-      console.log('Simulando envío de correo');
-    } else if (command.includes('guardar borrador')) {
-      statusText.textContent = 'Guardado.';
-      console.log('Simulando guardado');
-    } 
-    // --- NUEVO COMANDO ---
-    else if (command.includes('volver al inicio')) {
-      statusText.textContent = 'Volviendo...';
-      window.location.href = 'PantallaPrincipal.html';
-    }
-  };
-
-  // Modo 2: Escuchando Dictado (sin cambios)
-  const handleDictation = (event) => {
-    let interimTranscript = '';
-    let hasFoundStop = false;
-
-    for (let i = event.resultIndex; i < event.results.length; ++i) {
-      const transcript = event.results[i][0].transcript;
-      
-      if (transcript.toLowerCase().includes('terminar redacción')) {
-        hasFoundStop = true;
+  <div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
+    <div class="layout-container flex h-full grow flex-col">
+      <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 px-6 md:px-10 py-3">
+        <div class="flex items-center gap-4 text-slate-900 dark:text-white">
+          <div class="size-6 text-primary">
+            <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13.8261 17.4264C16.7203 18.1174 20.2244 18.5217 24 18.5217C27.7756 18.5217 31.2797 18.1174 34.1739 17.4264C36.9144 16.7722 39.9967 15.2331 41.3563 14.1648L24.8486 40.6391C24.4571 41.267 23.5429 41.267 23.1514 40.6391L6.64374 14.1648C8.00331 15.2331 11.0856 16.7722 13.8261 17.4264Z" fill="currentColor"></path>
+              <path clip-rule="evenodd" d="M39.998 12.236C39.9944 12.2537 39.9875 12.2845 39.9748 12.3294C39.9436 12.4399 39.8949 12.5741 39.8346 12.7175C39.8168 12.7597 39.7989 12.8007 39.7813 12.8398C38.5103 13.7113 35.9788 14.9393 33.7095 15.4811C30.9875 16.131 27.6413 16.5217 24 16.5217C20.3587 16.5217 17.0125 16.131 14.2905 15.4811C12.0012 14.9346 9.44505 13.6897 8.18538 12.8168C8.17384 12.7925 8.16216 12.767 8.15052 12.7408C8.09919 12.6249 8.05721 12.5114 8.02977 12.411C8.00356 12.3152 8.00039 12.2667 8.00004 12.2612C8.00004 12.261 8 12.2607 8.00004 12.2612C8.00004 12.2359 8.0104 11.9233 8.68485 11.3686C9.34546 10.8254 10.4222 10.2469 11.9291 9.72276C14.9242 8.68098 19.1919 8 24 8C28.8081 8 33.0758 8.68098 36.0709 9.72276C37.5778 10.2469 38.6545 10.8254 39.3151 11.3686C39.9006 11.8501 39.9857 12.1489 39.998 12.236ZM4.95178 15.2312L21.4543 41.6973C22.6288 43.5809 25.3712 43.5809 26.5457 41.6973L43.0534 15.223C43.0709 15.1948 43.0878 15.1662 43.104 15.1371L41.3563 14.1648C43.104 15.1371 43.1038 15.1374 43.104 15.1371L43.1051 15.135L43.1065 15.1325L43.1101 15.1261L43.1199 15.1082C43.1276 15.094 43.1377 15.0754 43.1497 15.0527C43.1738 15.0075 43.2062 14.9455 43.244 14.8701C43.319 14.7208 43.4196 14.511 43.5217 14.2683C43.6901 13.8679 44 13.0689 44 12.2609C44 10.5573 43.003 9.22254 41.8558 8.2791C40.6947 7.32427 39.1354 6.55361 37.385 5.94477C33.8654 4.72057 29.133 4 24 4C18.867 4 14.1346 4.72057 10.615 5.94478C8.86463 6.55361 7.30529 7.32428 6.14419 8.27911C4.99695 9.22255 3.99999 10.5573 3.99999 12.2609C3.99999 13.1275 4.29264 13.9078 4.49321 14.3607C4.60375 14.6102 4.71348 14.8196 4.79687 14.9689C4.83898 15.0444 4.87547 15.1065 4.9035 15.1529C4.91754 15.1762 4.92954 15.1957 4.93916 15.2111L4.94662 15.223L4.95178 15.2312ZM35.9868 18.996L24 38.22L12.0131 18.996C12.4661 19.1391 12.9179 19.2658 13.3617 19.3718C16.4281 20.1039 20.0901 20.5217 24 20.5217C27.9099 20.5217 31.5719 20.1039 34.6383 19.3718C35.082 19.2658 35.5339 19.1391 35.9868 18.996Z" fill="currentColor" fill-rule="evenodd"></path>
+            </svg>
+          </div>
+          <h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">VoiceCompose</h2>
+        </div>
+        <div class="flex flex-1 justify-end items-center gap-4">
+          <button aria-label="Ayuda" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+            <span class="material-symbols-outlined">help</span>
+          </button>
+          <button aria-label="Configuración" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Avatar de usuario" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCm-Dq-u4wtDCndVnk147L2XWtVWfc82cz5kF17tIm23fVSs9KdywGUvT25ppfjX6CQK1hsZ-8_5IhhtwTNvrqn7Oete1CfwBtZyHYNz3fFqOAPyHt4Pk4kDxYaq9Gvq1Vc3k-PWIqLrn4RjUk6XBY8wW355gVq7o2o3Au6AhM9SLy4aPYbW5soM0Pb0K5Ii4d4W5nu8xzFavp3fw4tQSSw0kBqmjY1Lk99nSW6nE1vx0vNdKf0WHoDyKoOn4QxjXN_pON3Y2BIKmOk");'></div>
+        </div>
+      </header>
+      <main class="flex flex-1 justify-center py-5 px-4 sm:px-6 lg:px-8">
+        <div class="layout-content-container flex flex-col w-full max-w-5xl flex-1">
+          <div class="flex flex-wrap justify-between items-center gap-3 p-4">
+            <p class="text-slate-900 dark:text-white tracking-tight text-[32px] font-bold leading-tight min-w-72">Componer nuevo correo</p>
+          </div>
+          <div class="flex flex-col lg:flex-row gap-8 p-4">
+            <div class="flex-1 flex flex-col gap-6">
+              <div class="flex flex-col sm:flex-row gap-4">
+                <div class="flex flex-col min-w-40 flex-1">
+                  <label for="email-to" class="text-slate-900 dark:text-slate-200 text-base font-medium leading-normal pb-2">Para:</label>
+                  <input id="email-to" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary h-14 placeholder:text-slate-500 dark:placeholder:text-slate-400 p-[15px] text-base font-normal leading-normal" placeholder="Diga 'Añadir destinatario' seguido de un email" value="" />
+                </div>
+                <div class="flex items-end gap-2">
+                  <button class="text-primary font-semibold text-sm h-14">Cc</button>
+                  <button class="text-primary font-semibold text-sm h-14">Cco</button>
+                </div>
+              </div>
+              <div class="flex flex-col min-w-40 flex-1">
+                <label for="email-subject" class="text-slate-900 dark:text-slate-200 text-base font-medium leading-normal pb-2">Asunto:</label>
+                <input id="email-subject" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary h-14 placeholder:text-slate-500 dark:placeholder:text-slate-400 p-[15px] text-base font-normal leading-normal" placeholder="Diga 'Añadir asunto' seguido del asunto" value="" />
+              </div>
+              <div class="flex flex-col min-w-40 flex-1">
+                <label for="email-body" class="sr-only">Cuerpo del correo</label>
+                <textarea id="email-body" class="form-input flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary min-h-72 placeholder:text-slate-500 dark:placeholder:text-slate-400 p-[15px] text-base font-normal leading-normal" placeholder="Empiece a dictar su mensaje..."></textarea>
+              </div>
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <div class="flex gap-2">
+                  <button aria-label="Enviar correo" class="flex items-center justify-center gap-2 h-11 px-4 rounded-lg bg-primary text-white font-semibold text-sm">
+                    <span class="material-symbols-outlined">send</span>
+                    <span>Enviar</span>
+                  </button>
+                  <button aria-label="Guardar borrador" class="flex items-center justify-center gap-2 h-11 px-4 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white font-semibold text-sm">
+                    <span class="material-symbols-outlined">draft</span>
+                    <span>Guardar Borrador</span>
+                  </button>
+                  <button aria-label="Adjuntar archivo" class="flex items-center justify-center gap-2 h-11 px-4 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white font-semibold text-sm">
+                    <span class="material-symbols-outlined">attach_file</span>
+                    <span>Adjuntar</span>
+                  </button>
+                </div>
+                <button aria-label="Descartar correo" class="flex items-center justify-center h-11 px-4 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-sm">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            </div>
+            <aside class="w-full lg:w-72 flex flex-col gap-6">
+              <div class="p-6 rounded-xl bg-slate-100 dark:bg-slate-800 flex flex-col items-center text-center">
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase">Estado de Voz</p>
+                <button aria-label="Activar dictado" class="w-24 h-24 rounded-full flex items-center justify-center bg-danger/10 text-danger mb-3">
+                  <span class="material-symbols-outlined !text-5xl animate-pulse">mic</span>
+                </button>
+                <p class="status-text text-lg font-bold text-danger" aria-live="polite" aria-atomic="true">Escuchando...</p>
+                <p class="status-subtext text-sm text-slate-600 dark:text-slate-300">Diga "Pausar dictado" para detener</p>
+              </div>
+              <div class="p-6 rounded-xl bg-slate-100 dark:bg-slate-800">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Comandos de Voz</h3>
+                <ul class="space-y-3 text-slate-700 dark:text-slate-300 text-sm">
+                  <li class="flex items-start gap-2">
+                    <span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
+                    <div>
+                      <p class="font-semibold">Destinatario/Asunto:</p>
+                      <p class="text-slate-600 dark:text-slate-300">"añadir destinatario ...", "añadir asunto ...", "borrar asunto"</p>
+                    </div>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
+                    <div>
+                      <p class="font-semibold">Puntuación:</p>
+                      <p class="text-slate-600 dark:text-slate-300">"coma", "punto"</p>
+                    </div>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
+                    <div>
+                      <p class="font-semibold">Formato:</p>
+                      <p class="text-slate-600 dark:text-slate-300">"nuevo párrafo", "nueva línea"</p>
+                    </div>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
+                    <div>
+                      <p class="font-semibold">Edición:</p>
+                      <p class="text-slate-600 dark:text-slate-300">"borrar última palabra"</p>
+                    </div>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
+                    <div>
+                      <p class="font-semibold">Acciones:</p>
+                      <p class="text-slate-600 dark:text-slate-300">"enviar correo", "guardar borrador", "volver al inicio"</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Tu navegador no soporta la API de Voz.");
+        return;
       }
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'es-ES';
+
+      // --- Elementos de la UI ---
+      const emailBody = document.getElementById('email-body');
+      const emailTo = document.getElementById('email-to');
+      const emailSubject = document.getElementById('email-subject');
       
-      if (event.results[i].isFinal && !hasFoundStop) {
-        finalDictatedText += transcript.trim() + ' ';
-      } else if (!event.results[i].isFinal && !hasFoundStop) {
-        interimTranscript += transcript;
+      const micContainer = document.querySelector('.p-6.rounded-xl.bg-slate-100');
+      const statusText = micContainer.querySelector('.status-text');
+      const statusSubtext = micContainer.querySelector('.status-subtext');
+      const micButton = micContainer.querySelector('button[aria-label="Activar dictado"]');
+      const micIcon = micButton.querySelector('span');
+
+      let isDictating = false;
+      let finalDictatedText = ''; // Texto para el BODY
+
+      // --- Lógica de Manejo de Voz ---
+
+      // Modo 1: Escuchando Comandos
+      const handleCommand = (event) => {
+        const command = event.results[0][0].transcript.toLowerCase().trim();
+        console.log('Comando recibido:', command);
+
+        if (command.includes('comenzar redacción')) {
+          startDictationMode();
+        } 
+        // --- NUEVOS COMANDOS DE CORREO ---
+        else if (command.startsWith('añadir destinatario') || command.startsWith('modificar destinatario')) {
+            let email = command.replace('añadir destinatario', '').replace('modificar destinatario', '').trim();
+            // Limpia el email (quito espacios, etc.)
+            email = email.replace(/\s+/g, ''); 
+            emailTo.value = email;
+            statusText.textContent = 'Destinatario añadido';
+        } else if (command.includes('borrar destinatario')) {
+            emailTo.value = '';
+            statusText.textContent = 'Destinatario borrado';
+        } else if (command.startsWith('añadir asunto') || command.startsWith('modificar asunto')) {
+            let subject = command.replace('añadir asunto', '').replace('modificar asunto', '').trim();
+            emailSubject.value = subject.charAt(0).toUpperCase() + subject.slice(1);
+            statusText.textContent = 'Asunto añadido';
+        } else if (command.includes('borrar asunto')) {
+            emailSubject.value = '';
+            statusText.textContent = 'Asunto borrado';
+        }
+        // --- FIN NUEVOS COMANDOS ---
+        else if (command.includes('enviar correo')) {
+          statusText.textContent = 'Enviando...';
+          console.log('Simulando envío de correo');
+        } else if (command.includes('guardar borrador')) {
+          statusText.textContent = 'Guardado.';
+          console.log('Simulando guardado');
+        } else if (command.includes('volver al inicio')) {
+          statusText.textContent = 'Volviendo...';
+          window.location.href = 'PantallaPrincipal.html';
+        }
+      };
+
+      // Modo 2: Escuchando Dictado (para el cuerpo)
+      const handleDictation = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+        let hasFoundStop = false;
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
+
+          if (transcript.toLowerCase().includes('terminar redacción')) {
+            hasFoundStop = true;
+          }
+
+          if (event.results[i].isFinal && !hasFoundStop) {
+            finalTranscript += transcript.trim() + ' ';
+          } else if (!event.results[i].isFinal && !hasFoundStop) {
+            interimTranscript += transcript;
+          }
+        }
+        
+        // Procesar la transcripción final en busca de comandos
+        if(finalTranscript) {
+            processFinalTranscript(finalTranscript);
+        }
+
+        // Actualizar el textarea
+        emailBody.value = finalDictatedText + interimTranscript;
+        // Mover el scroll al final
+        emailBody.scrollTop = emailBody.scrollHeight;
+
+        if (hasFoundStop) {
+          finalDictatedText = emailBody.value.replace(/terminar redacción/gi, '').trim();
+          emailBody.value = finalDictatedText;
+          startCommandMode();
+        }
+      };
+      
+      // NUEVA FUNCIÓN para procesar texto dictado (para TEXTAREA)
+      function processFinalTranscript(transcript) {
+          transcript = transcript.toLowerCase().trim();
+          
+          if (transcript.includes('nuevo párrafo')) {
+              finalDictatedText += '\n\n';
+          } else if (transcript.includes('nueva línea')) {
+              finalDictatedText += '\n';
+          } else if (transcript.includes('coma')) {
+              finalDictatedText = finalDictatedText.trim() + ', ';
+          } else if (transcript.includes('punto')) {
+              finalDictatedText = finalDictatedText.trim() + '. ';
+          } else if (transcript.includes('borrar última palabra')) {
+              const lastSpace = finalDictatedText.trimEnd().lastIndexOf(' ');
+              if(lastSpace > -1) {
+                  finalDictatedText = finalDictatedText.substring(0, lastSpace).trim() + ' ';
+              } else {
+                  finalDictatedText = ''; // Borrar todo
+              }
+          } else {
+              // Es texto normal
+              finalDictatedText += transcript + ' ';
+          }
       }
-    }
 
-    emailBody.value = finalDictatedText + interimTranscript;
+      // --- Funciones de Control de Estado ---
+      function startCommandMode() {
+        console.log('Cambiando a Modo Comando');
+        isDictating = false;
+        recognition.stop();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.onresult = handleCommand;
+        
+        statusText.textContent = 'Escuchando...';
+        statusSubtext.textContent = 'Di "comenzar redacción" para dictar.';
+        micButton.classList.remove('text-danger', 'bg-danger/10');
+        micButton.classList.add('text-primary', 'bg-primary/10');
+        micIcon.classList.remove('animate-pulse');
+        micButton.setAttribute('aria-label', 'Activar dictado');
+      }
 
-    if (hasFoundStop) {
-      finalDictatedText = emailBody.value.replace(/terminar redacción/gi, '').trim(); 
-      emailBody.value = finalDictatedText;
+      function startDictationMode() {
+        console.log('Cambiando a Modo Dictado');
+        isDictating = true;
+        recognition.stop();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.onresult = handleDictation;
+
+        finalDictatedText = emailBody.value.trim();
+        if (finalDictatedText.length > 0 && !finalDictatedText.endsWith(' ')) {
+          finalDictatedText += ' ';
+        }
+        emailBody.focus();
+
+        statusText.textContent = 'Dictando...';
+        statusSubtext.textContent = 'Di "terminar redacción" para parar.';
+        micButton.classList.add('text-danger', 'bg-danger/10');
+        micButton.classList.remove('text-primary', 'bg-primary/10');
+        micIcon.classList.add('animate-pulse');
+        micButton.setAttribute('aria-label', 'Detener dictado');
+      }
+
+      // --- Inicio ---
+      recognition.onend = () => {
+        // Reinicia automáticamente el modo en el que estaba
+        console.log('Reiniciando reconocimiento...');
+        try {
+          recognition.start();
+        } catch (e) {
+          console.error("Error al reiniciar:", e);
+        }
+      };
+
+      micButton.addEventListener('click', () => {
+        if (isDictating) {
+          startCommandMode();
+        } else {
+          startDictationMode();
+        }
+      });
+
       startCommandMode();
-    }
-  };
-
-  // --- Funciones de Control de Estado (sin cambios) ---
-  function startCommandMode() {
-    console.log('Cambiando a Modo Comando');
-    isDictating = false;
-    recognition.stop();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.onresult = handleCommand;
-    
-    statusText.textContent = 'Escuchando...';
-    statusSubtext.textContent = 'Di "comenzar redacción" para dictar.';
-    micButton.classList.remove('text-danger', 'bg-danger/10');
-    micButton.classList.add('text-primary', 'bg-primary/10'); 
-    micIcon.classList.remove('animate-pulse');
-    micButton.setAttribute('aria-label', 'Activar dictado');
-  }
-
-  function startDictationMode() {
-    console.log('Cambiando a Modo Dictado');
-    isDictating = true;
-    recognition.stop();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.onresult = handleDictation;
-    
-    finalDictatedText = emailBody.value.trim();
-    if (finalDictatedText.length > 0 && !finalDictatedText.endsWith(' ')) {
-        finalDictatedText += ' ';
-    }
-    emailBody.focus();
-
-    statusText.textContent = 'Dictando...';
-    statusSubtext.textContent = 'Di "terminar redacción" para parar.';
-    micButton.classList.add('text-danger', 'bg-danger/10');
-    micButton.classList.remove('text-primary', 'bg-primary/10');
-    micIcon.classList.add('animate-pulse');
-    micButton.setAttribute('aria-label', 'Detener dictado');
-  }
-  
-  // --- Inicio (sin cambios) ---
-  recognition.onend = () => {
-    console.log('Reiniciando reconocimiento...');
-    try {
       recognition.start();
-    } catch (e) {
-      console.error("Error al reiniciar:", e);
-    }
-  };
-
-  micButton.addEventListener('click', () => {
-     if (isDictating) {
-        startCommandMode();
-     } else {
-        startDictationMode();
-     }
-  });
-
-  startCommandMode(); 
-  recognition.start();
-});
-</script>
+    });
+  </script>
 </body>
 </html>

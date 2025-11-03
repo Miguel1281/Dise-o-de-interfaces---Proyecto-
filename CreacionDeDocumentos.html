@@ -1,296 +1,397 @@
 <!DOCTYPE html>
-
-<html class="light" lang="es"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>VozDoc - Editor de Documentos por Voz</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#137fec",
-                        "background-light": "#f6f7f8",
-                        "background-dark": "#101922",
-                        "primary-accent": "#50E3C2",
-                        "text-light": "#333333",
-                        "text-dark": "#E0E0E0",
-                        "surface-light": "#FFFFFF",
-                        "surface-dark": "#1A2836",
-                        "border-light": "#E0E0E0",
-                        "border-dark": "#2C3A47",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                },
-            },
-        }
-    </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-    </style>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>VozDoc - Editor de Documentos por Voz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#005A9C",
+            "background-light": "#f6f7f8",
+            "background-dark": "#101922",
+            "primary-accent": "#50E3C2",
+            "text-light": "#333333",
+            "text-dark": "#E0E0E0",
+            "surface-light": "#FFFFFF",
+            "surface-dark": "#1A2836",
+            "border-light": "#E0E0E0",
+            "border-dark": "#2C3A47",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Estilo para el placeholder del editor contenteditable */
+    [contenteditable="true"]:empty:before {
+        content: attr(placeholder);
+        pointer-events: none;
+        display: block; /* Para que ocupe espacio */
+        color: #9ca3af; /* Color de placeholder similar a tailwind */
+    }
+  </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
-<div class="flex h-screen w-full flex-col">
-<header class="flex items-center justify-between border-b border-solid border-border-light dark:border-border-dark px-6 py-3 bg-surface-light dark:bg-surface-dark flex-shrink-0">
-<div class="flex items-center gap-4">
-<svg class="text-primary" fill="currentColor" height="24" viewbox="0 0 48 48" width="24" xmlns="http://www.w3.org/2000/svg">
-<path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill-rule="evenodd"></path>
-</svg>
-<h2 class="text-lg font-bold">VozDoc</h2>
-</div>
-<div class="flex items-center gap-4">
-<button aria-label="Guardar documento" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold">
-<span>Guardar</span>
-</button>
-<button aria-label="Exportar documento" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark text-sm font-bold">
-<span>Exportar</span>
-</button>
-<button aria-label="Ayuda" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
-<span class="material-symbols-outlined">help</span>
-</button>
-<button aria-label="Activar modo oscuro" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
-<span class="material-symbols-outlined">toggle_on</span>
-</button>
-<div class="h-10 w-10 rounded-full bg-cover bg-center" data-alt="User avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuARtDAcyBZMoA_Rrm50ggs-eXuC52YhBPFwL95JbwWRmq2M-s8UykfBMcFfCwC6UdnSrQFdZR3cspl981106E0R-JsDmzwcxYKkHdRTsy-43m5dUUsZ0oXNCIjEL2eLHKUpPm5DHUGWHjsWDn9oocAUonjRTVBITk2Aoeq1ueNf3uXIYjj8Z0g8nKo3L1V3qohozfgGezyiZM_AG615Uuv3c_SuBqs9pe5uOTXVti4mvgyEJeDZxU04yNUA75_SJIQXKMjP70HOW_kz");'></div>
-</div>
-</header>
-<div class="flex flex-1 overflow-hidden">
-<aside class="flex h-full w-64 flex-shrink-0 flex-col justify-between border-r border-solid border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-4">
-<div class="flex flex-col gap-4">
-<div class="flex items-center gap-3">
-<div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-primary">
-<span class="material-symbols-outlined">campaign</span>
-</div>
-<div class="flex flex-col">
-<h1 class="text-base font-medium">Comandos de Voz</h1>
-<p class="text-sm text-gray-500 dark:text-gray-400">Guía Rápida</p>
-</div>
-</div>
-<div class="flex flex-col gap-1">
-<div class="flex items-center gap-3 rounded-lg bg-primary/10 px-3 py-2 text-primary dark:bg-primary/20">
-<span class="material-symbols-outlined w-6 text-center">title</span>
-<p class="text-sm font-medium">Formato</p>
-</div>
-<div class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5">
-<span class="material-symbols-outlined w-6 text-center">edit</span>
-<p class="text-sm font-medium">Edición</p>
-</div>
-<div class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5">
-<span class="material-symbols-outlined w-6 text-center">navigation</span>
-<p class="text-sm font-medium">Navegación</p>
-</div>
-<div class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5">
-<span class="material-symbols-outlined w-6 text-center">bolt</span>
-<p class="text-sm font-medium">Acciones</p>
-</div>
-</div>
-</div>
-<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold">
-<span>Ver todos</span>
-</button>
-</aside>
-<main class="flex flex-1 flex-col bg-background-light dark:bg-background-dark">
-<div class="mx-auto w-full max-w-4xl flex-grow px-4 sm:px-6 lg:px-8 py-8">
-<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark h-full flex flex-col">
-<div class="flex justify-between items-center gap-2 px-4 py-2 border-b border-border-light dark:border-border-dark">
-<div class="flex flex-wrap gap-1">
-<button aria-label="Deshacer" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">undo</span></button>
-<button aria-label="Rehacer" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">redo</span></button>
-<div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-<button aria-label="Negrita" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_bold</span></button>
-<button aria-label="Cursiva" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_italic</span></button>
-<button aria-label="Subrayado" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_underlined</span></button>
-<div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-<button aria-label="Alinear a la izquierda" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_left</span></button>
-<button aria-label="Alinear al centro" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_center</span></button>
-<button aria-label="Alinear a la derecha" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_right</span></button>
-<div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-<button aria-label="Imprimir" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">print</span></button>
-</div>
-<div class="flex items-center gap-2">
-<span class="text-sm text-gray-500 dark:text-gray-400">EN</span>
-<button aria-label="Traducir" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">translate</span></button>
-</div>
-</div>
-<div class="flex-grow p-8 flex flex-col">
-<div class="mb-6">
-<label class="flex flex-col w-full">
-<span class="sr-only">Título del documento</span>
-<input aria-label="Título del documento" class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden text-2xl font-bold leading-tight tracking-tight focus:outline-0 focus:ring-0 border-none bg-transparent p-0 placeholder:text-gray-400 dark:placeholder:text-gray-500" placeholder="Documento sin título" value=""/>
-</label>
-</div>
-<div class="flex-grow text-base text-text-light dark:text-text-dark leading-relaxed">
-<p>Di 'Empezar a dictar' o haz clic en el micrófono para comenzar.</p>
-<p class="mt-4">Aquí es donde aparecerá el texto dictado. Puedes usar comandos como "nuevo párrafo" para estructurar tu documento, o "negrita" para formatear el texto.</p>
-</div>
-</div>
-</div>
-</div>
-<footer class="flex-shrink-0 p-4">
-<div class="mx-auto w-full max-w-4xl flex items-center justify-between">
-<div class="flex items-center gap-2 text-sm text-primary-accent font-medium">
-<span class="material-symbols-outlined text-base">check_circle</span>
-<span>Documento guardado</span>
-</div>
-<div class="flex items-center justify-center">
-<button aria-label="Activar dictado" class="flex h-16 w-16 animate-pulse cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105">
-<span class="material-symbols-outlined text-4xl">mic</span>
-</button>
-</div>
-<div class="text-sm text-gray-500 dark:text-gray-400" aria-live="polite" aria-atomic="true">
-                             Último comando: 'Negrita' aplicado
-                        </div>
-</div>
-</footer>
-</main>
-</div>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    alert("Tu navegador no soporta la API de Voz.");
-    return;
-  }
-
-  const recognition = new SpeechRecognition();
-  recognition.lang = 'es-ES';
-
-  // --- Elementos de la UI (sin cambios) ---
-  const docEditor = document.querySelector('.flex-grow.text-base');
-  const titleInput = document.querySelector('input[placeholder="Documento sin título"]');
-  const micButton = document.querySelector('footer button[aria-label="Activar dictado"]');
-  const micIcon = micButton.querySelector('span');
-  const statusText = document.querySelector('footer .text-sm.text-gray-500');
-
-  let isDictating = false;
-  let finalDictatedText = ''; 
-  const placeholderHTML = docEditor.innerHTML;
-
-  // --- Lógica de Manejo de Voz ---
-
-  const handleCommand = (event) => {
-    const command = event.results[0][0].transcript.toLowerCase().trim();
-    console.log('Comando recibido:', command);
-    statusText.textContent = `Último comando: '${command}'`;
-
-    if (command.includes('comenzar redacción')) {
-      startDictationMode();
-    } else if (command.includes('poner título')) {
-       const newTitle = command.replace('poner título', '').trim();
-       titleInput.value = newTitle.charAt(0).toUpperCase() + newTitle.slice(1);
-       statusText.textContent = `Título actualizado`;
-    }
-    // --- NUEVO COMANDO ---
-    else if (command.includes('volver al inicio')) {
-        statusText.textContent = 'Volviendo al inicio...';
-        window.location.href = 'PantallaPrincipal.html';
-    }
-  };
-
-  // Modo 2: Escuchando Dictado (sin cambios)
-  const handleDictation = (event) => {
-    let interimTranscript = '';
-    let hasFoundStop = false;
-
-    for (let i = event.resultIndex; i < event.results.length; ++i) {
-      const transcript = event.results[i][0].transcript;
-      
-      if (transcript.toLowerCase().includes('terminar redacción')) {
-        hasFoundStop = true;
+  <div class="flex min-h-screen w-full flex-col">
+    <header class="flex items-center justify-between border-b border-solid border-border-light dark:border-border-dark px-6 py-3 bg-surface-light dark:bg-surface-dark flex-shrink-0">
+      <div class="flex items-center gap-4">
+        <svg class="text-primary" fill="currentColor" height="24" viewbox="0 0 48 48" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill-rule="evenodd"></path>
+        </svg>
+        <h2 class="text-lg font-bold">VozDoc</h2>
+      </div>
+      <div class="flex items-center gap-4">
+        <button aria-label="Guardar documento" id="save-button" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold">
+          <span>Guardar</span>
+        </button>
+        <button aria-label="Exportar documento" id="export-button" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark text-sm font-bold">
+          <span>Exportar</span>
+        </button>
+        <button aria-label="Ayuda" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
+          <span class="material-symbols-outlined">help</span>
+        </button>
+        <button aria-label="Activar modo oscuro" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
+          <span class="material-symbols-outlined">toggle_on</span>
+        </button>
+        <div class="h-10 w-10 rounded-full bg-cover bg-center" data-alt="User avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuARtDAcyBZMoA_Rrm50ggs-eXuC52YhBPFwL95JbwWRmq2M-s8UykfBMcFfCwC6UdnSrQFdZR3cspl981106E0R-JsDmzwcxYKkHdRTsy-43m5dUUsZ0oXNCIjEL2eLHKUpPm5DHUGWHjsWDn9oocAUonjRTVBITk2Aoeq1ueNf3uXIYjj8Z0g8nKo3L1V3qohozfgGezyiZM_AG615Uuv3c_SuBqs9pe5uOTXVti4mvgyEJeDZxU04yNUA75_SJIQXKMjP70HOW_kz");'></div>
+      </div>
+    </header>
+    <div class="flex flex-1">
+      <aside class="flex h-full w-64 flex-shrink-0 flex-col justify-between border-r border-solid border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-4">
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-primary">
+              <span class="material-symbols-outlined">campaign</span>
+            </div>
+            <div class="flex flex-col">
+              <h1 class="text-base font-medium">Comandos de Voz</h1>
+              <p class="text-sm text-gray-700 dark:text-gray-300">Guía Rápida</p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-3 rounded-lg bg-primary/10 px-3 py-2 text-primary dark:bg-primary/20">
+              <span class="material-symbols-outlined w-6 text-center">title</span>
+              <p class="text-sm font-medium">Formato</p>
+            </div>
+            <div class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5">
+              <span class="material-symbols-outlined w-6 text-center">edit</span>
+              <p class="text-sm font-medium">Edición</p>
+            </div>
+            <div class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5">
+              <span class="material-symbols-outlined w-6 text-center">navigation</span>
+              <p class="text-sm font-medium">Navegación</p>
+            </div>
+            <div class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5">
+              <span class="material-symbols-outlined w-6 text-center">bolt</span>
+              <p class="text-sm font-medium">Acciones</p>
+            </div>
+          </div>
+        </div>
+        <button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold">
+          <span>Ver todos</span>
+        </button>
+      </aside>
+      <main class="flex flex-1 flex-col bg-background-light dark:bg-background-dark">
+        <div class="mx-auto w-full max-w-4xl flex-grow px-4 sm:px-6 lg:px-8 py-8">
+          <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark h-full flex flex-col">
+            <div class="flex justify-between items-center gap-2 px-4 py-2 border-b border-border-light dark:border-border-dark">
+              <div class="flex flex-wrap gap-1">
+                <button aria-label="Deshacer" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">undo</span></button>
+                <button aria-label="Rehacer" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">redo</span></button>
+                <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
+                <button aria-label="Negrita" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_bold</span></button>
+                <button aria-label="Cursiva" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_italic</span></button>
+                <button aria-label="Subrayado" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_underlined</span></button>
+                <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
+                <button aria-label="Alinear a la izquierda" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_left</span></button>
+                <button aria-label="Alinear al centro" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_center</span></button>
+                <button aria-label="Alinear a la derecha" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_right</span></button>
+                <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
+                <button aria-label="Imprimir" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">print</span></button>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-700 dark:text-gray-300">EN</span>
+                <button aria-label="Traducir" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">translate</span></button>
+              </div>
+            </div>
+            <div class="flex-grow p-8 flex flex-col">
+              <div class="mb-6">
+                <label class="flex flex-col w-full">
+                  <span class="sr-only">Título del documento</span>
+                  <input id="doc-title" aria-label="Título del documento" class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden text-2xl font-bold leading-tight tracking-tight focus:outline-0 focus:ring-0 border-none bg-transparent p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400" placeholder="Documento sin título" value="" />
+                </label>
+              </div>
+              
+              <div id="doc-editor" 
+                   contenteditable="true" 
+                   role="textbox" 
+                   aria-multiline="true"
+                   placeholder="Di 'Empezar a dictar' o haz clic en el micrófono para comenzar."
+                   class="flex-grow text-base text-text-light dark:text-text-dark leading-relaxed focus:outline-none">
+                </div>
+              </div>
+          </div>
+        </div>
+        <footer class="flex-shrink-0 p-4">
+          <div class="mx-auto w-full max-w-4xl flex items-center justify-between">
+            <div id="save-status" class="flex items-center gap-2 text-sm text-gray-500 font-medium">
+              </div>
+            <div class="flex items-center justify-center">
+              <button aria-label="Activar dictado" class="flex h-16 w-16 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105">
+                <span class="material-symbols-outlined text-4xl">mic</span>
+              </button>
+            </div>
+            <div class="status-text text-sm text-gray-700 dark:text-gray-300 w-48 text-right" aria-live="polite" aria-atomic="true">
+              Haz clic para activar
+            </div>
+          </div>
+        </footer>
+      </main>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Tu navegador no soporta la API de Voz.");
+        return;
       }
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'es-ES';
+
+      // --- Elementos de la UI ---
+      const docEditor = document.getElementById('doc-editor');
+      const titleInput = document.getElementById('doc-title');
+      const micButton = document.querySelector('footer button[aria-label="Activar dictado"]');
+      const micIcon = micButton.querySelector('span');
+      const statusText = document.querySelector('footer .status-text');
+      const saveStatus = document.getElementById('save-status');
+
+      let isDictating = false;
+      let finalDictatedText = ''; // Almacenamos el HTML
       
-      if (event.results[i].isFinal && !hasFoundStop) {
-        finalDictatedText += transcript.trim() + ' ';
-      } else if (!event.results[i].isFinal && !hasFoundStop) {
-        interimTranscript += transcript;
-      }
-    }
+      // Banderas de formato
+      let isBold = false;
+      let isItalic = false;
 
-    docEditor.innerHTML = finalDictatedText + `<span class="text-gray-400">${interimTranscript}</span>`;
+      // --- Lógica de Manejo de Voz ---
 
-    if (hasFoundStop) {
-      finalDictatedText = docEditor.innerHTML.replace(/terminar redacción/gi, '').replace(/<span.*span>/i, '').trim(); 
-      docEditor.innerHTML = finalDictatedText;
-      startCommandMode();
-    }
-  };
+      // Modo 1: Escuchando Comandos (Cuando NO se está dictando)
+      const handleCommand = (event) => {
+        const command = event.results[0][0].transcript.toLowerCase().trim();
+        console.log('Comando recibido:', command);
+        statusText.textContent = `Comando: '${command.substring(0, 20)}...'`;
 
-  // --- Funciones de Control de Estado (sin cambios) ---
-  function startCommandMode() {
-    console.log('Cambiando a Modo Comando');
-    isDictating = false;
-    recognition.stop();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.onresult = handleCommand;
-    recognition.onend = () => {
-        if (!isDictating) {
-            try { recognition.start(); } catch(e) {}
+        if (command.includes('comenzar redacción')) {
+          startDictationMode();
+        } else if (command.startsWith('poner título')) {
+          const newTitle = command.replace('poner título', '').trim();
+          titleInput.value = newTitle.charAt(0).toUpperCase() + newTitle.slice(1);
+          statusText.textContent = `Título actualizado`;
+          showSaveStatus('Cambios sin guardar');
+        } else if (command.includes('guardar documento')) {
+            console.log('Simulando guardado...');
+            statusText.textContent = `Documento guardado`;
+            showSaveStatus('Guardado', true);
+        } else if (command.includes('exportar')) {
+            console.log('Simulando exportación...');
+            statusText.textContent = `Exportando...`;
+        } else if (command.includes('volver al inicio')) {
+          statusText.textContent = 'Volviendo al inicio...';
+          window.location.href = 'PantallaPrincipal.html';
         }
-    };
-    
-    statusText.textContent = 'Haz clic o di "comenzar redacción"';
-    micIcon.classList.remove('animate-pulse');
-    micButton.classList.remove('animate-pulse', 'bg-red-500');
-    micButton.classList.add('bg-primary');
-    micButton.setAttribute('aria-label', 'Activar dictado');
-  }
+      };
+      
+      // Función para mostrar el estado de guardado
+      function showSaveStatus(message, success = false) {
+          saveStatus.textContent = message;
+          if (success) {
+              saveStatus.className = 'flex items-center gap-2 text-sm text-primary-accent font-medium';
+              // Opcional: ocultar después de unos segundos
+              setTimeout(() => { saveStatus.textContent = ''; }, 3000);
+          } else {
+              saveStatus.className = 'flex items-center gap-2 text-sm text-gray-500 font-medium';
+          }
+      }
 
-  function startDictationMode() {
-    console.log('Cambiando a Modo Dictado');
-    isDictating = true;
-    recognition.stop();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.onresult = handleDictation;
-    recognition.onend = () => {
+      // Modo 2: Escuchando Dictado (transcripción libre)
+      const handleDictation = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+        let hasFoundStop = false;
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
+
+          if (transcript.toLowerCase().includes('terminar redacción')) {
+            hasFoundStop = true;
+          }
+
+          if (event.results[i].isFinal && !hasFoundStop) {
+            finalTranscript += transcript.trim() + ' ';
+          } else if (!event.results[i].isFinal && !hasFoundStop) {
+            interimTranscript += transcript;
+          }
+        }
+        
+        // Procesar la transcripción final en busca de comandos
+        if(finalTranscript) {
+            processFinalTranscript(finalTranscript);
+            showSaveStatus('Cambios sin guardar');
+        }
+
+        // Actualizar el editor
+        docEditor.innerHTML = finalDictatedText + `<span class="text-gray-400">${interimTranscript}</span>`;
+        
+        // Mover el cursor al final
+        placeCursorAtEnd();
+
+        if (hasFoundStop) {
+          finalDictatedText = docEditor.innerHTML.replace(/terminar redacción/gi, '').replace(/<span.*span>/i, '').trim();
+          docEditor.innerHTML = finalDictatedText;
+          startCommandMode();
+        }
+      };
+      
+      // NUEVA FUNCIÓN para procesar texto dictado y comandos
+      function processFinalTranscript(transcript) {
+          transcript = transcript.toLowerCase().trim();
+          
+          if (transcript.includes('nuevo párrafo')) {
+              finalDictatedText += '<br><br>';
+          } else if (transcript.includes('nueva línea')) {
+              finalDictatedText += '<br>';
+          } else if (transcript.includes('coma')) {
+              finalDictatedText = finalDictatedText.trim() + ', ';
+          } else if (transcript.includes('punto')) {
+              finalDictatedText = finalDictatedText.trim() + '. ';
+          } else if (transcript.includes('activar negrita')) {
+              isBold = true;
+              finalDictatedText += '<b>';
+          } else if (transcript.includes('desactivar negrita')) {
+              isBold = false;
+              finalDictatedText += '</b>';
+          } else if (transcript.includes('activar cursiva')) {
+              isItalic = true;
+              finalDictatedText += '<i>';
+          } else if (transcript.includes('desactivar cursiva')) {
+              isItalic = false;
+              finalDictatedText += '</i>';
+          } else if (transcript.includes('borrar última palabra')) {
+              // Esta es una lógica simple, no maneja bien el HTML.
+              // Una implementación real necesitaría un manejo del DOM.
+              const lastSpace = finalDictatedText.trimEnd().lastIndexOf(' ');
+              if(lastSpace > -1) {
+                  finalDictatedText = finalDictatedText.substring(0, lastSpace).trim() + ' ';
+              } else {
+                  finalDictatedText = ''; // Borrar todo si no hay espacios
+              }
+          } else {
+              // Es texto normal
+              finalDictatedText += transcript + ' ';
+          }
+      }
+
+      // --- Funciones de Control de Estado ---
+      function startCommandMode() {
+        console.log('Cambiando a Modo Comando');
+        isDictating = false;
+        if(isBold) { finalDictatedText += '</b>'; isBold = false; } // Cierra etiquetas abiertas
+        if(isItalic) { finalDictatedText += '</i>'; isItalic = false; }
+        docEditor.innerHTML = finalDictatedText; // Limpia el interim
+        
+        recognition.stop();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.onresult = handleCommand;
+        recognition.onend = () => {
+          if (!isDictating) {
+            try { recognition.start(); } catch (e) {}
+          }
+        };
+
+        statusText.textContent = 'Haz clic o di "comenzar redacción"';
+        micIcon.classList.remove('animate-pulse');
+        micButton.classList.remove('animate-pulse', 'bg-red-500');
+        micButton.classList.add('bg-primary');
+        micButton.setAttribute('aria-label', 'Activar dictado');
+      }
+
+      function startDictationMode() {
+        console.log('Cambiando a Modo Dictado');
+        isDictating = true;
+        recognition.stop();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.onresult = handleDictation;
+        recognition.onend = () => {
+          if (isDictating) {
+            try { recognition.start(); } catch (e) {}
+          }
+        };
+
+        // Prepara el texto final
+        finalDictatedText = docEditor.innerHTML.replace(/<span.*span>/i, '').trim();
+        if (finalDictatedText.length > 0 && !finalDictatedText.endsWith(' ')) {
+            finalDictatedText += ' ';
+        }
+
+        statusText.textContent = 'Dictando... (Di "terminar redacción")';
+        micIcon.classList.add('animate-pulse');
+        micButton.classList.add('animate-pulse', 'bg-red-500');
+        micButton.classList.remove('bg-primary');
+        micButton.setAttribute('aria-label', 'Detener dictado');
+      }
+      
+      // Helper para poner el cursor al final del contenteditable
+      function placeCursorAtEnd() {
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(docEditor);
+        range.collapse(false); // false para colapsar al final
+        sel.removeAllRanges();
+        sel.addRange(range);
+        docEditor.focus();
+      }
+
+      // --- Inicio ---
+      micButton.addEventListener('click', () => {
         if (isDictating) {
-            try { recognition.start(); } catch(e) {}
+          startCommandMode();
+        } else {
+          startDictationMode();
         }
-    };
-    
-    if (docEditor.innerHTML.trim() === placeholderHTML.trim()) {
-       docEditor.innerHTML = '';
-       finalDictatedText = '';
-    } else {
-       finalDictatedText = docEditor.innerHTML.replace(/<span.*span>/i, '').trim() + ' ';
-    }
+      });
+      
+      // Guardar el estado al hacer clic en el botón
+      document.getElementById('save-button').addEventListener('click', () => {
+          showSaveStatus('Guardado', true);
+      });
 
-    statusText.textContent = 'Dictando... (Di "terminar redacción")';
-    micIcon.classList.add('animate-pulse');
-    micButton.classList.add('animate-pulse', 'bg-red-500');
-    micButton.classList.remove('bg-primary');
-    micButton.setAttribute('aria-label', 'Detener dictado');
-  }
-  
-  // --- Inicio (sin cambios) ---
-  micButton.addEventListener('click', () => {
-     if (isDictating) {
-        startCommandMode();
-     } else {
-        startDictationMode();
-     }
-  });
-  
-  startCommandMode();
-  recognition.start();
+      startCommandMode();
+      recognition.start();
 
-});
-</script>
+    });
+  </script>
 </body>
 </html>
