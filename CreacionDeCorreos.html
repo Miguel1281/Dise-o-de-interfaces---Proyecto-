@@ -94,7 +94,7 @@
               </div>
               <div class="flex flex-col min-w-40 flex-1">
                 <label for="email-body" class="sr-only">Cuerpo del correo</label>
-                <textarea id="email-body" class="form-input flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary min-h-72 placeholder:text-slate-500 dark:placeholder:text-slate-400 p-[15px] text-base font-normal leading-normal" placeholder="Empiece a dictar su mensaje..."></textarea>
+                <textarea id="email-body" class="form-input flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary min-h-72 placeholder:text-slate-500 dark:placeholder:text-slate-400 p-[15px] text-base font-normal leading-normal" placeholder="Di 'Comenzar redacción' para dictar el cuerpo..."></textarea>
               </div>
               <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
                 <div class="flex gap-2">
@@ -119,54 +119,56 @@
             <aside class="w-full lg:w-72 flex flex-col gap-6">
               <div class="p-6 rounded-xl bg-slate-100 dark:bg-slate-800 flex flex-col items-center text-center">
                 <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase">Estado de Voz</p>
-                <button aria-label="Activar dictado" class="w-24 h-24 rounded-full flex items-center justify-center bg-danger/10 text-danger mb-3">
-                  <span class="material-symbols-outlined !text-5xl animate-pulse">mic</span>
+                <button aria-label="Activar dictado" class="w-24 h-24 rounded-full flex items-center justify-center bg-primary/10 text-primary mb-3">
+                  <span class="material-symbols-outlined !text-5xl">mic</span>
                 </button>
-                <p class="status-text text-lg font-bold text-danger" aria-live="polite" aria-atomic="true">Escuchando...</p>
-                <p class="status-subtext text-sm text-slate-600 dark:text-slate-300">Diga "Pausar dictado" para detener</p>
+                <p class="status-text text-lg font-bold text-primary" aria-live="polite" aria-atomic="true">Escuchando...</p>
+                <p class="status-subtext text-sm text-slate-600 dark:text-slate-300">Di "comenzar redacción" para dictar.</p>
               </div>
+              
               <div class="p-6 rounded-xl bg-slate-100 dark:bg-slate-800">
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Comandos de Voz</h3>
-                <ul class="space-y-3 text-slate-700 dark:text-slate-300 text-sm">
-                  <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
-                    <div>
-                      <p class="font-semibold">Destinatario/Asunto:</p>
-                      <p class="text-slate-600 dark:text-slate-300">"añadir destinatario ...", "añadir asunto ...", "borrar asunto"</p>
-                    </div>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
-                    <div>
-                      <p class="font-semibold">Puntuación:</p>
-                      <p class="text-slate-600 dark:text-slate-300">"coma", "punto"</p>
-                    </div>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
-                    <div>
-                      <p class="font-semibold">Formato:</p>
-                      <p class="text-slate-600 dark:text-slate-300">"nuevo párrafo", "nueva línea"</p>
-                    </div>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
-                    <div>
-                      <p class="font-semibold">Edición:</p>
-                      <p class="text-slate-600 dark:text-slate-300">"borrar última palabra"</p>
-                    </div>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined !text-base mt-0.5 text-primary">keyboard_command_key</span>
-                    <div>
-                      <p class="font-semibold">Acciones:</p>
-                      <p class="text-slate-600 dark:text-slate-300">"enviar correo", "guardar borrador", "volver al inicio"</p>
-                    </div>
-                  </li>
-                </ul>
+                <div class="flex flex-col gap-4 text-sm">
+                  <h1 class="text-lg font-bold text-slate-900 dark:text-white">Comandos de Voz</h1>
+                  <div>
+                    <h2 class="font-bold text-primary">Acciones de Correo</h2>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
+                      <li><b>"Añadir destinatario [email]"</b></li>
+                      <li><b>"Añadir asunto [texto]"</b></li>
+                      <li><b>"Borrar destinatario"</b></li>
+                      <li><b>"Borrar asunto"</b></li>
+                      <li><b>"Enviar correo"</b></li>
+                      <li><b>"Guardar borrador"</b></li>
+                      <li><b>"Leer correo"</b></li>
+                      <li><b>"Volver al inicio"</b></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h2 class="font-bold text-primary">Comandos de Dictado</h2>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
+                        <li><b>"Comenzar redacción"</b></li>
+                        <li><b>"Terminar redacción"</b></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h2 class="font-bold text-primary">Puntuación (en dictado)</h2>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
+                      <li><b>"Coma"</b> (Inserta ,)</li>
+                      <li><b>"Punto"</b> (Inserta .)</li>
+                      <li><b>"Punto y aparte"</b></li>
+                      <li><b>"Nuevo párrafo"</b></li>
+                      <li><b>"Nueva línea"</b></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h2 class="font-bold text-primary">Edición (en dictado)</h2>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
+                      <li><b>"Borrar última palabra"</b></li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </aside>
-          </div>
+            </div>
         </div>
       </main>
     </div>
@@ -195,6 +197,17 @@
 
       let isDictating = false;
       let finalDictatedText = ''; // Texto para el BODY
+      
+      function leerTexto(texto) {
+        if (!'speechSynthesis' in window) {
+          alert('Tu navegador no soporta la síntesis de voz.');
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(texto);
+        utterance.lang = 'es-ES';
+        window.speechSynthesis.speak(utterance);
+      }
 
       // --- Lógica de Manejo de Voz ---
 
@@ -206,10 +219,10 @@
         if (command.includes('comenzar redacción')) {
           startDictationMode();
         } 
-        // --- NUEVOS COMANDOS DE CORREO ---
+        
         else if (command.startsWith('añadir destinatario') || command.startsWith('modificar destinatario')) {
             let email = command.replace('añadir destinatario', '').replace('modificar destinatario', '').trim();
-            // Limpia el email (quito espacios, etc.)
+            email = email.replace(/^[,.\s]+/, ''); 
             email = email.replace(/\s+/g, ''); 
             emailTo.value = email;
             statusText.textContent = 'Destinatario añadido';
@@ -218,13 +231,24 @@
             statusText.textContent = 'Destinatario borrado';
         } else if (command.startsWith('añadir asunto') || command.startsWith('modificar asunto')) {
             let subject = command.replace('añadir asunto', '').replace('modificar asunto', '').trim();
+            subject = subject.replace(/^[,.\s]+/, ''); 
             emailSubject.value = subject.charAt(0).toUpperCase() + subject.slice(1);
             statusText.textContent = 'Asunto añadido';
         } else if (command.includes('borrar asunto')) {
             emailSubject.value = '';
             statusText.textContent = 'Asunto borrado';
         }
-        // --- FIN NUEVOS COMANDOS ---
+        
+        else if (command.includes('leer correo')) {
+            const destinatario = emailTo.value || "Sin destinatario";
+            const asunto = emailSubject.value || "Sin asunto";
+            const cuerpo = emailBody.value || "Correo vacío";
+            
+            const textoCompleto = `Para: ${destinatario}. Asunto: ${asunto}. Cuerpo: ${cuerpo}`;
+            statusText.textContent = 'Leyendo correo...';
+            leerTexto(textoCompleto);
+        }
+        
         else if (command.includes('enviar correo')) {
           statusText.textContent = 'Enviando...';
           console.log('Simulando envío de correo');
@@ -240,7 +264,9 @@
       // Modo 2: Escuchando Dictado (para el cuerpo)
       const handleDictation = (event) => {
         let interimTranscript = '';
-        let finalTranscript = '';
+        // --- INICIO: CORRECCIÓN DE BUG DE ACUMULACIÓN ---
+        let localFinalTranscript = ''; // Usar variable local para el *nuevo* texto
+        // --- FIN: CORRECCIÓN DE BUG DE ACUMULACIÓN ---
         let hasFoundStop = false;
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -251,20 +277,19 @@
           }
 
           if (event.results[i].isFinal && !hasFoundStop) {
-            finalTranscript += transcript.trim() + ' ';
+             // --- CORRECCIÓN DE BUG DE ACUMULACIÓN ---
+            localFinalTranscript += transcript.trim() + ' '; // Añadir a la variable local
           } else if (!event.results[i].isFinal && !hasFoundStop) {
             interimTranscript += transcript;
           }
         }
         
-        // Procesar la transcripción final en busca de comandos
-        if(finalTranscript) {
-            processFinalTranscript(finalTranscript);
+         // --- CORRECCIÓN DE BUG DE ACUMULACIÓN ---
+        if(localFinalTranscript) { // Si hay nuevo texto final
+            processFinalTranscript(localFinalTranscript); // Procesar *solo* el nuevo texto
         }
 
-        // Actualizar el textarea
         emailBody.value = finalDictatedText + interimTranscript;
-        // Mover el scroll al final
         emailBody.scrollTop = emailBody.scrollHeight;
 
         if (hasFoundStop) {
@@ -274,11 +299,11 @@
         }
       };
       
-      // NUEVA FUNCIÓN para procesar texto dictado (para TEXTAREA)
+      // --- INICIO: LÓGICA DE DICTADO PARA TEXTAREA (INCLUYE CORRECCIÓN DE PUNTO) ---
       function processFinalTranscript(transcript) {
           transcript = transcript.toLowerCase().trim();
           
-          if (transcript.includes('nuevo párrafo')) {
+          if (transcript.includes('nuevo párrafo') || transcript.includes('punto y aparte')) {
               finalDictatedText += '\n\n';
           } else if (transcript.includes('nueva línea')) {
               finalDictatedText += '\n';
@@ -295,9 +320,13 @@
               }
           } else {
               // Es texto normal
+              if (transcript.endsWith('.')) {
+                  transcript = transcript.substring(0, transcript.length - 1);
+              }
               finalDictatedText += transcript + ' ';
           }
       }
+      // --- FIN: LÓGICA DE DICTADO PARA TEXTAREA ---
 
       // --- Funciones de Control de Estado ---
       function startCommandMode() {

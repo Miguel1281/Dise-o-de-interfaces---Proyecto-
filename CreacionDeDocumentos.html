@@ -46,7 +46,9 @@
         content: attr(placeholder);
         pointer-events: none;
         display: block; /* Para que ocupe espacio */
-        color: #9ca3af; /* Color de placeholder similar a tailwind */
+        color: #6b7280; /* Color de placeholder (gray-500) */
+        font-style: italic;
+        font-size: 1.1rem; /* Ligeramente más grande */
     }
   </style>
 </head>
@@ -60,10 +62,10 @@
         <h2 class="text-lg font-bold">VozDoc</h2>
       </div>
       <div class="flex items-center gap-4">
-        <button aria-label="Guardar documento" id="save-button" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold">
+        <button aria-label="Guardar documento" id="save-button" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-primary text-white text-sm font-bold">
           <span>Guardar</span>
         </button>
-        <button aria-label="Exportar documento" id="export-button" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark text-sm font-bold">
+        <button aria-label="Exportar documento" id="export-button" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark text-sm font-bold">
           <span>Exportar</span>
         </button>
         <button aria-label="Ayuda" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
@@ -77,56 +79,106 @@
     </header>
     <div class="flex flex-1">
       <aside class="flex h-full w-64 flex-shrink-0 flex-col justify-between border-r border-solid border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-4">
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-4 overflow-y-auto">
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-primary">
               <span class="material-symbols-outlined">campaign</span>
             </div>
             <div class="flex flex-col">
-              <h1 class="text-base font-medium">Comandos de Voz</h1>
-              <p class="text-sm text-gray-700 dark:text-gray-300">Guía Rápida</p>
+              <h1 class="text-lg font-bold">Comandos de Voz</h1>
             </div>
           </div>
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-3 rounded-lg bg-primary/10 px-3 py-2 text-primary dark:bg-primary/20">
-              <span class="material-symbols-outlined w-6 text-center">title</span>
-              <p class="text-sm font-medium">Formato</p>
+          
+          <div class="flex flex-col gap-4 mt-4 text-sm">
+            <div>
+              <h2 class="font-bold text-primary">Acciones</h2>
+              <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
+                <li><b>"Comenzar redacción"</b></li>
+                <li><b>"Terminar redacción"</b></li>
+                <li><b>"Poner título [texto]"</b></li>
+                <li><b>"Guardar documento"</b></li>
+                <li><b>"Leer documento"</b></li>
+                <li><b>"Volver al inicio"</b></li>
+              </ul>
             </div>
-            <div class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5">
-              <span class="material-symbols-outlined w-6 text-center">edit</span>
-              <p class="text-sm font-medium">Edición</p>
+            <div>
+              <h2 class="font-bold text-primary">Puntuación y Formato</h2>
+              <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
+                <li><b>"Coma"</b> (Inserta ,)</li>
+                <li><b>"Punto"</b> (Inserta .)</li>
+                <li><b>"Punto y aparte"</b></li>
+                <li><b>"Nuevo párrafo"</b></li>
+                <li><b>"Nueva línea"</b></li>
+              </ul>
             </div>
-            <div class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5">
-              <span class="material-symbols-outlined w-6 text-center">navigation</span>
-              <p class="text-sm font-medium">Navegación</p>
+            <div>
+              <h2 class="font-bold text-primary">Estilo de Texto</h2>
+              <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
+                <li><b>"Activar negrita"</b></li>
+                <li><b>"Desactivar negrita"</b></li>
+                <li><b>"Activar cursiva"</b></li>
+                <li><b>"Desactivar cursiva"</b></li>
+                <li><b>"Poner fuente [Arial]"</b></li>
+                <li><b>"Poner tamaño [16]"</b></li>
+              </ul>
             </div>
-            <div class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-black/5 dark:hover:bg-white/5">
-              <span class="material-symbols-outlined w-6 text-center">bolt</span>
-              <p class="text-sm font-medium">Acciones</p>
+            <div>
+              <h2 class="font-bold text-primary">Alineación</h2>
+              <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
+                <li><b>"Alinear izquierda"</b></li>
+                <li><b>"Centrar texto"</b></li>
+                <li><b>"Alinear derecha"</b></li>
+                <li><b>"Justificar texto"</b></li>
+              </ul>
+            </div>
+            <div>
+              <h2 class="font-bold text-primary">Edición</h2>
+              <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
+                <li><b>"Borrar última palabra"</b></li>
+              </ul>
             </div>
           </div>
         </div>
-        <button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold">
-          <span>Ver todos</span>
-        </button>
       </aside>
       <main class="flex flex-1 flex-col bg-background-light dark:bg-background-dark">
         <div class="mx-auto w-full max-w-4xl flex-grow px-4 sm:px-6 lg:px-8 py-8">
           <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark h-full flex flex-col">
             <div class="flex justify-between items-center gap-2 px-4 py-2 border-b border-border-light dark:border-border-dark">
               <div class="flex flex-wrap gap-1">
-                <button aria-label="Deshacer" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">undo</span></button>
-                <button aria-label="Rehacer" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">redo</span></button>
+                <button aria-label="Deshacer" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">undo</span></button>
+                <button aria-label="Rehacer" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">redo</span></button>
+                
                 <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-                <button aria-label="Negrita" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_bold</span></button>
-                <button aria-label="Cursiva" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_italic</span></button>
-                <button aria-label="Subrayado" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_underlined</span></button>
+                <select id="font-select" aria-label="Fuente" class="form-select text-sm h-10 w-32 rounded-md border-border-light dark:border-border-dark bg-transparent focus:outline-0 focus:ring-0 focus:border-primary">
+                    <option value="Inter">Inter</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Garamond">Garamond</option>
+                </select>
+                <select id="size-select" aria-label="Tamaño de fuente" class="form-select text-sm h-10 w-20 rounded-md border-border-light dark:border-border-dark bg-transparent focus:outline-0 focus:ring-0 focus:border-primary">
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="14">14</option>
+                    <option value="16">16</option>
+                    <option value="18">18</option>
+                    <option value="24">24</option>
+                    <option value="36">36</option>
+                </select>
+                
                 <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-                <button aria-label="Alinear a la izquierda" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_left</span></button>
-                <button aria-label="Alinear al centro" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_center</span></button>
-                <button aria-label="Alinear a la derecha" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_right</span></button>
+                <button aria-label="Negrita" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_bold</span></button>
+                <button aria-label="Cursiva" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_italic</span></button>
+                <button aria-label="Subrayado" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_underlined</span></button>
                 <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-                <button aria-label="Imprimir" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">print</span></button>
+                <button aria-label="Alinear a la izquierda" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_left</span></button>
+                <button aria-label="Alinear al centro" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_center</span></button>
+                <button aria-label="Alinear a la derecha" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_right</span></button>
+                <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
+                <button aria-label="Imprimir" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">print</span></button>
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-sm text-gray-700 dark:text-gray-300">EN</span>
@@ -145,7 +197,7 @@
                    contenteditable="true" 
                    role="textbox" 
                    aria-multiline="true"
-                   placeholder="Di 'Empezar a dictar' o haz clic en el micrófono para comenzar."
+                   placeholder="Di 'Comenzar redacción' para iniciar el dictado. (Consulta la lista de comandos a la izquierda)"
                    class="flex-grow text-base text-text-light dark:text-text-dark leading-relaxed focus:outline-none">
                 </div>
               </div>
@@ -186,6 +238,9 @@
       const micIcon = micButton.querySelector('span');
       const statusText = document.querySelector('footer .status-text');
       const saveStatus = document.getElementById('save-status');
+      
+      const fontSelector = document.getElementById('font-select');
+      const sizeSelector = document.getElementById('size-select');
 
       let isDictating = false;
       let finalDictatedText = ''; // Almacenamos el HTML
@@ -193,6 +248,17 @@
       // Banderas de formato
       let isBold = false;
       let isItalic = false;
+      
+      function leerTexto(texto) {
+        if (!'speechSynthesis' in window) {
+          alert('Tu navegador no soporta la síntesis de voz.');
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(texto);
+        utterance.lang = 'es-ES';
+        window.speechSynthesis.speak(utterance);
+      }
 
       // --- Lógica de Manejo de Voz ---
 
@@ -205,10 +271,22 @@
         if (command.includes('comenzar redacción')) {
           startDictationMode();
         } else if (command.startsWith('poner título')) {
-          const newTitle = command.replace('poner título', '').trim();
+          
+          let newTitle = command.replace('poner título', '').trim();
+          newTitle = newTitle.replace(/^[,.\s]+/, ''); 
+          
           titleInput.value = newTitle.charAt(0).toUpperCase() + newTitle.slice(1);
           statusText.textContent = `Título actualizado`;
           showSaveStatus('Cambios sin guardar');
+          
+        } else if (command.includes('leer documento')) {
+            const titulo = titleInput.value || "Documento sin título";
+            const contenido = docEditor.innerText || "Documento vacío"; 
+            
+            const textoCompleto = `Título: ${titulo}. Contenido: ${contenido}`;
+            statusText.textContent = 'Leyendo documento...';
+            leerTexto(textoCompleto);
+            
         } else if (command.includes('guardar documento')) {
             console.log('Simulando guardado...');
             statusText.textContent = `Documento guardado`;
@@ -222,12 +300,10 @@
         }
       };
       
-      // Función para mostrar el estado de guardado
       function showSaveStatus(message, success = false) {
           saveStatus.textContent = message;
           if (success) {
               saveStatus.className = 'flex items-center gap-2 text-sm text-primary-accent font-medium';
-              // Opcional: ocultar después de unos segundos
               setTimeout(() => { saveStatus.textContent = ''; }, 3000);
           } else {
               saveStatus.className = 'flex items-center gap-2 text-sm text-gray-500 font-medium';
@@ -237,7 +313,9 @@
       // Modo 2: Escuchando Dictado (transcripción libre)
       const handleDictation = (event) => {
         let interimTranscript = '';
-        let finalTranscript = '';
+        // --- INICIO: CORRECCIÓN DE BUG DE ACUMULACIÓN ---
+        let localFinalTranscript = ''; // Usar variable local para el *nuevo* texto
+        // --- FIN: CORRECCIÓN DE BUG DE ACUMULACIÓN ---
         let hasFoundStop = false;
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -248,22 +326,21 @@
           }
 
           if (event.results[i].isFinal && !hasFoundStop) {
-            finalTranscript += transcript.trim() + ' ';
+            // --- CORRECCIÓN DE BUG DE ACUMULACIÓN ---
+            localFinalTranscript += transcript.trim() + ' '; // Añadir a la variable local
           } else if (!event.results[i].isFinal && !hasFoundStop) {
             interimTranscript += transcript;
           }
         }
         
-        // Procesar la transcripción final en busca de comandos
-        if(finalTranscript) {
-            processFinalTranscript(finalTranscript);
+        // --- CORRECCIÓN DE BUG DE ACUMULACIÓN ---
+        if(localFinalTranscript) { // Si hay nuevo texto final
+            processFinalTranscript(localFinalTranscript); // Procesar *solo* el nuevo texto
             showSaveStatus('Cambios sin guardar');
         }
 
-        // Actualizar el editor
         docEditor.innerHTML = finalDictatedText + `<span class="text-gray-400">${interimTranscript}</span>`;
         
-        // Mover el cursor al final
         placeCursorAtEnd();
 
         if (hasFoundStop) {
@@ -273,11 +350,47 @@
         }
       };
       
-      // NUEVA FUNCIÓN para procesar texto dictado y comandos
+      // --- LÓGICA DE COMANDOS DE DICTADO (INCLUYE CORRECCIÓN DE PUNTO) ---
       function processFinalTranscript(transcript) {
           transcript = transcript.toLowerCase().trim();
           
-          if (transcript.includes('nuevo párrafo')) {
+          // 1. Comandos con parámetros (RegEx)
+          const tamanoMatch = transcript.match(/poner tamaño (\d+)/); // ej: "poner tamaño 16"
+          const fuenteMatch = transcript.match(/poner fuente (.+)/); // ej: "poner fuente arial"
+
+          if (tamanoMatch && tamanoMatch[1]) {
+              const newSize = tamanoMatch[1];
+              if (sizeSelector) {
+                  let sizeExists = Array.from(sizeSelector.options).some(o => o.value === newSize);
+                  if (sizeExists) {
+                      sizeSelector.value = newSize;
+                      console.log(`Tamaño cambiado a: ${newSize}`);
+                  }
+              }
+          } else if (fuenteMatch && fuenteMatch[1]) {
+              const newFont = fuenteMatch[1].trim();
+              if (fontSelector) {
+                  let found = false;
+                  for (let option of fontSelector.options) {
+                      if (option.text.toLowerCase() === newFont) {
+                          fontSelector.value = option.value;
+                          found = true;
+                          console.log(`Fuente cambiada a: ${option.value}`);
+                          break;
+                      }
+                  }
+              }
+          
+          } else if (transcript.includes('justificar texto')) {
+              docEditor.style.textAlign = 'justify';
+          } else if (transcript.includes('alinear izquierda')) {
+              docEditor.style.textAlign = 'left';
+          } else if (transcript.includes('alinear derecha')) {
+              docEditor.style.textAlign = 'right';
+          } else if (transcript.includes('centrar texto') || transcript.includes('alinear centro')) {
+              docEditor.style.textAlign = 'center';
+          
+          } else if (transcript.includes('nuevo párrafo') || transcript.includes('punto y aparte')) {
               finalDictatedText += '<br><br>';
           } else if (transcript.includes('nueva línea')) {
               finalDictatedText += '<br>';
@@ -298,16 +411,17 @@
               isItalic = false;
               finalDictatedText += '</i>';
           } else if (transcript.includes('borrar última palabra')) {
-              // Esta es una lógica simple, no maneja bien el HTML.
-              // Una implementación real necesitaría un manejo del DOM.
               const lastSpace = finalDictatedText.trimEnd().lastIndexOf(' ');
               if(lastSpace > -1) {
                   finalDictatedText = finalDictatedText.substring(0, lastSpace).trim() + ' ';
               } else {
-                  finalDictatedText = ''; // Borrar todo si no hay espacios
+                  finalDictatedText = ''; 
               }
           } else {
-              // Es texto normal
+              // 3. Es texto normal
+              if (transcript.endsWith('.')) {
+                  transcript = transcript.substring(0, transcript.length - 1);
+              }
               finalDictatedText += transcript + ' ';
           }
       }
@@ -316,9 +430,9 @@
       function startCommandMode() {
         console.log('Cambiando a Modo Comando');
         isDictating = false;
-        if(isBold) { finalDictatedText += '</b>'; isBold = false; } // Cierra etiquetas abiertas
+        if(isBold) { finalDictatedText += '</b>'; isBold = false; } 
         if(isItalic) { finalDictatedText += '</i>'; isItalic = false; }
-        docEditor.innerHTML = finalDictatedText; // Limpia el interim
+        docEditor.innerHTML = finalDictatedText; 
         
         recognition.stop();
         recognition.continuous = false;
@@ -329,7 +443,7 @@
             try { recognition.start(); } catch (e) {}
           }
         };
-
+        
         statusText.textContent = 'Haz clic o di "comenzar redacción"';
         micIcon.classList.remove('animate-pulse');
         micButton.classList.remove('animate-pulse', 'bg-red-500');
@@ -350,7 +464,6 @@
           }
         };
 
-        // Prepara el texto final
         finalDictatedText = docEditor.innerHTML.replace(/<span.*span>/i, '').trim();
         if (finalDictatedText.length > 0 && !finalDictatedText.endsWith(' ')) {
             finalDictatedText += ' ';
@@ -363,12 +476,11 @@
         micButton.setAttribute('aria-label', 'Detener dictado');
       }
       
-      // Helper para poner el cursor al final del contenteditable
       function placeCursorAtEnd() {
         const range = document.createRange();
         const sel = window.getSelection();
         range.selectNodeContents(docEditor);
-        range.collapse(false); // false para colapsar al final
+        range.collapse(false); 
         sel.removeAllRanges();
         sel.addRange(range);
         docEditor.focus();
@@ -383,7 +495,6 @@
         }
       });
       
-      // Guardar el estado al hacer clic en el botón
       document.getElementById('save-button').addEventListener('click', () => {
           showSaveStatus('Guardado', true);
       });
