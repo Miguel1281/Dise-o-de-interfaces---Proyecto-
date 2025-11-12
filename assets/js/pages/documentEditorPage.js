@@ -24,9 +24,167 @@ class DocumentUI {
         this.commandOverlayBackdrop = this.commandOverlay ? this.commandOverlay.querySelector('[data-overlay-backdrop]') : null;
         this.commandOverlayOpenButton = getOptionalElement('#open-commands');
         this.helpButton = getOptionalElement('#help-toggle');
+        this.exportOverlay = getOptionalElement('#export-overlay');
+        this.exportOverlayPanel = getOptionalElement('#export-overlay-panel');
+        this.exportOverlayClose = getOptionalElement('#export-overlay-close');
+        this.exportOverlayBackdrop = this.exportOverlay ? this.exportOverlay.querySelector('[data-overlay-backdrop]') : null;
+        this.exportOptionWord = getOptionalElement('[data-export-option="word"]');
+        this.exportOptionPdf = getOptionalElement('[data-export-option="pdf"]');
+        this.exportOptionCancel = getOptionalElement('[data-export-option="cancel"]');
 
         this.saveStatusTimer = null;
         this.bodyOverflowBackup = '';
+        this.bodyScrollLocks = 0;
+        this.exportOverlayDismissHandler = null;
+    }
+
+    promptExportFormat() {
+        setTextContent(this.statusText, '¿En qué formato deseas exportar? Di "Exportar en Word" o "Exportar en PDF".');
+        this.notifyInfo('Di "Exportar en Word" o "Exportar en PDF"');
+        this.hideCommandsOverlay({ silent: true });
+        this.showExportOverlay();
+    }
+
+    remindExportFormat() {
+        setTextContent(this.statusText, 'Formato no reconocido. Di "Exportar en Word" o "Exportar en PDF".');
+        this.notifyError('Formato de exportación no reconocido');
+        this.showExportOverlay();
+    }
+
+    cancelExportPrompt() {
+        setTextContent(this.statusText, 'Exportación cancelada.');
+        this.notifySuccess('Exportación cancelada');
+        this.hideExportOverlay({ restoreFocus: true });
+    }
+
+    showExportInProgress(format) {
+        const label = format === 'pdf' ? 'PDF' : 'Word';
+        setTextContent(this.statusText, `Generando ${label}...`);
+        this.notifyInfo(`Generando ${label}`);
+        this.hideExportOverlay({ restoreFocus: false });
+    }
+
+    showExportSuccess(format) {
+        const label = format === 'pdf' ? 'PDF' : 'documento Word';
+        setTextContent(this.statusText, `${label.charAt(0).toUpperCase()}${label.slice(1)} descargado.`);
+        this.notifySuccess(`${label.charAt(0).toUpperCase()}${label.slice(1)} descargado`);
+    }
+
+    showExportError(message) {
+        setTextContent(this.statusText, message);
+        this.notifyError(message);
+    }
+
+    async exportDocument(format) {
+        const exportData = this.getExportData();
+
+        if (format === 'word') {
+            this.exportAsWord(exportData);
+            return;
+        }
+
+        if (format === 'pdf') {
+            await this.exportAsPdf(exportData);
+            return;
+        }
+
+        throw new Error('Formato de exportación no soportado');
+    }
+
+    getExportData() {
+        const rawTitle = (this.titleInput.value || '').trim() || 'Documento sin título';
+        const sanitizedTitle = this.sanitizeFileName(rawTitle);
+        const htmlContent = this.captureEditorContent();
+        const finalHtml = htmlContent || '<p>(Documento vacío)</p>';
+        const textContent = this.docEditor.innerText.trim() || 'Documento vacío';
+
+        this.commitEditorContent(finalHtml);
+
+        return {
+            title: rawTitle,
+            sanitizedTitle,
+            html: finalHtml,
+            text: textContent,
+        };
+    }
+
+    sanitizeFileName(name) {
+        const fallback = 'documento';
+        const normalized = typeof name.normalize === 'function' ? name.normalize('NFD') : name;
+        const slug = normalized
+            .replace(/[^a-zA-Z0-9\s-]/g, '')
+            .trim()
+            .replace(/[\s_-]+/g, '-');
+        return slug.length > 0 ? slug.toLowerCase() : fallback;
+    }
+
+    escapeHtml(value) {
+        const safeValue = String(value);
+        return safeValue
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    exportAsWord({ title, sanitizedTitle, html }) {
+        const escapedTitle = this.escapeHtml(title);
+        const documentMarkup = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>${escapedTitle}</title></head><body>${html}</body></html>`;
+        const blob = new Blob(['\ufeff', documentMarkup], { type: 'application/msword' });
+        this.triggerDownload(blob, `${sanitizedTitle}.doc`);
+    }
+
+    async exportAsPdf({ title, sanitizedTitle, html }) {
+        const namespace = window.jspdf;
+        if (!namespace || !namespace.jsPDF) {
+            throw new Error('La librería de PDF no está disponible.');
+        }
+
+        const pdf = new namespace.jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'fixed';
+        wrapper.style.left = '-9999px';
+        wrapper.style.top = '0';
+        wrapper.style.width = '595px';
+        wrapper.style.padding = '24px';
+        wrapper.style.fontFamily = window.getComputedStyle(this.docEditor).fontFamily || 'Inter, sans-serif';
+        wrapper.style.background = '#ffffff';
+        wrapper.innerHTML = html || '<p>(Documento vacío)</p>';
+        document.body.appendChild(wrapper);
+
+        try {
+            await pdf.html(wrapper, {
+                x: 40,
+                y: 40,
+                margin: [40, 40, 60, 40],
+                autoPaging: 'text',
+                html2canvas: {
+                    scale: 0.8,
+                    useCORS: true,
+                    ignoreElements: (element) => element.tagName === 'BUTTON',
+                },
+                callback: (doc) => {
+                    doc.setProperties({ title });
+                    doc.save(`${sanitizedTitle}.pdf`);
+                },
+            });
+        } finally {
+            if (wrapper.parentElement) {
+                wrapper.parentElement.removeChild(wrapper);
+            }
+        }
+    }
+
+    triggerDownload(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
 
     notifySuccess(message) {
@@ -46,6 +204,32 @@ class DocumentUI {
     notifyInfo(message) {
         if (this.feedback && message) {
             this.feedback.showToast(message, 'info');
+        }
+    }
+
+    lockBodyScroll() {
+        if (typeof document === 'undefined') {
+            return;
+        }
+
+        if (this.bodyScrollLocks === 0) {
+            this.bodyOverflowBackup = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+        }
+
+        this.bodyScrollLocks += 1;
+    }
+
+    unlockBodyScroll() {
+        if (typeof document === 'undefined' || this.bodyScrollLocks === 0) {
+            return;
+        }
+
+        this.bodyScrollLocks -= 1;
+
+        if (this.bodyScrollLocks === 0) {
+            document.body.style.overflow = this.bodyOverflowBackup || '';
+            this.bodyOverflowBackup = '';
         }
     }
 
@@ -83,9 +267,53 @@ class DocumentUI {
         }
     }
 
+    bindExportOverlay(actions = {}) {
+        const { onWord, onPdf, onCancel, onDismiss } = actions;
+
+        if (this.exportOptionWord && typeof onWord === 'function') {
+            this.exportOptionWord.addEventListener('click', onWord);
+        }
+
+        if (this.exportOptionPdf && typeof onPdf === 'function') {
+            this.exportOptionPdf.addEventListener('click', onPdf);
+        }
+
+        if (this.exportOptionCancel && typeof onCancel === 'function') {
+            this.exportOptionCancel.addEventListener('click', onCancel);
+        }
+
+        if (typeof onDismiss === 'function') {
+            this.exportOverlayDismissHandler = onDismiss;
+
+            if (this.exportOverlayClose) {
+                this.exportOverlayClose.addEventListener('click', onDismiss);
+            }
+
+            if (this.exportOverlayBackdrop) {
+                this.exportOverlayBackdrop.addEventListener('click', onDismiss);
+            }
+        } else {
+            this.exportOverlayDismissHandler = null;
+        }
+    }
+
     enableOverlayKeyboardDismiss() {
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && this.isCommandsOverlayVisible()) {
+            if (event.key !== 'Escape') {
+                return;
+            }
+
+            if (this.isExportOverlayVisible()) {
+                event.preventDefault();
+                if (typeof this.exportOverlayDismissHandler === 'function') {
+                    this.exportOverlayDismissHandler();
+                } else {
+                    this.hideExportOverlay({ restoreFocus: true });
+                }
+                return;
+            }
+
+            if (this.isCommandsOverlayVisible()) {
                 event.preventDefault();
                 this.hideCommandsOverlay();
             }
@@ -103,8 +331,7 @@ class DocumentUI {
 
         this.commandOverlay.classList.remove('hidden');
         this.commandOverlay.setAttribute('aria-hidden', 'false');
-        this.bodyOverflowBackup = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
+        this.lockBodyScroll();
         setTextContent(this.statusText, 'Guía de comandos abierta. Di "ocultar comandos" para cerrarla.');
 
         window.requestAnimationFrame(() => {
@@ -114,33 +341,52 @@ class DocumentUI {
         });
     }
 
-    hideCommandsOverlay() {
+    hideCommandsOverlay(options = {}) {
         if (!this.commandOverlay || !this.isCommandsOverlayVisible()) {
             return;
         }
 
         this.commandOverlay.classList.add('hidden');
         this.commandOverlay.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = this.bodyOverflowBackup || '';
-        this.bodyOverflowBackup = '';
-        setTextContent(this.statusText, 'Comandos ocultos. Di "mostrar comandos" si los necesitas.');
+        this.unlockBodyScroll();
+
+        if (!options.silent) {
+            setTextContent(this.statusText, 'Comandos ocultos. Di "mostrar comandos" si los necesitas.');
+        }
     }
 
-    showUnsupportedMessage() {
-        setTextContent(this.statusText, 'Tu navegador no soporta la API de voz.');
-        this.micButton.disabled = true;
-        setAriaLabel(this.micButton, 'Reconocimiento no disponible');
-        this.micButton.classList.add('opacity-60', 'cursor-not-allowed');
-        this.notifyError('Reconocimiento de voz no disponible');
+    isExportOverlayVisible() {
+        return Boolean(this.exportOverlay && !this.exportOverlay.classList.contains('hidden'));
     }
 
-    showCommandMode() {
-        setTextContent(this.statusText, 'Listo. Di "comenzar redacción" o "mostrar comandos".');
-        this.micButton.classList.remove('animate-pulse', 'bg-rose-500', 'text-primary', 'bg-slate-200');
-        this.micIcon.classList.remove('animate-pulse');
-        this.micButton.classList.add('bg-primary', 'text-white');
-        this.editorWrapper.classList.remove('listening-active');
-        setAriaLabel(this.micButton, 'Activar dictado');
+    showExportOverlay() {
+        if (!this.exportOverlay || this.isExportOverlayVisible()) {
+            return;
+        }
+
+        this.exportOverlay.classList.remove('hidden');
+        this.exportOverlay.setAttribute('aria-hidden', 'false');
+        this.lockBodyScroll();
+
+        window.requestAnimationFrame(() => {
+            if (this.exportOverlayPanel) {
+                this.exportOverlayPanel.focus();
+            }
+        });
+    }
+
+    hideExportOverlay(options = {}) {
+        if (!this.exportOverlay || !this.isExportOverlayVisible()) {
+            return;
+        }
+
+        this.exportOverlay.classList.add('hidden');
+        this.exportOverlay.setAttribute('aria-hidden', 'true');
+        this.unlockBodyScroll();
+
+        if (options.restoreFocus && this.exportButton) {
+            this.exportButton.focus();
+        }
     }
 
     showDictationMode() {
@@ -150,7 +396,17 @@ class DocumentUI {
         this.micIcon.classList.add('animate-pulse');
         this.editorWrapper.classList.add('listening-active');
         setAriaLabel(this.micButton, 'Detener dictado');
-        this.hideCommandsOverlay();
+        this.hideCommandsOverlay({ silent: true });
+        this.hideExportOverlay();
+    }
+
+    showCommandMode() {
+        setTextContent(this.statusText, 'Escuchando comandos. Di un comando o "mostrar comandos".');
+        this.micButton.classList.remove('animate-pulse', 'bg-rose-500', 'bg-slate-200', 'text-primary');
+        this.micButton.classList.add('bg-primary', 'text-white');
+        this.micIcon.classList.remove('animate-pulse');
+        this.editorWrapper.classList.remove('listening-active');
+        setAriaLabel(this.micButton, 'Iniciar dictado');
     }
 
     showIdleStatus() {
@@ -159,6 +415,7 @@ class DocumentUI {
         this.micButton.classList.add('bg-slate-200', 'text-primary');
         this.micIcon.classList.remove('animate-pulse');
         this.editorWrapper.classList.remove('listening-active');
+        setAriaLabel(this.micButton, 'Activar dictado');
     }
 
     showLastCommand(commandText) {
@@ -493,6 +750,8 @@ class DocumentCommandProcessor {
         this.ui = ui;
         this.speechService = speechService;
         this.onStartDictation = onStartDictation;
+        this.awaitingExportFormat = false;
+        this.exportInProgress = false;
     }
 
     handleRecognitionEvent(event) {
@@ -502,6 +761,21 @@ class DocumentCommandProcessor {
     }
 
     handleCommand(command) {
+        if (this.awaitingExportFormat) {
+            if (/(cancelar|anular) (la )?exportación/.test(command) || /cancelar/.test(command)) {
+                this.cancelPendingExport();
+                return;
+            }
+
+            const format = this.detectExportFormat(command);
+            if (format) {
+                this.executeExport(format);
+            } else {
+                this.ui.remindExportFormat();
+            }
+            return;
+        }
+
         if (/\b(mostrar|ver)\b.*\bcomandos?\b/.test(command) || /\bmostrar\b.*\bayuda\b/.test(command) || /\bayuda\b/.test(command)) {
             if (this.ui.isCommandsOverlayVisible()) {
                 setTextContent(this.ui.statusText, 'La guía de comandos ya está abierta.');
@@ -525,6 +799,7 @@ class DocumentCommandProcessor {
         }
 
         if (command.includes('comenzar redacción')) {
+            this.awaitingExportFormat = false;
             this.onStartDictation();
             this.ui.notifySuccess('Dictado activado');
             return;
@@ -548,8 +823,14 @@ class DocumentCommandProcessor {
         }
 
         if (command.includes('exportar')) {
-            setTextContent(this.ui.statusText, 'Exportando...');
-            this.ui.notifySuccess('Exportando documento');
+            const format = this.detectExportFormat(command);
+            if (format) {
+                this.executeExport(format);
+            } else {
+                this.awaitingExportFormat = true;
+                this.ui.notifySuccess('Exportar documento');
+                this.ui.promptExportFormat();
+            }
             return;
         }
 
@@ -562,6 +843,67 @@ class DocumentCommandProcessor {
 
         setTextContent(this.ui.statusText, 'No se reconoció el comando.');
         this.ui.notifyError('No se reconoció el comando');
+    }
+
+    detectExportFormat(command) {
+        if (/\b(pdf)\b/.test(command)) {
+            return 'pdf';
+        }
+
+        if (/(word|docx?|microsoft word|archivo de word)/.test(command)) {
+            return 'word';
+        }
+
+        return null;
+    }
+
+    async executeExport(format) {
+        if (this.exportInProgress) {
+            this.ui.notifyInfo('Ya se está generando una exportación.');
+            return;
+        }
+
+        this.awaitingExportFormat = false;
+        this.exportInProgress = true;
+        this.ui.showExportInProgress(format);
+
+        try {
+            await this.ui.exportDocument(format);
+            this.ui.showExportSuccess(format);
+        } catch (error) {
+            console.error(error);
+            const message = error instanceof Error ? error.message : 'No se pudo completar la exportación.';
+            this.ui.showExportError(message);
+        } finally {
+            this.exportInProgress = false;
+        }
+    }
+
+    initiateExportPrompt() {
+        if (this.exportInProgress) {
+            this.ui.notifyInfo('Ya se está generando una exportación.');
+            return;
+        }
+
+        this.awaitingExportFormat = true;
+        this.ui.promptExportFormat();
+    }
+
+    cancelPendingExport(options = {}) {
+        const { silent } = options;
+
+        if (!this.awaitingExportFormat && !this.ui.isExportOverlayVisible()) {
+            return;
+        }
+
+        this.awaitingExportFormat = false;
+
+        if (!silent) {
+            this.ui.cancelExportPrompt();
+            return;
+        }
+
+        this.ui.hideExportOverlay({ restoreFocus: true });
     }
 
     applyTitleUpdate(command) {
@@ -651,14 +993,21 @@ function bootstrapDocumentPage() {
         if (modeManager.isModeActive('dictation')) {
             modeManager.switchTo(commandModeConfig);
         } else {
+            commandProcessor.cancelPendingExport({ silent: true });
             modeManager.switchTo(dictationModeConfig);
         }
     });
 
     ui.bindSave(() => ui.showSaveStatus('Guardado', true));
-    ui.bindExport(() => setTextContent(ui.statusText, 'Exportando...'));
+    ui.bindExport(() => commandProcessor.initiateExportPrompt());
     ui.bindShowCommands(() => ui.showCommandsOverlay());
     ui.bindHideCommands(() => ui.hideCommandsOverlay());
+    ui.bindExportOverlay({
+        onWord: () => commandProcessor.executeExport('word'),
+        onPdf: () => commandProcessor.executeExport('pdf'),
+        onCancel: () => commandProcessor.cancelPendingExport(),
+        onDismiss: () => commandProcessor.cancelPendingExport(),
+    });
     ui.enableOverlayKeyboardDismiss();
 
     modeManager.start(commandModeConfig);

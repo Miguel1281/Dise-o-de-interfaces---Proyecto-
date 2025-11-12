@@ -81,6 +81,10 @@
       }
     }
   </style>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+    crossorigin="anonymous"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+    crossorigin="anonymous"></script>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
@@ -153,7 +157,7 @@
               <div class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
                 <span class="material-symbols-outlined text-base">info</span>
                 <span>El contorno del editor se ilumina cuando el sistema está escuchando activamente. Di "Mostrar
-                  comandos" o usa el botón para ver la guía completa.</span>
+                  comandos" para consultar la guía y "Exportar documento" para descargar en Word o PDF.</span>
               </div>
             </div>
             <div
@@ -266,6 +270,10 @@
             <li><b>"Terminar redacción"</b></li>
             <li><b>"Poner título [texto]"</b></li>
             <li><b>"Guardar documento"</b></li>
+            <li><b>"Exportar documento"</b> (Abre las opciones de formato)</li>
+            <li><b>"Exportar en Word"</b></li>
+            <li><b>"Exportar en PDF"</b></li>
+            <li><b>"Cancelar exportación"</b></li>
             <li><b>"Leer documento"</b></li>
             <li><b>"Volver al inicio"</b></li>
           </ul>
@@ -306,6 +314,51 @@
             <li><b>"Borrar última palabra"</b></li>
           </ul>
         </section>
+      </div>
+    </aside>
+  </div>
+  <div id="export-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4" aria-hidden="true">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm cursor-pointer" data-overlay-backdrop></div>
+    <aside id="export-overlay-panel" role="dialog" aria-modal="true" aria-labelledby="export-overlay-title"
+      tabindex="-1"
+      class="relative z-10 w-full max-w-md rounded-2xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-2xl">
+      <header
+        class="flex items-start justify-between gap-4 border-b border-border-light dark:border-border-dark px-6 py-4">
+        <div class="flex items-start gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-primary">
+            <span class="material-symbols-outlined">file_download</span>
+          </div>
+          <div>
+            <h1 id="export-overlay-title" class="text-lg font-bold">Exportar documento</h1>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Di "Exportar en Word" o "Exportar en PDF" para
+              elegir, o utiliza los botones.</p>
+          </div>
+        </div>
+        <button id="export-overlay-close" aria-label="Cerrar opciones de exportación"
+          class="flex h-10 w-10 items-center justify-center rounded-full bg-transparent text-gray-500 transition-colors duration-150 ease-in-out hover:bg-black/5 dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </header>
+      <div class="px-6 py-5 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+        <p>Selecciona el formato para descargar el documento. Puedes decir "Cancelar exportación" en cualquier momento.
+        </p>
+        <div class="flex flex-col gap-3">
+          <button type="button" data-export-option="word"
+            class="flex items-center justify-between gap-3 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark px-4 py-3 text-left font-semibold transition-colors duration-150 ease-in-out hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <span>Exportar en Word</span>
+            <span class="material-symbols-outlined text-primary">description</span>
+          </button>
+          <button type="button" data-export-option="pdf"
+            class="flex items-center justify-between gap-3 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark px-4 py-3 text-left font-semibold transition-colors duration-150 ease-in-out hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <span>Exportar en PDF</span>
+            <span class="material-symbols-outlined text-primary">picture_as_pdf</span>
+          </button>
+          <button type="button" data-export-option="cancel"
+            class="flex items-center justify-between gap-3 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark px-4 py-3 text-left font-semibold transition-colors duration-150 ease-in-out hover:bg-black/5 dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <span>Cancelar exportación</span>
+            <span class="material-symbols-outlined text-gray-500">cancel</span>
+          </button>
+        </div>
       </div>
     </aside>
   </div>
