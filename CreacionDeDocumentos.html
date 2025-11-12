@@ -103,26 +103,25 @@
 </head>
 
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
-  <div class="flex min-h-screen w-full bg-background-light dark:bg-background-dark">
-    <div class="flex w-full flex-1 flex-col lg:flex-row">
+  <div class="flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
+    <header
+      class="flex w-full items-center justify-between border-b border-border-light bg-background-light px-8 py-6 dark:border-border-dark dark:bg-background-dark">
+      <div class="flex items-center gap-3">
+        <svg class="h-10 w-10 text-primary" fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path clip-rule="evenodd"
+            d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z"
+            fill-rule="evenodd"></path>
+        </svg>
+        <div>
+          <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">VozDoc</h1>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Editor de documentos guiado por voz</p>
+        </div>
+      </div>
+      <div id="save-status" class="text-sm font-medium text-gray-500 dark:text-gray-300"></div>
+    </header>
+    <div class="flex w-full flex-1 flex-col gap-8 px-6 py-8 lg:flex-row lg:items-start lg:gap-10 lg:px-10">
       <main class="flex flex-1 flex-col">
-        <header
-          class="flex items-center justify-between border-b border-border-light dark:border-border-dark px-8 py-6">
-          <div class="flex items-center gap-3">
-            <svg class="h-10 w-10 text-primary" fill="currentColor" viewBox="0 0 48 48"
-              xmlns="http://www.w3.org/2000/svg">
-              <path clip-rule="evenodd"
-                d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z"
-                fill-rule="evenodd"></path>
-            </svg>
-            <div>
-              <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">VozDoc</h1>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Editor de documentos guiado por voz</p>
-            </div>
-          </div>
-          <div id="save-status" class="text-sm font-medium text-gray-500 dark:text-gray-300"></div>
-        </header>
-        <section class="flex-1 overflow-y-auto px-6 py-8 lg:px-10">
+        <section class="flex-1 overflow-y-auto">
           <div class="mx-auto flex w-full max-w-3xl flex-col gap-8">
             <div
               class="rounded-3xl border border-border-light bg-surface-light p-8 shadow-sm dark:border-border-dark dark:bg-surface-dark">
@@ -155,7 +154,7 @@
       </main>
       <aside id="voice-sidebar"
         class="flex w-full flex-col border-t border-border-light bg-white/80 backdrop-blur dark:border-border-dark dark:bg-surface-dark/90 lg:w-[360px] lg:border-l lg:border-t-0">
-        <div class="sticky top-0 flex max-h-screen flex-col gap-8 px-6 py-8">
+        <div class="sticky top-4 flex max-h-screen flex-col gap-8 px-6 py-8">
           <div class="flex flex-col items-center gap-4 text-center">
             <div class="relative">
               <button id="dictation-toggle" aria-label="Activar dictado"
