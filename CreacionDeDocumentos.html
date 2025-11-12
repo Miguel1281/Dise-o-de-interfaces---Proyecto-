@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html class="light" lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -41,44 +42,85 @@
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
+
     /* Estilo para el placeholder del editor contenteditable */
     [contenteditable="true"]:empty:before {
-        content: attr(placeholder);
-        pointer-events: none;
-        display: block; /* Para que ocupe espacio */
-        color: #6b7280; /* Color de placeholder (gray-500) */
-        font-style: italic;
-        font-size: 1.1rem; /* Ligeramente más grande */
+      content: attr(placeholder);
+      pointer-events: none;
+      display: block;
+      /* Para que ocupe espacio */
+      color: #6b7280;
+      /* Color de placeholder (gray-500) */
+      font-style: italic;
+      font-size: 1.1rem;
+      /* Ligeramente más grande */
+    }
+
+    #editor-wrapper {
+      position: relative;
+      transition: border-color 0.25s ease, box-shadow 0.4s ease, background-color 0.25s ease;
+    }
+
+    #editor-wrapper.listening-active {
+      border-color: rgba(59, 130, 246, 0.45);
+      box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.15), 0 0 32px rgba(59, 130, 246, 0.25);
+      animation: dictationAura 1.6s ease-in-out infinite;
+    }
+
+    @keyframes dictationAura {
+      0% {
+        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.15), 0 0 28px rgba(59, 130, 246, 0.2);
+      }
+
+      50% {
+        box-shadow: 0 0 0 16px rgba(59, 130, 246, 0.12), 0 0 44px rgba(59, 130, 246, 0.35);
+      }
+
+      100% {
+        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.15), 0 0 28px rgba(59, 130, 246, 0.2);
+      }
     }
   </style>
 </head>
+
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
   <div class="flex min-h-screen w-full flex-col">
-    <header class="flex items-center justify-between border-b border-solid border-border-light dark:border-border-dark px-6 py-3 bg-surface-light dark:bg-surface-dark flex-shrink-0">
+    <header
+      class="flex items-center justify-between border-b border-solid border-border-light dark:border-border-dark px-6 py-3 bg-surface-light dark:bg-surface-dark flex-shrink-0">
       <div class="flex items-center gap-4">
-        <svg class="text-primary" fill="currentColor" height="24" viewbox="0 0 48 48" width="24" xmlns="http://www.w3.org/2000/svg">
-          <path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill-rule="evenodd"></path>
+        <svg class="text-primary" fill="currentColor" height="24" viewbox="0 0 48 48" width="24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path clip-rule="evenodd"
+            d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z"
+            fill-rule="evenodd"></path>
         </svg>
         <h2 class="text-lg font-bold">VozDoc</h2>
       </div>
       <div class="flex items-center gap-4">
-        <button aria-label="Guardar documento" id="save-button" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-primary text-white text-sm font-bold">
+        <button aria-label="Guardar documento" id="save-button"
+          class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-primary text-white text-sm font-bold">
           <span>Guardar</span>
         </button>
-        <button aria-label="Exportar documento" id="export-button" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark text-sm font-bold">
+        <button aria-label="Exportar documento" id="export-button"
+          class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark text-sm font-bold">
           <span>Exportar</span>
         </button>
-        <button aria-label="Ayuda" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
+        <button aria-label="Ayuda"
+          class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
           <span class="material-symbols-outlined">help</span>
         </button>
-        <button aria-label="Activar modo oscuro" class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
+        <button aria-label="Activar modo oscuro"
+          class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
           <span class="material-symbols-outlined">toggle_on</span>
         </button>
-        <div class="h-10 w-10 rounded-full bg-cover bg-center" data-alt="User avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuARtDAcyBZMoA_Rrm50ggs-eXuC52YhBPFwL95JbwWRmq2M-s8UykfBMcFfCwC6UdnSrQFdZR3cspl981106E0R-JsDmzwcxYKkHdRTsy-43m5dUUsZ0oXNCIjEL2eLHKUpPm5DHUGWHjsWDn9oocAUonjRTVBITk2Aoeq1ueNf3uXIYjj8Z0g8nKo3L1V3qohozfgGezyiZM_AG615Uuv3c_SuBqs9pe5uOTXVti4mvgyEJeDZxU04yNUA75_SJIQXKMjP70HOW_kz");'></div>
+        <div class="h-10 w-10 rounded-full bg-cover bg-center" data-alt="User avatar"
+          style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuARtDAcyBZMoA_Rrm50ggs-eXuC52YhBPFwL95JbwWRmq2M-s8UykfBMcFfCwC6UdnSrQFdZR3cspl981106E0R-JsDmzwcxYKkHdRTsy-43m5dUUsZ0oXNCIjEL2eLHKUpPm5DHUGWHjsWDn9oocAUonjRTVBITk2Aoeq1ueNf3uXIYjj8Z0g8nKo3L1V3qohozfgGezyiZM_AG615Uuv3c_SuBqs9pe5uOTXVti4mvgyEJeDZxU04yNUA75_SJIQXKMjP70HOW_kz");'>
+        </div>
       </div>
     </header>
     <div class="flex flex-1">
-      <aside class="flex h-full w-64 flex-shrink-0 flex-col justify-between border-r border-solid border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-4">
+      <aside
+        class="flex h-full w-64 flex-shrink-0 flex-col justify-between border-r border-solid border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-4">
         <div class="flex flex-col gap-4 overflow-y-auto">
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-primary">
@@ -88,7 +130,7 @@
               <h1 class="text-lg font-bold">Comandos de Voz</h1>
             </div>
           </div>
-          
+
           <div class="flex flex-col gap-4 mt-4 text-sm">
             <div>
               <h2 class="font-bold text-primary">Acciones</h2>
@@ -142,367 +184,113 @@
       </aside>
       <main class="flex flex-1 flex-col bg-background-light dark:bg-background-dark">
         <div class="mx-auto w-full max-w-4xl flex-grow px-4 sm:px-6 lg:px-8 py-8">
-          <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark h-full flex flex-col">
-            <div class="flex justify-between items-center gap-2 px-4 py-2 border-b border-border-light dark:border-border-dark">
+          <div
+            class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark h-full flex flex-col">
+            <div id="dictation-panel"
+              class="flex flex-col gap-4 border-b border-border-light dark:border-border-dark px-6 py-4">
+              <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-4 flex-1 min-w-[260px]">
+                  <button id="dictation-toggle" aria-label="Activar dictado"
+                    class="flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center rounded-full bg-slate-200 text-primary transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-300">
+                    <span class="material-symbols-outlined text-4xl">mic</span>
+                  </button>
+                  <div class="flex flex-col gap-1 dictation-status" aria-live="polite" aria-atomic="true">
+                    <span id="dictation-status-text"
+                      class="status-text text-base font-semibold text-gray-900 dark:text-gray-100">Haz clic para
+                      activar</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-300">Di "Comenzar redacción" para iniciar y
+                      "Terminar redacción" para finalizar.</span>
+                  </div>
+                </div>
+                <div id="save-status" class="flex items-center gap-2 text-sm text-gray-500 font-medium min-h-[20px]">
+                </div>
+              </div>
+              <div class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                <span class="material-symbols-outlined text-base">info</span>
+                <span>El contorno del editor se ilumina cuando el sistema está escuchando activamente.</span>
+              </div>
+            </div>
+            <div
+              class="flex justify-between items-center gap-2 px-4 py-2 border-b border-border-light dark:border-border-dark">
               <div class="flex flex-wrap gap-1">
-                <button aria-label="Deshacer" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">undo</span></button>
-                <button aria-label="Rehacer" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">redo</span></button>
-                
+                <button aria-label="Deshacer" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
+                    class="material-symbols-outlined">undo</span></button>
+                <button aria-label="Rehacer" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
+                    class="material-symbols-outlined">redo</span></button>
+
                 <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-                <select id="font-select" aria-label="Fuente" class="form-select text-sm h-10 w-32 rounded-md border-border-light dark:border-border-dark bg-transparent focus:outline-0 focus:ring-0 focus:border-primary">
-                    <option value="Inter">Inter</option>
-                    <option value="Arial">Arial</option>
-                    <option value="Times New Roman">Times New Roman</option>
-                    <option value="Verdana">Verdana</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Courier New">Courier New</option>
-                    <option value="Garamond">Garamond</option>
+                <select id="font-select" aria-label="Fuente"
+                  class="form-select text-sm h-10 w-32 rounded-md border-border-light dark:border-border-dark bg-transparent focus:outline-0 focus:ring-0 focus:border-primary">
+                  <option value="Inter">Inter</option>
+                  <option value="Arial">Arial</option>
+                  <option value="Times New Roman">Times New Roman</option>
+                  <option value="Verdana">Verdana</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Courier New">Courier New</option>
+                  <option value="Garamond">Garamond</option>
                 </select>
-                <select id="size-select" aria-label="Tamaño de fuente" class="form-select text-sm h-10 w-20 rounded-md border-border-light dark:border-border-dark bg-transparent focus:outline-0 focus:ring-0 focus:border-primary">
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
-                    <option value="14">14</option>
-                    <option value="16">16</option>
-                    <option value="18">18</option>
-                    <option value="24">24</option>
-                    <option value="36">36</option>
+                <select id="size-select" aria-label="Tamaño de fuente"
+                  class="form-select text-sm h-10 w-20 rounded-md border-border-light dark:border-border-dark bg-transparent focus:outline-0 focus:ring-0 focus:border-primary">
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                  <option value="14">14</option>
+                  <option value="16">16</option>
+                  <option value="18">18</option>
+                  <option value="24">24</option>
+                  <option value="36">36</option>
                 </select>
-                
+
                 <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-                <button aria-label="Negrita" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_bold</span></button>
-                <button aria-label="Cursiva" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_italic</span></button>
-                <button aria-label="Subrayado" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_underlined</span></button>
+                <button aria-label="Negrita" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
+                    class="material-symbols-outlined">format_bold</span></button>
+                <button aria-label="Cursiva" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
+                    class="material-symbols-outlined">format_italic</span></button>
+                <button aria-label="Subrayado" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
+                    class="material-symbols-outlined">format_underlined</span></button>
                 <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-                <button aria-label="Alinear a la izquierda" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_left</span></button>
-                <button aria-label="Alinear al centro" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_center</span></button>
-                <button aria-label="Alinear a la derecha" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">format_align_right</span></button>
+                <button aria-label="Alinear a la izquierda"
+                  class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
+                    class="material-symbols-outlined">format_align_left</span></button>
+                <button aria-label="Alinear al centro"
+                  class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
+                    class="material-symbols-outlined">format_align_center</span></button>
+                <button aria-label="Alinear a la derecha"
+                  class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
+                    class="material-symbols-outlined">format_align_right</span></button>
                 <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-                <button aria-label="Imprimir" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">print</span></button>
+                <button aria-label="Imprimir" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
+                    class="material-symbols-outlined">print</span></button>
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-sm text-gray-700 dark:text-gray-300">EN</span>
-                <button aria-label="Traducir" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span class="material-symbols-outlined">translate</span></button>
+                <button aria-label="Traducir" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
+                    class="material-symbols-outlined">translate</span></button>
               </div>
             </div>
             <div class="flex-grow p-8 flex flex-col">
               <div class="mb-6">
                 <label class="flex flex-col w-full">
                   <span class="sr-only">Título del documento</span>
-                  <input id="doc-title" aria-label="Título del documento" class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden text-2xl font-bold leading-tight tracking-tight focus:outline-0 focus:ring-0 border-none bg-transparent p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400" placeholder="Documento sin título" value="" />
+                  <input id="doc-title" aria-label="Título del documento"
+                    class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden text-2xl font-bold leading-tight tracking-tight focus:outline-0 focus:ring-0 border-none bg-transparent p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                    placeholder="Documento sin título" value="" />
                 </label>
               </div>
-              
-              <div id="doc-editor" 
-                   contenteditable="true" 
-                   role="textbox" 
-                   aria-multiline="true"
-                   placeholder="Di 'Comenzar redacción' para iniciar el dictado. (Consulta la lista de comandos a la izquierda)"
-                   class="flex-grow text-base text-text-light dark:text-text-dark leading-relaxed focus:outline-none">
+              <div id="editor-wrapper"
+                class="flex-grow rounded-2xl border-2 border-transparent bg-white dark:bg-surface-dark p-6 transition-all duration-300 ease-in-out">
+                <div id="doc-editor" contenteditable="true" role="textbox" aria-multiline="true"
+                  placeholder="Di 'Comenzar redacción' para iniciar el dictado. (Consulta la lista de comandos a la izquierda)"
+                  class="min-h-[320px] text-base text-text-light dark:text-text-dark leading-relaxed focus:outline-none">
                 </div>
               </div>
+            </div>
           </div>
         </div>
-        <footer class="flex-shrink-0 p-4">
-          <div class="mx-auto w-full max-w-4xl flex items-center justify-between">
-            <div id="save-status" class="flex items-center gap-2 text-sm text-gray-500 font-medium">
-              </div>
-            <div class="flex items-center justify-center">
-              <button aria-label="Activar dictado" class="flex h-16 w-16 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105">
-                <span class="material-symbols-outlined text-4xl">mic</span>
-              </button>
-            </div>
-            <div class="status-text text-sm text-gray-700 dark:text-gray-300 w-48 text-right" aria-live="polite" aria-atomic="true">
-              Haz clic para activar
-            </div>
-          </div>
-        </footer>
       </main>
     </div>
   </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        alert("Tu navegador no soporta la API de Voz.");
-        return;
-      }
-
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'es-ES';
-
-      // --- Elementos de la UI ---
-      const docEditor = document.getElementById('doc-editor');
-      const titleInput = document.getElementById('doc-title');
-      const micButton = document.querySelector('footer button[aria-label="Activar dictado"]');
-      const micIcon = micButton.querySelector('span');
-      const statusText = document.querySelector('footer .status-text');
-      const saveStatus = document.getElementById('save-status');
-      
-      const fontSelector = document.getElementById('font-select');
-      const sizeSelector = document.getElementById('size-select');
-
-      let isDictating = false;
-      let finalDictatedText = ''; // Almacenamos el HTML
-      
-      // Banderas de formato
-      let isBold = false;
-      let isItalic = false;
-      
-      function leerTexto(texto) {
-        if (!'speechSynthesis' in window) {
-          alert('Tu navegador no soporta la síntesis de voz.');
-          return;
-        }
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(texto);
-        utterance.lang = 'es-ES';
-        window.speechSynthesis.speak(utterance);
-      }
-
-      // --- Lógica de Manejo de Voz ---
-
-      // Modo 1: Escuchando Comandos (Cuando NO se está dictando)
-      const handleCommand = (event) => {
-        const command = event.results[0][0].transcript.toLowerCase().trim();
-        console.log('Comando recibido:', command);
-        statusText.textContent = `Comando: '${command.substring(0, 20)}...'`;
-
-        if (command.includes('comenzar redacción')) {
-          startDictationMode();
-        } else if (command.startsWith('poner título')) {
-          
-          let newTitle = command.replace('poner título', '').trim();
-          newTitle = newTitle.replace(/^[,.\s]+/, ''); 
-          
-          titleInput.value = newTitle.charAt(0).toUpperCase() + newTitle.slice(1);
-          statusText.textContent = `Título actualizado`;
-          showSaveStatus('Cambios sin guardar');
-          
-        } else if (command.includes('leer documento')) {
-            const titulo = titleInput.value || "Documento sin título";
-            const contenido = docEditor.innerText || "Documento vacío"; 
-            
-            const textoCompleto = `Título: ${titulo}. Contenido: ${contenido}`;
-            statusText.textContent = 'Leyendo documento...';
-            leerTexto(textoCompleto);
-            
-        } else if (command.includes('guardar documento')) {
-            console.log('Simulando guardado...');
-            statusText.textContent = `Documento guardado`;
-            showSaveStatus('Guardado', true);
-        } else if (command.includes('exportar')) {
-            console.log('Simulando exportación...');
-            statusText.textContent = `Exportando...`;
-        } else if (command.includes('volver al inicio')) {
-          statusText.textContent = 'Volviendo al inicio...';
-          window.location.href = 'PantallaPrincipal.html';
-        }
-      };
-      
-      function showSaveStatus(message, success = false) {
-          saveStatus.textContent = message;
-          if (success) {
-              saveStatus.className = 'flex items-center gap-2 text-sm text-primary-accent font-medium';
-              setTimeout(() => { saveStatus.textContent = ''; }, 3000);
-          } else {
-              saveStatus.className = 'flex items-center gap-2 text-sm text-gray-500 font-medium';
-          }
-      }
-
-      // Modo 2: Escuchando Dictado (transcripción libre)
-      const handleDictation = (event) => {
-        let interimTranscript = '';
-        // --- INICIO: CORRECCIÓN DE BUG DE ACUMULACIÓN ---
-        let localFinalTranscript = ''; // Usar variable local para el *nuevo* texto
-        // --- FIN: CORRECCIÓN DE BUG DE ACUMULACIÓN ---
-        let hasFoundStop = false;
-
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const transcript = event.results[i][0].transcript;
-
-          if (transcript.toLowerCase().includes('terminar redacción')) {
-            hasFoundStop = true;
-          }
-
-          if (event.results[i].isFinal && !hasFoundStop) {
-            // --- CORRECCIÓN DE BUG DE ACUMULACIÓN ---
-            localFinalTranscript += transcript.trim() + ' '; // Añadir a la variable local
-          } else if (!event.results[i].isFinal && !hasFoundStop) {
-            interimTranscript += transcript;
-          }
-        }
-        
-        // --- CORRECCIÓN DE BUG DE ACUMULACIÓN ---
-        if(localFinalTranscript) { // Si hay nuevo texto final
-            processFinalTranscript(localFinalTranscript); // Procesar *solo* el nuevo texto
-            showSaveStatus('Cambios sin guardar');
-        }
-
-        docEditor.innerHTML = finalDictatedText + `<span class="text-gray-400">${interimTranscript}</span>`;
-        
-        placeCursorAtEnd();
-
-        if (hasFoundStop) {
-          finalDictatedText = docEditor.innerHTML.replace(/terminar redacción/gi, '').replace(/<span.*span>/i, '').trim();
-          docEditor.innerHTML = finalDictatedText;
-          startCommandMode();
-        }
-      };
-      
-      // --- LÓGICA DE COMANDOS DE DICTADO (INCLUYE CORRECCIÓN DE PUNTO) ---
-      function processFinalTranscript(transcript) {
-          transcript = transcript.toLowerCase().trim();
-          
-          // 1. Comandos con parámetros (RegEx)
-          const tamanoMatch = transcript.match(/poner tamaño (\d+)/); // ej: "poner tamaño 16"
-          const fuenteMatch = transcript.match(/poner fuente (.+)/); // ej: "poner fuente arial"
-
-          if (tamanoMatch && tamanoMatch[1]) {
-              const newSize = tamanoMatch[1];
-              if (sizeSelector) {
-                  let sizeExists = Array.from(sizeSelector.options).some(o => o.value === newSize);
-                  if (sizeExists) {
-                      sizeSelector.value = newSize;
-                      console.log(`Tamaño cambiado a: ${newSize}`);
-                  }
-              }
-          } else if (fuenteMatch && fuenteMatch[1]) {
-              const newFont = fuenteMatch[1].trim();
-              if (fontSelector) {
-                  let found = false;
-                  for (let option of fontSelector.options) {
-                      if (option.text.toLowerCase() === newFont) {
-                          fontSelector.value = option.value;
-                          found = true;
-                          console.log(`Fuente cambiada a: ${option.value}`);
-                          break;
-                      }
-                  }
-              }
-          
-          } else if (transcript.includes('justificar texto')) {
-              docEditor.style.textAlign = 'justify';
-          } else if (transcript.includes('alinear izquierda')) {
-              docEditor.style.textAlign = 'left';
-          } else if (transcript.includes('alinear derecha')) {
-              docEditor.style.textAlign = 'right';
-          } else if (transcript.includes('centrar texto') || transcript.includes('alinear centro')) {
-              docEditor.style.textAlign = 'center';
-          
-          } else if (transcript.includes('nuevo párrafo') || transcript.includes('punto y aparte')) {
-              finalDictatedText += '<br><br>';
-          } else if (transcript.includes('nueva línea')) {
-              finalDictatedText += '<br>';
-          } else if (transcript.includes('coma')) {
-              finalDictatedText = finalDictatedText.trim() + ', ';
-          } else if (transcript.includes('punto')) {
-              finalDictatedText = finalDictatedText.trim() + '. ';
-          } else if (transcript.includes('activar negrita')) {
-              isBold = true;
-              finalDictatedText += '<b>';
-          } else if (transcript.includes('desactivar negrita')) {
-              isBold = false;
-              finalDictatedText += '</b>';
-          } else if (transcript.includes('activar cursiva')) {
-              isItalic = true;
-              finalDictatedText += '<i>';
-          } else if (transcript.includes('desactivar cursiva')) {
-              isItalic = false;
-              finalDictatedText += '</i>';
-          } else if (transcript.includes('borrar última palabra')) {
-              const lastSpace = finalDictatedText.trimEnd().lastIndexOf(' ');
-              if(lastSpace > -1) {
-                  finalDictatedText = finalDictatedText.substring(0, lastSpace).trim() + ' ';
-              } else {
-                  finalDictatedText = ''; 
-              }
-          } else {
-              // 3. Es texto normal
-              if (transcript.endsWith('.')) {
-                  transcript = transcript.substring(0, transcript.length - 1);
-              }
-              finalDictatedText += transcript + ' ';
-          }
-      }
-
-      // --- Funciones de Control de Estado ---
-      function startCommandMode() {
-        console.log('Cambiando a Modo Comando');
-        isDictating = false;
-        if(isBold) { finalDictatedText += '</b>'; isBold = false; } 
-        if(isItalic) { finalDictatedText += '</i>'; isItalic = false; }
-        docEditor.innerHTML = finalDictatedText; 
-        
-        recognition.stop();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.onresult = handleCommand;
-        recognition.onend = () => {
-          if (!isDictating) {
-            try { recognition.start(); } catch (e) {}
-          }
-        };
-        
-        statusText.textContent = 'Haz clic o di "comenzar redacción"';
-        micIcon.classList.remove('animate-pulse');
-        micButton.classList.remove('animate-pulse', 'bg-red-500');
-        micButton.classList.add('bg-primary');
-        micButton.setAttribute('aria-label', 'Activar dictado');
-      }
-
-      function startDictationMode() {
-        console.log('Cambiando a Modo Dictado');
-        isDictating = true;
-        recognition.stop();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.onresult = handleDictation;
-        recognition.onend = () => {
-          if (isDictating) {
-            try { recognition.start(); } catch (e) {}
-          }
-        };
-
-        finalDictatedText = docEditor.innerHTML.replace(/<span.*span>/i, '').trim();
-        if (finalDictatedText.length > 0 && !finalDictatedText.endsWith(' ')) {
-            finalDictatedText += ' ';
-        }
-
-        statusText.textContent = 'Dictando... (Di "terminar redacción")';
-        micIcon.classList.add('animate-pulse');
-        micButton.classList.add('animate-pulse', 'bg-red-500');
-        micButton.classList.remove('bg-primary');
-        micButton.setAttribute('aria-label', 'Detener dictado');
-      }
-      
-      function placeCursorAtEnd() {
-        const range = document.createRange();
-        const sel = window.getSelection();
-        range.selectNodeContents(docEditor);
-        range.collapse(false); 
-        sel.removeAllRanges();
-        sel.addRange(range);
-        docEditor.focus();
-      }
-
-      // --- Inicio ---
-      micButton.addEventListener('click', () => {
-        if (isDictating) {
-          startCommandMode();
-        } else {
-          startDictationMode();
-        }
-      });
-      
-      document.getElementById('save-button').addEventListener('click', () => {
-          showSaveStatus('Guardado', true);
-      });
-
-      startCommandMode();
-      recognition.start();
-
-    });
-  </script>
+  <script type="module" src="assets/js/pages/documentEditorPage.js"></script>
 </body>
+
 </html>

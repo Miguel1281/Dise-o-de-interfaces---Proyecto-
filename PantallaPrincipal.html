@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html class="light" lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -43,7 +44,8 @@
     <div class="layout-container flex h-full grow flex-col">
       <div class="flex flex-1 justify-center py-5 sm:px-6 lg:px-8">
         <div class="layout-content-container flex flex-col w-full max-w-4xl flex-1 px-4">
-          <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-700 py-4 mb-8">
+          <header
+            class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-700 py-4 mb-8">
             <div class="flex items-center gap-4 text-gray-800 dark:text-white">
               <span class="material-symbols-outlined text-primary text-3xl">
                 auto_draw_solid
@@ -51,12 +53,14 @@
               <h1 class="text-[#333333] dark:text-white text-2xl font-bold leading-tight tracking-tight">VozDoc</h1>
             </div>
             <div class="flex items-center gap-2">
-              <button aria-label="Ayuda" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-gray-200 dark:bg-background-dark dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold leading-normal tracking-[0.015em]">
+              <button aria-label="Ayuda"
+                class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-gray-200 dark:bg-background-dark dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold leading-normal tracking-[0.015em]">
                 <span class="material-symbols-outlined text-xl">
                   help
                 </span>
               </button>
-              <button aria-label="Configuración" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-gray-200 dark:bg-background-dark dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold leading-normal tracking-[0.015em]">
+              <button aria-label="Configuración"
+                class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-gray-200 dark:bg-background-dark dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold leading-normal tracking-[0.015em]">
                 <span class="material-symbols-outlined text-xl">
                   settings
                 </span>
@@ -66,72 +70,96 @@
           <main class="flex flex-col gap-10">
             <div class="flex flex-wrap justify-between gap-3">
               <div class="flex min-w-72 flex-col gap-2">
-                <h2 class="text-[#333333] dark:text-white text-4xl font-black leading-tight tracking-tight">Hola, ¿qué te gustaría hacer?</h2>
-                <p class="text-gray-700 dark:text-gray-300 text-lg font-normal leading-normal">Di 'crear documento' o 'crear correo' para empezar.</p>
+                <h2 class="text-[#333333] dark:text-white text-4xl font-black leading-tight tracking-tight">Hola, ¿qué
+                  te gustaría hacer?</h2>
+                <p class="text-gray-700 dark:text-gray-300 text-lg font-normal leading-normal">Di 'crear documento' o
+                  'crear correo' para empezar.</p>
               </div>
             </div>
 
             <div id="voice-control-container" class="flex items-center justify-center h-16 gap-3 my-4">
               <div class="relative flex items-center justify-center">
                 <div class="ping-animation absolute h-10 w-10 animate-ping rounded-full bg-green-400 opacity-50"></div>
-                <button aria-label="Activar o desactivar micrófono" class="mic-button relative flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white">
+                <button aria-label="Activar o desactivar micrófono"
+                  class="mic-button relative flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white">
                   <span class="material-symbols-outlined">mic</span>
                 </button>
               </div>
-              <p class="status-text text-base font-medium text-green-700 dark:text-green-300" aria-live="polite" aria-atomic="true">Escuchando...</p>
+              <p class="status-text text-base font-medium text-green-700 dark:text-green-300" aria-live="polite"
+                aria-atomic="true">Escuchando...</p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <a href="CreacionDeDocumentos.html" class="flex flex-1 gap-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 flex-col items-start justify-center cursor-pointer transition-all hover:border-primary hover:shadow-lg dark:hover:border-primary">
+              <a href="CreacionDeDocumentos.html"
+                class="flex flex-1 gap-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 flex-col items-start justify-center cursor-pointer transition-all hover:border-primary hover:shadow-lg dark:hover:border-primary">
                 <div class="text-primary bg-primary/10 rounded-lg p-3">
                   <span class="material-symbols-outlined text-4xl">
                     article
                   </span>
                 </div>
                 <div class="flex flex-col gap-1">
-                  <h2 class="text-[#333333] dark:text-white text-xl font-bold leading-tight">Crear un nuevo documento</h2>
-                  <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Di "crear documento"</p>
+                  <h2 class="text-[#333333] dark:text-white text-xl font-bold leading-tight">Crear un nuevo documento
+                  </h2>
+                  <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Di "crear documento"
+                  </p>
                 </div>
               </a>
-              <a href="CreacionDeCorreos.html" class="flex flex-1 gap-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 flex-col items-start justify-center cursor-pointer transition-all hover:border-primary hover:shadow-lg dark:hover:border-primary">
+              <a href="CreacionDeCorreos.html"
+                class="flex flex-1 gap-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 flex-col items-start justify-center cursor-pointer transition-all hover:border-primary hover:shadow-lg dark:hover:border-primary">
                 <div class="text-primary bg-primary/10 rounded-lg p-3">
                   <span class="material-symbols-outlined text-4xl">
                     mail
                   </span>
                 </div>
                 <div class="flex flex-col gap-1">
-                  <h2 class="text-[#333333] dark:text-white text-xl font-bold leading-tight">Redactar un nuevo correo</h2>
+                  <h2 class="text-[#333333] dark:text-white text-xl font-bold leading-tight">Redactar un nuevo correo
+                  </h2>
                   <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Di "crear correo"</p>
                 </div>
               </a>
             </div>
             <div>
-              <h2 class="text-[#333333] dark:text-white text-2xl font-bold leading-tight tracking-tight pb-4 pt-5">Tus Borradores Recientes</h2>
+              <h2 class="text-[#333333] dark:text-white text-2xl font-bold leading-tight tracking-tight pb-4 pt-5">Tus
+                Borradores Recientes</h2>
               <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 <div class="flex flex-col gap-3 pb-3 group cursor-pointer">
-                  <div class="w-full bg-gray-200 dark:bg-gray-700 bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-lg overflow-hidden transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2 group-hover:ring-offset-background-light dark:group-hover:ring-offset-background-dark" data-alt="Abstract gradient from blue to purple representing a document thumbnail.">
-                    <img alt="Abstract gradient from blue to purple." class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAO9YI0cwnScPWSWv21hUCScshkhiyU9DTmI8KPfaKOFrT0XZeltLerkAblq8mHGDGvwwHETNktr9f9ZOnR43Y2nwtK2jZqdFpAP0BXT5cXAjLKcI1cQ9t_-cikPZvwVwbl9m26kOFP0TQO1mF0Cqx-avmn774nbLhdblL9SDUhBOpEV_8SfPSkV9ds0FbqT2XuvdRgQisdgAvVrBns9WdEktD-J9MVpr7gIBncZ3W40_1z8iZV58DUsev3hx7yemXh2tvi0BQwCBQ8" />
+                  <div
+                    class="w-full bg-gray-200 dark:bg-gray-700 bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-lg overflow-hidden transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2 group-hover:ring-offset-background-light dark:group-hover:ring-offset-background-dark"
+                    data-alt="Abstract gradient from blue to purple representing a document thumbnail.">
+                    <img alt="Abstract gradient from blue to purple." class="w-full h-full object-cover"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAO9YI0cwnScPWSWv21hUCScshkhiyU9DTmI8KPfaKOFrT0XZeltLerkAblq8mHGDGvwwHETNktr9f9ZOnR43Y2nwtK2jZqdFpAP0BXT5cXAjLKcI1cQ9t_-cikPZvwVwbl9m26kOFP0TQO1mF0Cqx-avmn774nbLhdblL9SDUhBOpEV_8SfPSkV9ds0FbqT2XuvdRgQisdgAvVrBns9WdEktD-J9MVpr7gIBncZ3W40_1z8iZV58DUsev3hx7yemXh2tvi0BQwCBQ8" />
                   </div>
                   <div>
                     <p class="text-[#333333] dark:text-white text-base font-bold leading-normal">Reunión Trimestral</p>
-                    <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Correo: Modificado hace 2 horas</p>
+                    <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Correo: Modificado
+                      hace 2 horas</p>
                   </div>
                 </div>
                 <div class="flex flex-col gap-3 pb-3 group cursor-pointer">
-                  <div class="w-full bg-gray-200 dark:bg-gray-700 bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-lg overflow-hidden transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2 group-hover:ring-offset-background-light dark:group-hover:ring-offset-background-dark" data-alt="Abstract pattern of geometric shapes representing a document thumbnail.">
-                    <img alt="Abstract pattern of geometric shapes." class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfJJsnCCaKaKNNnlxfggiZL5BendU9zhTzBJTQjq6cVaG70wwIIA03Zk4pV0oVkv8NYV7ANbvxE5Fz8DLtVQsETbib2RNKxHmaa6iYi6L9t9LWwgu2FgixZ0fKQdr3rz87hnFmZMdlZ9RqHXIh-zAh22owL2o5cOsiv_sih1gU5SzuapjsdPGOSk-PeWyjjABDsG5BvSFG_tXbrMIesH3RPAXFktmwpwHZLA85DMvSSQDVf97y0XCCmqf3lN5XOiISM_E9KPq2heXC" />
+                  <div
+                    class="w-full bg-gray-200 dark:bg-gray-700 bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-lg overflow-hidden transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2 group-hover:ring-offset-background-light dark:group-hover:ring-offset-background-dark"
+                    data-alt="Abstract pattern of geometric shapes representing a document thumbnail.">
+                    <img alt="Abstract pattern of geometric shapes." class="w-full h-full object-cover"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfJJsnCCaKaKNNnlxfggiZL5BendU9zhTzBJTQjq6cVaG70wwIIA03Zk4pV0oVkv8NYV7ANbvxE5Fz8DLtVQsETbib2RNKxHmaa6iYi6L9t9LWwgu2FgixZ0fKQdr3rz87hnFmZMdlZ9RqHXIh-zAh22owL2o5cOsiv_sih1gU5SzuapjsdPGOSk-PeWyjjABDsG5BvSFG_tXbrMIesH3RPAXFktmwpwHZLA85DMvSSQDVf97y0XCCmqf3lN5XOiISM_E9KPq2heXC" />
                   </div>
                   <div>
-                    <p class="text-[#333333] dark:text-white text-base font-bold leading-normal">Propuesta de Proyecto</p>
-                    <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Documento: Modificado ayer</p>
+                    <p class="text-[#333333] dark:text-white text-base font-bold leading-normal">Propuesta de Proyecto
+                    </p>
+                    <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Documento: Modificado
+                      ayer</p>
                   </div>
                 </div>
                 <div class="flex flex-col gap-3 pb-3 group cursor-pointer">
-                  <div class="w-full bg-gray-200 dark:bg-gray-700 bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-lg overflow-hidden transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2 group-hover:ring-offset-background-light dark:group-hover:ring-offset-background-dark" data-alt="Abstract wave pattern in shades of green and blue representing a document thumbnail.">
-                    <img alt="Abstract wave pattern in shades of green and blue." class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBD3jrG0_i3o-B0dJ1tQfqZ-CN_Ne2EVITW-Twzp-I72QgOw-8w5RHF8NmRf6qh1nV49ynCY9M-QSTf1f3ySSSE5gu04qdbDseWzBnykWpFImX-xILxgZmo33AgxMLmJ0ideQvOig8trukJiFAefRvn405GKDKiztJHYMlF7PxCDHnNgBYHnt9WCi3uVJtghunpHNK9amwRYKixBN-pKoJWNGwhH4nvHciqj-wfq1kiEF6IR6F7Let_e2OwG8AbEjzRn1IwsBIM0Mv1" />
+                  <div
+                    class="w-full bg-gray-200 dark:bg-gray-700 bg-center bg-no-repeat aspect-[4/3] bg-cover rounded-lg overflow-hidden transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2 group-hover:ring-offset-background-light dark:group-hover:ring-offset-background-dark"
+                    data-alt="Abstract wave pattern in shades of green and blue representing a document thumbnail.">
+                    <img alt="Abstract wave pattern in shades of green and blue." class="w-full h-full object-cover"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuBD3jrG0_i3o-B0dJ1tQfqZ-CN_Ne2EVITW-Twzp-I72QgOw-8w5RHF8NmRf6qh1nV49ynCY9M-QSTf1f3ySSSE5gu04qdbDseWzBnykWpFImX-xILxgZmo33AgxMLmJ0ideQvOig8trukJiFAefRvn405GKDKiztJHYMlF7PxCDHnNgBYHnt9WCi3uVJtghunpHNK9amwRYKixBN-pKoJWNGwhH4nvHciqj-wfq1kiEF6IR6F7Let_e2OwG8AbEjzRn1IwsBIM0Mv1" />
                   </div>
                   <div>
-                    <p class="text-[#333333] dark:text-white text-base font-bold leading-normal">Seguimiento de Ventas</p>
-                    <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Correo: Modificado hace 3 días</p>
+                    <p class="text-[#333333] dark:text-white text-base font-bold leading-normal">Seguimiento de Ventas
+                    </p>
+                    <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Correo: Modificado
+                      hace 3 días</p>
                   </div>
                 </div>
 
@@ -141,137 +169,9 @@
         </div>
       </div>
     </div>
-    
-    </div>
+
+  </div>
 </body>
-<script>
-  // Espera a que todo el contenido HTML se haya cargado
-  document.addEventListener('DOMContentLoaded', () => {
+<script type="module" src="assets/js/pages/dashboardPage.js"></script>
 
-    // 1. Configurar el reconocimiento de voz
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    // --- NUEVO: Variables de estado ---
-    let isListening = false;
-    let isManuallyStopped = false; // Para evitar que se reinicie si el usuario lo detuvo
-
-    // 2. Encontrar los elementos de la UI (Selectores actualizados)
-    const voiceContainer = document.getElementById('voice-control-container');
-    const micButton = voiceContainer.querySelector('.mic-button');
-    const statusText = voiceContainer.querySelector('.status-text');
-    const pingAnimation = voiceContainer.querySelector('.ping-animation');
-
-    // Comprobar si el navegador soporta la API
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'es-ES'; // Configurar el idioma a español
-      recognition.continuous = true;
-      recognition.interimResults = false;
-
-      if (micButton && statusText && pingAnimation) {
-
-        // 3. Activar/Desactivar al hacer clic en el micrófono
-        micButton.addEventListener('click', () => {
-          if (isListening) {
-            isManuallyStopped = true; // El usuario lo detuvo
-            recognition.stop();
-          } else {
-            isManuallyStopped = false; // El usuario lo (re)inició
-            try {
-              recognition.start();
-            } catch (e) {
-              console.error("Error al iniciar manually:", e);
-              statusText.textContent = 'Error al iniciar';
-            }
-          }
-        });
-      }
-
-      // 4. Qué hacer cuando el reconocimiento empieza
-      recognition.onstart = () => {
-        isListening = true;
-        statusText.textContent = 'Escuchando...';
-        statusText.className = 'status-text text-base font-medium text-green-700 dark:text-green-300';
-        pingAnimation.classList.remove('hidden');
-        micButton.classList.remove('bg-gray-500'); // Quita gris
-        micButton.classList.add('bg-green-500'); // Pone verde
-        micButton.setAttribute('aria-label', 'Desactivar micrófono');
-      };
-
-      // 5. Qué hacer cuando se obtiene un resultado
-      recognition.onresult = (event) => {
-        // Adaptado para modo continuo
-        const last = event.results.length - 1;
-        const transcript = event.results[last][0].transcript.toLowerCase().trim();
-
-        console.log('Comando recibido:', transcript);
-
-        // 6. Lógica de navegación
-        if (transcript.includes('crear documento')) {
-          statusText.textContent = 'Entendido. Yendo a documentos...';
-          window.location.href = 'CreacionDeDocumentos.html';
-        } else if (transcript.includes('crear correo')) {
-          statusText.textContent = 'Entendido. Yendo a correos...';
-          window.location.href = 'CreacionDeCorreos.html';
-        } else {
-          // Comando no reconocido, pero seguimos escuchando
-        }
-      };
-
-      // 7. Manejo de errores
-      recognition.onerror = (event) => {
-        console.error('Error de reconocimiento:', event.error);
-        if (event.error === 'no-speech') {
-          // No pasa nada, se reiniciará
-        } else if (event.error === 'not-allowed') {
-          statusText.textContent = 'Permiso de micrófono denegado.';
-          isManuallyStopped = true; // No reintentar si el permiso fue denegado
-        } else {
-          statusText.textContent = 'Error. Reiniciando...';
-        }
-      };
-
-      // 8. Cuando el reconocimiento termina
-      recognition.onend = () => {
-        isListening = false;
-
-        // Actualiza la UI a "detenido" solo si el usuario lo detuvo
-        if (isManuallyStopped) {
-          statusText.textContent = 'Detenido. Haz clic para activar.';
-          statusText.className = 'status-text text-base font-medium text-gray-700 dark:text-gray-400'; // Color gris
-          pingAnimation.classList.add('hidden');
-          micButton.classList.add('bg-gray-500'); // Pone gris
-          micButton.classList.remove('bg-green-500'); // Quita verde
-          micButton.setAttribute('aria-label', 'Activar micrófono');
-        }
-
-        // --- NUEVO: Auto-reinicio ---
-        // Solo reinicia si NO fue detenido manualmente
-        if (!isManuallyStopped) {
-          try {
-            recognition.start();
-          } catch (e) {
-            console.error("Error al reiniciar automáticamente:", e);
-          }
-        }
-      };
-
-      // --- NUEVO: Iniciar automáticamente al cargar ---
-      try {
-        isManuallyStopped = false;
-        recognition.start();
-      } catch (e) {
-        console.error("No se pudo iniciar al cargar:", e);
-        statusText.textContent = 'Error al iniciar.';
-      }
-
-    } else {
-      // Si el navegador no soporta la API
-      console.error('Tu navegador no soporta la Web Speech API.');
-      if (voiceContainer) {
-        voiceContainer.innerHTML = '<p class="text-center text-red-500 py-4">Tu navegador no soporta reconocimiento de voz.</p>';
-      }
-    }
-  });
-</script>
 </html>
