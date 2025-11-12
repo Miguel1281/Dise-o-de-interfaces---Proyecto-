@@ -23,7 +23,7 @@
             "surface-light": "#FFFFFF",
             "surface-dark": "#1A2836",
             "border-light": "#E0E0E0",
-            "border-dark": "#2C3A47",
+            "border-dark": "#2C3A47"
           },
           fontFamily: {
             "display": ["Inter", "sans-serif"]
@@ -33,9 +33,9 @@
             "lg": "0.5rem",
             "xl": "0.75rem",
             "full": "9999px"
-          },
-        },
-      },
+          }
+        }
+      }
     }
   </script>
   <style>
@@ -43,17 +43,13 @@
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
 
-    /* Estilo para el placeholder del editor contenteditable */
     [contenteditable="true"]:empty:before {
       content: attr(placeholder);
       pointer-events: none;
       display: block;
-      /* Para que ocupe espacio */
       color: #6b7280;
-      /* Color de placeholder (gray-500) */
       font-style: italic;
       font-size: 1.1rem;
-      /* Ligeramente más grande */
     }
 
     #editor-wrapper {
@@ -62,22 +58,41 @@
     }
 
     #editor-wrapper.listening-active {
-      border-color: rgba(59, 130, 246, 0.45);
-      box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.15), 0 0 32px rgba(59, 130, 246, 0.25);
+      border-color: rgba(236, 72, 153, 0.45);
+      box-shadow: 0 0 0 6px rgba(236, 72, 153, 0.18), 0 0 32px rgba(236, 72, 153, 0.28);
       animation: dictationAura 1.6s ease-in-out infinite;
     }
 
     @keyframes dictationAura {
       0% {
-        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.15), 0 0 28px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 0 0 6px rgba(236, 72, 153, 0.18), 0 0 28px rgba(236, 72, 153, 0.22);
       }
 
       50% {
-        box-shadow: 0 0 0 16px rgba(59, 130, 246, 0.12), 0 0 44px rgba(59, 130, 246, 0.35);
+        box-shadow: 0 0 0 16px rgba(236, 72, 153, 0.14), 0 0 44px rgba(236, 72, 153, 0.32);
       }
 
       100% {
-        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.15), 0 0 28px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 0 0 6px rgba(236, 72, 153, 0.18), 0 0 28px rgba(236, 72, 153, 0.22);
+      }
+    }
+
+    .voice-chip {
+      transition: transform 0.25s ease, box-shadow 0.35s ease, border-color 0.25s ease;
+    }
+
+    .voice-chip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    }
+
+    #voice-sidebar {
+      position: relative;
+    }
+
+    @media (min-width: 1024px) {
+      #voice-sidebar {
+        min-width: 320px;
       }
     }
   </style>
@@ -88,279 +103,215 @@
 </head>
 
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
-  <div class="flex min-h-screen w-full flex-col">
-    <header
-      class="flex items-center justify-between border-b border-solid border-border-light dark:border-border-dark px-6 py-3 bg-surface-light dark:bg-surface-dark flex-shrink-0">
-      <div class="flex items-center gap-4">
-        <svg class="text-primary" fill="currentColor" height="24" viewbox="0 0 48 48" width="24"
-          xmlns="http://www.w3.org/2000/svg">
-          <path clip-rule="evenodd"
-            d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z"
-            fill-rule="evenodd"></path>
-        </svg>
-        <h2 class="text-lg font-bold">VozDoc</h2>
-      </div>
-      <div class="flex items-center gap-4">
-        <button aria-label="Guardar documento" id="save-button"
-          class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-primary text-white text-sm font-bold">
-          <span>Guardar</span>
-        </button>
-        <button aria-label="Exportar documento" id="export-button"
-          class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark text-sm font-bold">
-          <span>Exportar</span>
-        </button>
-        <button id="help-toggle" aria-label="Ayuda"
-          class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
-          <span class="material-symbols-outlined">help</span>
-        </button>
-        <button aria-label="Activar modo oscuro"
-          class="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-background-light dark:bg-surface-dark border border-border-light dark:border-border-dark">
-          <span class="material-symbols-outlined">toggle_on</span>
-        </button>
-        <div class="h-10 w-10 rounded-full bg-cover bg-center" data-alt="User avatar"
-          style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuARtDAcyBZMoA_Rrm50ggs-eXuC52YhBPFwL95JbwWRmq2M-s8UykfBMcFfCwC6UdnSrQFdZR3cspl981106E0R-JsDmzwcxYKkHdRTsy-43m5dUUsZ0oXNCIjEL2eLHKUpPm5DHUGWHjsWDn9oocAUonjRTVBITk2Aoeq1ueNf3uXIYjj8Z0g8nKo3L1V3qohozfgGezyiZM_AG615Uuv3c_SuBqs9pe5uOTXVti4mvgyEJeDZxU04yNUA75_SJIQXKMjP70HOW_kz");'>
-        </div>
-      </div>
-    </header>
-    <div class="flex flex-1">
-      <main class="flex flex-1 flex-col bg-background-light dark:bg-background-dark">
-        <div class="mx-auto w-full max-w-4xl flex-grow px-4 sm:px-6 lg:px-8 py-8">
-          <div
-            class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark h-full flex flex-col">
-            <div id="dictation-panel"
-              class="flex flex-col gap-4 border-b border-border-light dark:border-border-dark px-6 py-4">
-              <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-4 flex-1 min-w-[260px]">
-                  <button id="dictation-toggle" aria-label="Activar dictado"
-                    class="flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center rounded-full bg-slate-200 text-primary transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-300">
-                    <span class="material-symbols-outlined text-4xl">mic</span>
-                  </button>
-                  <div class="flex flex-col gap-1 dictation-status" aria-live="polite" aria-atomic="true">
-                    <span id="dictation-status-text"
-                      class="status-text text-base font-semibold text-gray-900 dark:text-gray-100">Haz clic para
-                      activar</span>
-                    <span class="text-sm text-gray-600 dark:text-gray-300">Di "Comenzar redacción" para iniciar y
-                      "Terminar redacción" para finalizar.</span>
+  <div class="flex min-h-screen w-full bg-background-light dark:bg-background-dark">
+    <div class="flex w-full flex-1 flex-col lg:flex-row">
+      <main class="flex flex-1 flex-col">
+        <header
+          class="flex items-center justify-between border-b border-border-light dark:border-border-dark px-8 py-6">
+          <div class="flex items-center gap-3">
+            <svg class="h-10 w-10 text-primary" fill="currentColor" viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg">
+              <path clip-rule="evenodd"
+                d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z"
+                fill-rule="evenodd"></path>
+            </svg>
+            <div>
+              <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">VozDoc</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Editor de documentos guiado por voz</p>
+            </div>
+          </div>
+          <div id="save-status" class="text-sm font-medium text-gray-500 dark:text-gray-300"></div>
+        </header>
+        <section class="flex-1 overflow-y-auto px-6 py-8 lg:px-10">
+          <div class="mx-auto flex w-full max-w-3xl flex-col gap-8">
+            <div
+              class="rounded-3xl border border-border-light bg-surface-light p-8 shadow-sm dark:border-border-dark dark:bg-surface-dark">
+              <div class="space-y-6">
+                <div>
+                  <label class="sr-only" for="doc-title">Título del documento</label>
+                  <input id="doc-title" aria-label="Título del documento"
+                    class="w-full border-none bg-transparent p-0 text-3xl font-bold leading-tight tracking-tight text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-0 dark:text-gray-100 dark:placeholder:text-gray-400"
+                    placeholder="Documento sin título" value="" />
+                </div>
+                <div id="editor-wrapper"
+                  class="rounded-2xl border-2 border-transparent bg-white p-6 transition-all duration-300 ease-in-out dark:bg-surface-dark">
+                  <div id="doc-editor" contenteditable="true" role="textbox" aria-multiline="true"
+                    placeholder="Di 'Comenzar redacción' para iniciar el dictado."
+                    class="min-h-[360px] text-base leading-relaxed text-text-light focus:outline-none dark:text-text-dark">
                   </div>
                 </div>
-                <div class="flex flex-wrap items-center justify-end gap-3 flex-1 min-w-[240px]">
-                  <button id="open-commands" aria-label="Mostrar lista de comandos"
-                    class="inline-flex items-center gap-2 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark px-4 py-2 text-sm font-semibold text-primary transition-colors duration-200 ease-in-out hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                    <span class="material-symbols-outlined text-base">menu_book</span>
-                    <span>Ver comandos</span>
-                  </button>
-                  <div id="save-status"
-                    class="flex items-center gap-2 text-sm text-gray-500 font-medium min-h-[20px] text-right">
-                  </div>
-                </div>
-              </div>
-              <div class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                <span class="material-symbols-outlined text-base">info</span>
-                <span>El contorno del editor se ilumina cuando el sistema está escuchando activamente. Di "Mostrar
-                  comandos" para consultar la guía y "Exportar documento" para descargar en Word o PDF.</span>
               </div>
             </div>
             <div
-              class="flex justify-between items-center gap-2 px-4 py-2 border-b border-border-light dark:border-border-dark">
-              <div class="flex flex-wrap gap-1">
-                <button aria-label="Deshacer" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
-                    class="material-symbols-outlined">undo</span></button>
-                <button aria-label="Rehacer" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
-                    class="material-symbols-outlined">redo</span></button>
-
-                <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-                <select id="font-select" aria-label="Fuente"
-                  class="form-select text-sm h-10 w-32 rounded-md border-border-light dark:border-border-dark bg-transparent focus:outline-0 focus:ring-0 focus:border-primary">
-                  <option value="Inter">Inter</option>
-                  <option value="Arial">Arial</option>
-                  <option value="Times New Roman">Times New Roman</option>
-                  <option value="Verdana">Verdana</option>
-                  <option value="Georgia">Georgia</option>
-                  <option value="Courier New">Courier New</option>
-                  <option value="Garamond">Garamond</option>
-                </select>
-                <select id="size-select" aria-label="Tamaño de fuente"
-                  class="form-select text-sm h-10 w-20 rounded-md border-border-light dark:border-border-dark bg-transparent focus:outline-0 focus:ring-0 focus:border-primary">
-                  <option value="10">10</option>
-                  <option value="11">11</option>
-                  <option value="12">12</option>
-                  <option value="14">14</option>
-                  <option value="16">16</option>
-                  <option value="18">18</option>
-                  <option value="24">24</option>
-                  <option value="36">36</option>
-                </select>
-
-                <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-                <button aria-label="Negrita" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
-                    class="material-symbols-outlined">format_bold</span></button>
-                <button aria-label="Cursiva" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
-                    class="material-symbols-outlined">format_italic</span></button>
-                <button aria-label="Subrayado" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
-                    class="material-symbols-outlined">format_underlined</span></button>
-                <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-                <button aria-label="Alinear a la izquierda"
-                  class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
-                    class="material-symbols-outlined">format_align_left</span></button>
-                <button aria-label="Alinear al centro"
-                  class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
-                    class="material-symbols-outlined">format_align_center</span></button>
-                <button aria-label="Alinear a la derecha"
-                  class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
-                    class="material-symbols-outlined">format_align_right</span></button>
-                <div class="w-px bg-border-light dark:bg-border-dark mx-2"></div>
-                <button aria-label="Imprimir" class="p-3 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
-                    class="material-symbols-outlined">print</span></button>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-700 dark:text-gray-300">EN</span>
-                <button aria-label="Traducir" class="p-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5"><span
-                    class="material-symbols-outlined">translate</span></button>
-              </div>
+              class="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-6 text-sm text-primary dark:border-primary/40 dark:bg-primary/10">
+              <h2 class="text-base font-semibold tracking-tight text-primary">¿Cómo funciona?</h2>
+              <p class="mt-2 text-primary/80">
+                El panel de la derecha te muestra los comandos disponibles según tu contexto. Solo necesitas decirlos en
+                voz alta para que VozDoc ejecute la acción por ti.
+              </p>
             </div>
-            <div class="flex-grow p-8 flex flex-col">
-              <div class="mb-6">
-                <label class="flex flex-col w-full">
-                  <span class="sr-only">Título del documento</span>
-                  <input id="doc-title" aria-label="Título del documento"
-                    class="form-input w-full min-w-0 flex-1 resize-none overflow-hidden text-2xl font-bold leading-tight tracking-tight focus:outline-0 focus:ring-0 border-none bg-transparent p-0 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                    placeholder="Documento sin título" value="" />
-                </label>
-              </div>
-              <div id="editor-wrapper"
-                class="flex-grow rounded-2xl border-2 border-transparent bg-white dark:bg-surface-dark p-6 transition-all duration-300 ease-in-out">
-                <div id="doc-editor" contenteditable="true" role="textbox" aria-multiline="true"
-                  placeholder="Di 'Comenzar redacción' para iniciar el dictado. Di 'Mostrar comandos' para ver la guía de voz."
-                  class="min-h-[320px] text-base text-text-light dark:text-text-dark leading-relaxed focus:outline-none">
+          </div>
+        </section>
+      </main>
+      <aside id="voice-sidebar"
+        class="flex w-full flex-col border-t border-border-light bg-white/80 backdrop-blur dark:border-border-dark dark:bg-surface-dark/90 lg:w-[360px] lg:border-l lg:border-t-0">
+        <div class="sticky top-0 flex max-h-screen flex-col gap-8 px-6 py-8">
+          <div class="flex flex-col items-center gap-4 text-center">
+            <div class="relative">
+              <button id="dictation-toggle" aria-label="Activar dictado"
+                class="flex h-24 w-24 items-center justify-center rounded-full bg-slate-200 text-primary shadow-sm transition-colors duration-200 ease-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/40">
+                <span class="material-symbols-outlined text-5xl">mic</span>
+              </button>
+              <span id="sidebar-status-badge"
+                class="absolute -bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-border-light bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-600 shadow-sm dark:border-border-dark dark:bg-surface-dark dark:text-gray-300">Inactivo</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <p id="dictation-status-text" class="text-base font-semibold text-gray-900 dark:text-gray-100">No estoy
+                escuchando</p>
+              <p id="dictation-help-text" class="text-sm text-gray-600 dark:text-gray-400">Di "Comenzar redacción"</p>
+            </div>
+          </div>
+
+          <div id="sidebar-state-inactive" class="space-y-6">
+            <section class="space-y-3">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones
+                principales</h2>
+              <div class="space-y-3">
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Comenzar redacción"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Inicia el dictado y activa el micrófono.</p>
+                </div>
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Abrir documento"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Recupera un archivo reciente usando tu voz.</p>
+                </div>
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Guardar documento"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Guarda tu progreso de manera segura.</p>
+                </div>
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Exportar documento"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Prepara una copia en Word o PDF.</p>
+                </div>
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Imprimir documento"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Envía el documento a la impresora predeterminada.
+                  </p>
                 </div>
               </div>
+            </section>
+          </div>
+
+          <div id="sidebar-state-dictating" class="hidden space-y-6">
+            <section class="space-y-3">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Puntuación y
+                formato</h2>
+              <div class="space-y-3">
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Agrega coma"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Inserta una coma justo donde estás dictando.</p>
+                </div>
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Agrega punto"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Cierra la oración actual.</p>
+                </div>
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Nuevo párrafo"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Salta dos líneas para comenzar una idea nueva.</p>
+                </div>
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Negrita"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Destaca las palabras siguientes.</p>
+                </div>
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Subrayado"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Subraya la frase más reciente.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="space-y-3">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Corrección
+              </h2>
+              <div class="space-y-3">
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Deshacer"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Revierte la última acción realizada.</p>
+                </div>
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Borrar última palabra"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Elimina solo la palabra más reciente.</p>
+                </div>
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Borrar oración"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Quita la última oración completa.</p>
+                </div>
+                <div data-command-chip
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Borrar último párrafo"</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Retira el bloque anterior por completo.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="space-y-3">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones
+                secundarias</h2>
+              <div
+                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-4 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5"
+                data-command-chip>
+                <h3 class="font-semibold text-gray-900 dark:text-gray-100">"Terminar redacción"</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Cierra el dictado y vuelve al modo comandos.</p>
+              </div>
+            </section>
+          </div>
+
+          <div id="sidebar-export-options"
+            class="hidden space-y-3 rounded-2xl border border-border-light/70 bg-white/90 p-4 shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Exportar
+              documento</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Di "Exportar en Word" o "Exportar en PDF" para elegir el
+              formato.</p>
+            <div class="space-y-2">
+              <div data-command-chip
+                class="voice-chip rounded-xl border border-primary/40 bg-primary/10 p-3 text-left text-primary">
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold">"Exportar en Word"</span>
+                  <span class="material-symbols-outlined text-base">description</span>
+                </div>
+                <p class="mt-1 text-xs text-primary/80">Genera un archivo .doc listo para editar.</p>
+              </div>
+              <div data-command-chip
+                class="voice-chip rounded-xl border border-primary/40 bg-primary/10 p-3 text-left text-primary">
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold">"Exportar en PDF"</span>
+                  <span class="material-symbols-outlined text-base">picture_as_pdf</span>
+                </div>
+                <p class="mt-1 text-xs text-primary/80">Crea un PDF final listo para compartir.</p>
+              </div>
+              <div data-command-chip
+                class="voice-chip rounded-xl border border-border-light/60 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/10">
+                <span class="font-semibold text-gray-900 dark:text-gray-100">"Cancelar exportación"</span>
+                <p class="text-xs text-gray-600 dark:text-gray-400">Cierra esta opción sin descargar nada.</p>
+              </div>
             </div>
           </div>
         </div>
-      </main>
+      </aside>
     </div>
-  </div>
-  <div id="command-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4" aria-hidden="true">
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm cursor-pointer" data-overlay-backdrop></div>
-    <aside id="command-overlay-panel" role="dialog" aria-modal="true" aria-labelledby="command-overlay-title"
-      tabindex="-1"
-      class="relative z-10 w-full max-w-xl rounded-2xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-2xl max-h-[90vh] overflow-hidden">
-      <header
-        class="flex items-start justify-between gap-4 border-b border-border-light dark:border-border-dark px-6 py-4">
-        <div class="flex items-start gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-primary">
-            <span class="material-symbols-outlined">campaign</span>
-          </div>
-          <div>
-            <h1 id="command-overlay-title" class="text-lg font-bold">Comandos de Voz</h1>
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Di "Ocultar comandos" o pulsa cerrar para volver
-              al editor.</p>
-          </div>
-        </div>
-        <button id="command-overlay-close" aria-label="Cerrar lista de comandos"
-          class="flex h-10 w-10 items-center justify-center rounded-full bg-transparent text-gray-500 transition-colors duration-150 ease-in-out hover:bg-black/5 dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </header>
-      <div class="overflow-y-auto px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-        <section class="space-y-3">
-          <h2 class="text-base font-semibold text-primary">Acciones</h2>
-          <ul class="list-disc list-inside">
-            <li><b>"Comenzar redacción"</b></li>
-            <li><b>"Terminar redacción"</b></li>
-            <li><b>"Poner título [texto]"</b></li>
-            <li><b>"Guardar documento"</b></li>
-            <li><b>"Exportar documento"</b> (Abre las opciones de formato)</li>
-            <li><b>"Exportar en Word"</b></li>
-            <li><b>"Exportar en PDF"</b></li>
-            <li><b>"Cancelar exportación"</b></li>
-            <li><b>"Leer documento"</b></li>
-            <li><b>"Volver al inicio"</b></li>
-          </ul>
-        </section>
-        <section class="mt-5 space-y-3">
-          <h2 class="text-base font-semibold text-primary">Puntuación y Formato</h2>
-          <ul class="list-disc list-inside">
-            <li><b>"Coma"</b> (Inserta ,)</li>
-            <li><b>"Punto"</b> (Inserta .)</li>
-            <li><b>"Punto y aparte"</b></li>
-            <li><b>"Nuevo párrafo"</b></li>
-            <li><b>"Nueva línea"</b></li>
-          </ul>
-        </section>
-        <section class="mt-5 space-y-3">
-          <h2 class="text-base font-semibold text-primary">Estilo de Texto</h2>
-          <ul class="list-disc list-inside">
-            <li><b>"Activar negrita"</b></li>
-            <li><b>"Desactivar negrita"</b></li>
-            <li><b>"Activar cursiva"</b></li>
-            <li><b>"Desactivar cursiva"</b></li>
-            <li><b>"Poner fuente [Arial]"</b></li>
-            <li><b>"Poner tamaño [16]"</b></li>
-          </ul>
-        </section>
-        <section class="mt-5 space-y-3">
-          <h2 class="text-base font-semibold text-primary">Alineación</h2>
-          <ul class="list-disc list-inside">
-            <li><b>"Alinear izquierda"</b></li>
-            <li><b>"Centrar texto"</b></li>
-            <li><b>"Alinear derecha"</b></li>
-            <li><b>"Justificar texto"</b></li>
-          </ul>
-        </section>
-        <section class="mt-5 space-y-3">
-          <h2 class="text-base font-semibold text-primary">Edición</h2>
-          <ul class="list-disc list-inside">
-            <li><b>"Borrar última palabra"</b></li>
-          </ul>
-        </section>
-      </div>
-    </aside>
-  </div>
-  <div id="export-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4" aria-hidden="true">
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm cursor-pointer" data-overlay-backdrop></div>
-    <aside id="export-overlay-panel" role="dialog" aria-modal="true" aria-labelledby="export-overlay-title"
-      tabindex="-1"
-      class="relative z-10 w-full max-w-md rounded-2xl bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-2xl">
-      <header
-        class="flex items-start justify-between gap-4 border-b border-border-light dark:border-border-dark px-6 py-4">
-        <div class="flex items-start gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-primary">
-            <span class="material-symbols-outlined">file_download</span>
-          </div>
-          <div>
-            <h1 id="export-overlay-title" class="text-lg font-bold">Exportar documento</h1>
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Di "Exportar en Word" o "Exportar en PDF" para
-              elegir, o utiliza los botones.</p>
-          </div>
-        </div>
-        <button id="export-overlay-close" aria-label="Cerrar opciones de exportación"
-          class="flex h-10 w-10 items-center justify-center rounded-full bg-transparent text-gray-500 transition-colors duration-150 ease-in-out hover:bg-black/5 dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </header>
-      <div class="px-6 py-5 space-y-4 text-sm text-gray-700 dark:text-gray-300">
-        <p>Selecciona el formato para descargar el documento. Puedes decir "Cancelar exportación" en cualquier momento.
-        </p>
-        <div class="flex flex-col gap-3">
-          <button type="button" data-export-option="word"
-            class="flex items-center justify-between gap-3 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark px-4 py-3 text-left font-semibold transition-colors duration-150 ease-in-out hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-            <span>Exportar en Word</span>
-            <span class="material-symbols-outlined text-primary">description</span>
-          </button>
-          <button type="button" data-export-option="pdf"
-            class="flex items-center justify-between gap-3 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark px-4 py-3 text-left font-semibold transition-colors duration-150 ease-in-out hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-            <span>Exportar en PDF</span>
-            <span class="material-symbols-outlined text-primary">picture_as_pdf</span>
-          </button>
-          <button type="button" data-export-option="cancel"
-            class="flex items-center justify-between gap-3 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark px-4 py-3 text-left font-semibold transition-colors duration-150 ease-in-out hover:bg-black/5 dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-            <span>Cancelar exportación</span>
-            <span class="material-symbols-outlined text-gray-500">cancel</span>
-          </button>
-        </div>
-      </div>
-    </aside>
   </div>
   <script type="module" src="assets/js/pages/documentEditorPage.js"></script>
 </body>
