@@ -4,6 +4,32 @@ import { SpeechSynthesisService } from '../core/speechSynthesisService.js';
 import { FeedbackService } from '../core/feedbackService.js';
 import { getElement, getOptionalElement, setTextContent, setAriaLabel } from '../utils/dom.js';
 
+const HELP_COMMAND_REGEX = /\bayuda(?:\s+(?:con|sobre|para|del|de la|de los|de las))?\s+(.+)/i;
+const TRAILING_PUNCTUATION_REGEX = /[¿?¡!.,;:]+$/;
+
+function extractHelpTarget(commandText) {
+    if (!commandText) {
+        return null;
+    }
+
+    const match = commandText.match(HELP_COMMAND_REGEX);
+    if (!match) {
+        return null;
+    }
+
+    let phrase = match[1]
+        .replace(/["'«»“”]/g, ' ')
+        .replace(TRAILING_PUNCTUATION_REGEX, ' ')
+        .replace(/\bpor favor\b/gi, ' ')
+        .replace(/\bcomandos?\b/gi, ' ')
+        .trim();
+
+    phrase = phrase.replace(/^(el|la|los|las|un|una)\s+/i, '').trim();
+    phrase = phrase.replace(/\s+/g, ' ').trim();
+
+    return phrase;
+}
+
 class DocumentUI {
     constructor(feedbackService) {
         this.feedback = feedbackService;
@@ -22,6 +48,7 @@ class DocumentUI {
         this.sizeSelector = getOptionalElement('#size-select');
         this.editorWrapper = getElement('#editor-wrapper');
         this.commandChips = Array.from(document.querySelectorAll('[data-command-chip]'));
+        this.commandHelpMap = new Map();
 
         this.saveStatusTimer = null;
         this.commandHighlightTimer = null;
@@ -40,6 +67,8 @@ class DocumentUI {
         ];
         this.commandHighlightClasses = ['ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-surface-dark'];
         this.activeHighlightChips = [];
+
+        this.initializeCommandHelp();
     }
 
     bindMicToggle(handler) {
@@ -227,6 +256,120 @@ class DocumentUI {
         if (this.feedback && message) {
             this.feedback.showToast(message, 'info');
         }
+    }
+
+    normalizeCommandKey(value) {
+        if (!value) {
+            return '';
+        }
+
+        return value
+            .toString()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/["'«»“”]/g, ' ')
+            .replace(/\b(comando|comandos)\b/g, ' ')
+            .replace(/[^a-z0-9\s]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    initializeCommandHelp() {
+        if (!this.commandHelpMap) {
+            this.commandHelpMap = new Map();
+        } else {
+            this.commandHelpMap.clear();
+        }
+
+        this.commandChips.forEach((chip) => {
+            const description = chip.querySelector('[data-command-description]');
+            if (!description) {
+                return;
+            }
+
+            const rawTriggers = chip.dataset.commandTrigger || chip.dataset.commandLabel || '';
+            const triggers = rawTriggers
+                .split('|')
+                .map((value) => this.normalizeCommandKey(value))
+                .filter(Boolean);
+
+            if (!triggers.length) {
+                return;
+            }
+
+            const toggleButton = chip.querySelector('[data-command-toggle]');
+            const headingText = chip.dataset.commandLabel || (chip.querySelector('h3')?.textContent || '');
+            const label = headingText.replace(/["“”]/g, '').trim();
+
+            const entry = { chip, description, toggleButton, label };
+
+            triggers.forEach((trigger) => {
+                if (!this.commandHelpMap.has(trigger)) {
+                    this.commandHelpMap.set(trigger, entry);
+                }
+            });
+
+            description.classList.add('hidden');
+            description.setAttribute('aria-hidden', 'true');
+            description.dataset.expanded = 'false';
+
+            if (toggleButton) {
+                toggleButton.setAttribute('aria-expanded', 'false');
+                toggleButton.setAttribute('aria-label', `Mostrar descripción de ${label || 'este comando'}`);
+                toggleButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.toggleCommandDescription(label);
+                });
+            }
+        });
+    }
+
+    toggleCommandDescription(phrase) {
+        const normalized = this.normalizeCommandKey(phrase);
+        if (!normalized) {
+            return null;
+        }
+
+        const entry = this.commandHelpMap.get(normalized);
+        if (!entry) {
+            return null;
+        }
+
+        const { description, toggleButton, label } = entry;
+        const isCurrentlyHidden = description.classList.contains('hidden');
+        const resolvedLabel = label || phrase;
+
+        if (isCurrentlyHidden) {
+            description.classList.remove('hidden');
+            description.setAttribute('aria-hidden', 'false');
+            description.dataset.expanded = 'true';
+
+            if (toggleButton) {
+                toggleButton.setAttribute('aria-expanded', 'true');
+                toggleButton.setAttribute('aria-label', `Ocultar descripción de ${resolvedLabel}`);
+            }
+
+            return {
+                state: 'shown',
+                label: resolvedLabel,
+            };
+        }
+
+        description.classList.add('hidden');
+        description.setAttribute('aria-hidden', 'true');
+        description.dataset.expanded = 'false';
+
+        if (toggleButton) {
+            toggleButton.setAttribute('aria-expanded', 'false');
+            toggleButton.setAttribute('aria-label', `Mostrar descripción de ${resolvedLabel}`);
+        }
+
+        return {
+            state: 'hidden',
+            label: resolvedLabel,
+        };
     }
 
     setSidebarMode(mode) {
@@ -539,6 +682,27 @@ class DocumentDictationHandler {
             return;
         }
 
+        const helpTarget = extractHelpTarget(normalized);
+        if (helpTarget) {
+            const result = this.ui.toggleCommandDescription(helpTarget);
+            if (result) {
+                const { label, state } = result;
+                const message = state === 'shown'
+                    ? `Mostrando detalles de ${label}.`
+                    : `Ocultando detalles de ${label}.`;
+                setTextContent(this.ui.statusText, message);
+                if (state === 'shown') {
+                    this.ui.notifySuccess(message);
+                } else {
+                    this.ui.notifyInfo(message);
+                }
+            } else {
+                setTextContent(this.ui.statusText, 'No encontré ese comando para mostrar ayuda.');
+                this.ui.notifyError('No encontré ese comando para mostrar ayuda');
+            }
+            return;
+        }
+
         if (/\b(mostrar|ver)\b.*\bcomandos?\b/.test(normalized) || /\bmostrar\b.*\bayuda\b/.test(normalized) || /\bayuda\b/.test(normalized)) {
             this.ui.highlightCommandHints();
             setTextContent(this.ui.statusText, 'Comandos resaltados en el panel lateral.');
@@ -732,6 +896,27 @@ class DocumentCommandProcessor {
                 this.executeExport(format);
             } else {
                 this.ui.remindExportFormat();
+            }
+            return;
+        }
+
+        const helpTarget = extractHelpTarget(command);
+        if (helpTarget) {
+            const result = this.ui.toggleCommandDescription(helpTarget);
+            if (result) {
+                const { label, state } = result;
+                const message = state === 'shown'
+                    ? `Mostrando detalles de ${label}.`
+                    : `Ocultando detalles de ${label}.`;
+                setTextContent(this.ui.statusText, message);
+                if (state === 'shown') {
+                    this.ui.notifySuccess(message);
+                } else {
+                    this.ui.notifyInfo(message);
+                }
+            } else {
+                setTextContent(this.ui.statusText, 'No encontré ese comando para mostrar ayuda.');
+                this.ui.notifyError('No encontré ese comando para mostrar ayuda');
             }
             return;
         }
