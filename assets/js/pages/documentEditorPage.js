@@ -16,8 +16,15 @@ class DocumentUI {
         this.fontSelector = getOptionalElement('#font-select');
         this.sizeSelector = getOptionalElement('#size-select');
         this.editorWrapper = getElement('#editor-wrapper');
+        this.commandOverlay = getOptionalElement('#command-overlay');
+        this.commandOverlayPanel = getOptionalElement('#command-overlay-panel');
+        this.commandOverlayClose = getOptionalElement('#command-overlay-close');
+        this.commandOverlayBackdrop = this.commandOverlay ? this.commandOverlay.querySelector('[data-overlay-backdrop]') : null;
+        this.commandOverlayOpenButton = getOptionalElement('#open-commands');
+        this.helpButton = getOptionalElement('#help-toggle');
 
         this.saveStatusTimer = null;
+        this.bodyOverflowBackup = '';
     }
 
     bindMicToggle(handler) {
@@ -34,6 +41,68 @@ class DocumentUI {
         }
     }
 
+    bindShowCommands(handler) {
+        if (this.commandOverlayOpenButton) {
+            this.commandOverlayOpenButton.addEventListener('click', handler);
+        }
+
+        if (this.helpButton) {
+            this.helpButton.addEventListener('click', handler);
+        }
+    }
+
+    bindHideCommands(handler) {
+        if (this.commandOverlayClose) {
+            this.commandOverlayClose.addEventListener('click', handler);
+        }
+
+        if (this.commandOverlayBackdrop) {
+            this.commandOverlayBackdrop.addEventListener('click', handler);
+        }
+    }
+
+    enableOverlayKeyboardDismiss() {
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && this.isCommandsOverlayVisible()) {
+                event.preventDefault();
+                this.hideCommandsOverlay();
+            }
+        });
+    }
+
+    isCommandsOverlayVisible() {
+        return Boolean(this.commandOverlay && !this.commandOverlay.classList.contains('hidden'));
+    }
+
+    showCommandsOverlay() {
+        if (!this.commandOverlay || this.isCommandsOverlayVisible()) {
+            return;
+        }
+
+        this.commandOverlay.classList.remove('hidden');
+        this.commandOverlay.setAttribute('aria-hidden', 'false');
+        this.bodyOverflowBackup = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        setTextContent(this.statusText, 'Guía de comandos abierta. Di "ocultar comandos" para cerrarla.');
+
+        window.requestAnimationFrame(() => {
+            if (this.commandOverlayPanel) {
+                this.commandOverlayPanel.focus();
+            }
+        });
+    }
+
+    hideCommandsOverlay() {
+        if (!this.commandOverlay || !this.isCommandsOverlayVisible()) {
+            return;
+        }
+
+        this.commandOverlay.classList.add('hidden');
+        this.commandOverlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = this.bodyOverflowBackup || '';
+        this.bodyOverflowBackup = '';
+    }
+
     showUnsupportedMessage() {
         setTextContent(this.statusText, 'Tu navegador no soporta la API de voz.');
         this.micButton.disabled = true;
@@ -42,7 +111,7 @@ class DocumentUI {
     }
 
     showCommandMode() {
-        setTextContent(this.statusText, 'Listo. Di "comenzar redacción" o haz clic en el micrófono.');
+        setTextContent(this.statusText, 'Listo. Di "comenzar redacción" o "mostrar comandos".');
         this.micButton.classList.remove('animate-pulse', 'bg-rose-500', 'text-primary', 'bg-slate-200');
         this.micIcon.classList.remove('animate-pulse');
         this.micButton.classList.add('bg-primary', 'text-white');
@@ -57,10 +126,11 @@ class DocumentUI {
         this.micIcon.classList.add('animate-pulse');
         this.editorWrapper.classList.add('listening-active');
         setAriaLabel(this.micButton, 'Detener dictado');
+        this.hideCommandsOverlay();
     }
 
     showIdleStatus() {
-        setTextContent(this.statusText, 'Haz clic para activar');
+        setTextContent(this.statusText, 'Haz clic para activar. Di "mostrar comandos" para ver la guía.');
         this.micButton.classList.remove('bg-primary', 'bg-rose-500', 'text-white');
         this.micButton.classList.add('bg-slate-200', 'text-primary');
         this.micIcon.classList.remove('animate-pulse');
@@ -215,6 +285,16 @@ class DocumentDictationHandler {
             return;
         }
 
+        if (/\b(mostrar|ver)\b.*\bcomandos?\b/.test(normalized) || /\bmostrar\b.*\bayuda\b/.test(normalized) || /\bayuda\b/.test(normalized)) {
+            this.ui.showCommandsOverlay();
+            return;
+        }
+
+        if (/\b(ocultar|cerrar)\b.*\bcomandos?\b/.test(normalized) || /\bocultar\b.*\bayuda\b/.test(normalized) || /\bcerrar\b.*\bayuda\b/.test(normalized)) {
+            this.ui.hideCommandsOverlay();
+            return;
+        }
+
         const sizeMatch = normalized.match(/poner tamaño (\d+)/);
         if (sizeMatch?.[1]) {
             this.ui.applyFontSize(sizeMatch[1]);
@@ -355,6 +435,17 @@ class DocumentCommandProcessor {
     }
 
     handleCommand(command) {
+        if (/\b(mostrar|ver)\b.*\bcomandos?\b/.test(command) || /\bmostrar\b.*\bayuda\b/.test(command) || /\bayuda\b/.test(command)) {
+            this.ui.showCommandsOverlay();
+            return;
+        }
+
+        if (/\b(ocultar|cerrar)\b.*\bcomandos?\b/.test(command) || /\bocultar\b.*\bayuda\b/.test(command) || /\bcerrar\b.*\bayuda\b/.test(command)) {
+            this.ui.hideCommandsOverlay();
+            setTextContent(this.ui.statusText, 'Comandos ocultos. Di "mostrar comandos" si los necesitas.');
+            return;
+        }
+
         if (command.includes('comenzar redacción')) {
             this.onStartDictation();
             return;
@@ -474,6 +565,9 @@ function bootstrapDocumentPage() {
 
     ui.bindSave(() => ui.showSaveStatus('Guardado', true));
     ui.bindExport(() => setTextContent(ui.statusText, 'Exportando...'));
+    ui.bindShowCommands(() => ui.showCommandsOverlay());
+    ui.bindHideCommands(() => ui.hideCommandsOverlay());
+    ui.enableOverlayKeyboardDismiss();
 
     modeManager.start(commandModeConfig);
 }
