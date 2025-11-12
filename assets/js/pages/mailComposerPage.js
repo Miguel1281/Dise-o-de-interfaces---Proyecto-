@@ -1,10 +1,12 @@
 import { createSpeechRecognition, isSpeechRecognitionSupported } from '../core/speechRecognitionFactory.js';
 import { RecognitionModeManager } from '../core/recognitionModeManager.js';
 import { SpeechSynthesisService } from '../core/speechSynthesisService.js';
+import { FeedbackService } from '../core/feedbackService.js';
 import { getElement, setTextContent, setAriaLabel } from '../utils/dom.js';
 
 class MailComposerUI {
-    constructor() {
+    constructor(feedbackService) {
+        this.feedback = feedbackService;
         this.emailBody = getElement('#email-body');
         this.emailTo = getElement('#email-to');
         this.emailSubject = getElement('#email-subject');
@@ -13,6 +15,26 @@ class MailComposerUI {
         this.statusContainer = this.micButton.closest('.p-6');
         this.statusText = getElement('.status-text', this.statusContainer);
         this.statusSubtext = getElement('.status-subtext', this.statusContainer);
+    }
+
+    notifySuccess(message) {
+        if (this.feedback && message) {
+            this.feedback.playSuccess();
+            this.feedback.showToast(message, 'success');
+        }
+    }
+
+    notifyError(message) {
+        if (this.feedback && message) {
+            this.feedback.playError();
+            this.feedback.showToast(message, 'error');
+        }
+    }
+
+    notifyInfo(message) {
+        if (this.feedback && message) {
+            this.feedback.showToast(message, 'info');
+        }
     }
 
     bindMicToggle(handler) {
@@ -24,6 +46,7 @@ class MailComposerUI {
         setTextContent(this.statusSubtext, '');
         this.micButton.disabled = true;
         setAriaLabel(this.micButton, 'Reconocimiento no disponible');
+        this.notifyError('Reconocimiento de voz no disponible');
     }
 
     showCommandMode() {
@@ -133,6 +156,7 @@ class MailDictationHandler {
         if (shouldStop) {
             this.finalText = this.ui.captureBodyContent().replace(/terminar redacción/gi, '').trim();
             this.ui.commitBodyContent(this.finalText);
+            this.ui.notifySuccess('Dictado detenido');
             if (callbacks.onStop) {
                 callbacks.onStop();
             }
@@ -167,6 +191,7 @@ class MailDictationHandler {
 
         if (normalized.includes('borrar última palabra')) {
             this.removeLastWord();
+            this.ui.notifySuccess('Última palabra eliminada');
             return;
         }
 
@@ -205,6 +230,7 @@ class MailCommandProcessor {
     handleCommand(command) {
         if (command.includes('comenzar redacción')) {
             this.onStartDictation();
+            this.ui.notifySuccess('Dictado activado');
             return;
         }
 
@@ -216,6 +242,7 @@ class MailCommandProcessor {
         if (command.includes('borrar destinatario')) {
             this.ui.clearRecipient();
             this.ui.setStatusText('Destinatario borrado');
+            this.ui.notifySuccess('Destinatario borrado');
             return;
         }
 
@@ -227,6 +254,7 @@ class MailCommandProcessor {
         if (command.includes('borrar asunto')) {
             this.ui.clearSubject();
             this.ui.setStatusText('Asunto borrado');
+            this.ui.notifySuccess('Asunto borrado');
             return;
         }
 
@@ -237,26 +265,39 @@ class MailCommandProcessor {
 
         if (command.includes('enviar correo')) {
             this.ui.setStatusText('Enviando...');
+            this.ui.notifySuccess('Enviando correo');
             return;
         }
 
         if (command.includes('guardar borrador')) {
             this.ui.setStatusText('Guardado.');
+            this.ui.notifySuccess('Borrador guardado');
             return;
         }
 
         if (command.includes('volver al inicio')) {
             this.ui.setStatusText('Volviendo...');
+            this.ui.notifySuccess('Volviendo al inicio');
             window.location.href = 'PantallaPrincipal.html';
+            return;
         }
+
+        this.ui.setStatusText('No se reconoció el comando');
+        this.ui.notifyError('No se reconoció el comando');
     }
 
     applyRecipient(command) {
         let email = command.replace('añadir destinatario', '').replace('modificar destinatario', '').trim();
         email = email.replace(/^[,\.\s]+/, '');
         email = email.replace(/\s+/g, '');
+        if (!email) {
+            this.ui.setStatusText('No se detectó destinatario');
+            this.ui.notifyError('No se detectó destinatario');
+            return;
+        }
         this.ui.setRecipient(email);
         this.ui.setStatusText('Destinatario añadido');
+        this.ui.notifySuccess('Destinatario actualizado');
     }
 
     applySubject(command) {
@@ -264,12 +305,15 @@ class MailCommandProcessor {
         subject = subject.replace(/^[,\.\s]+/, '');
 
         if (!subject) {
+            this.ui.setStatusText('No se detectó asunto');
+            this.ui.notifyError('No se detectó asunto');
             return;
         }
 
         const formatted = subject.charAt(0).toUpperCase() + subject.slice(1);
         this.ui.setSubject(formatted);
         this.ui.setStatusText('Asunto añadido');
+        this.ui.notifySuccess('Asunto actualizado');
     }
 
     readMail() {
@@ -282,14 +326,17 @@ class MailCommandProcessor {
         try {
             this.speechService.speak(text);
             this.ui.setStatusText('Leyendo correo...');
+            this.ui.notifySuccess('Leyendo correo');
         } catch (error) {
             alert('Tu navegador no soporta la síntesis de voz.');
+            this.ui.notifyError('No se pudo reproducir el correo');
         }
     }
 }
 
 function bootstrapMailComposer() {
-    const ui = new MailComposerUI();
+    const feedback = new FeedbackService();
+    const ui = new MailComposerUI(feedback);
 
     if (!isSpeechRecognitionSupported()) {
         alert('Tu navegador no soporta la API de Voz.');

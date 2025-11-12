@@ -1,13 +1,35 @@
 import { createSpeechRecognition, isSpeechRecognitionSupported } from '../core/speechRecognitionFactory.js';
 import { RecognitionModeManager } from '../core/recognitionModeManager.js';
+import { FeedbackService } from '../core/feedbackService.js';
 import { getElement, setTextContent, setAriaLabel } from '../utils/dom.js';
 
 class DashboardUI {
-    constructor() {
+    constructor(feedbackService) {
+        this.feedback = feedbackService;
         this.voiceContainer = getElement('#voice-control-container');
         this.micButton = getElement('.mic-button', this.voiceContainer);
         this.statusText = getElement('.status-text', this.voiceContainer);
         this.pingAnimation = getElement('.ping-animation', this.voiceContainer);
+    }
+
+    notifySuccess(message) {
+        if (this.feedback && message) {
+            this.feedback.playSuccess();
+            this.feedback.showToast(message, 'success');
+        }
+    }
+
+    notifyError(message) {
+        if (this.feedback && message) {
+            this.feedback.playError();
+            this.feedback.showToast(message, 'error');
+        }
+    }
+
+    notifyInfo(message) {
+        if (this.feedback && message) {
+            this.feedback.showToast(message, 'info');
+        }
     }
 
     bindMicToggle(handler) {
@@ -35,6 +57,7 @@ class DashboardUI {
         this.pingAnimation.classList.add('hidden');
         this.micButton.classList.add('bg-gray-500');
         this.micButton.classList.remove('bg-green-500');
+        this.notifyError(message);
     }
 
     showNavigation(message) {
@@ -52,24 +75,33 @@ class DashboardCommandProcessor {
         const transcript = event.results[lastIndex][0].transcript.toLowerCase().trim();
 
         if (!transcript) {
+            this.ui.showNavigation('No se reconoció el comando.');
+            this.ui.notifyError('No se reconoció el comando');
             return;
         }
 
         if (transcript.includes('crear documento')) {
             this.ui.showNavigation('Entendido. Yendo a documentos...');
+            this.ui.notifySuccess('Abriendo editor de documentos');
             window.location.href = 'CreacionDeDocumentos.html';
             return;
         }
 
         if (transcript.includes('crear correo')) {
             this.ui.showNavigation('Entendido. Yendo a correos...');
+            this.ui.notifySuccess('Abriendo creador de correos');
             window.location.href = 'CreacionDeCorreos.html';
+            return;
         }
+
+        this.ui.showNavigation('No se reconoció el comando.');
+        this.ui.notifyError('No se reconoció el comando');
     }
 }
 
 function bootstrapDashboard() {
-    const ui = new DashboardUI();
+    const feedback = new FeedbackService();
+    const ui = new DashboardUI(feedback);
 
     if (!isSpeechRecognitionSupported()) {
         alert('Tu navegador no soporta la API de Voz.');

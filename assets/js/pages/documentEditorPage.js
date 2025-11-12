@@ -1,10 +1,12 @@
 import { createSpeechRecognition, isSpeechRecognitionSupported } from '../core/speechRecognitionFactory.js';
 import { RecognitionModeManager } from '../core/recognitionModeManager.js';
 import { SpeechSynthesisService } from '../core/speechSynthesisService.js';
+import { FeedbackService } from '../core/feedbackService.js';
 import { getElement, getOptionalElement, setTextContent, setAriaLabel } from '../utils/dom.js';
 
 class DocumentUI {
-    constructor() {
+    constructor(feedbackService) {
+        this.feedback = feedbackService;
         this.docEditor = getElement('#doc-editor');
         this.titleInput = getElement('#doc-title');
         this.saveButton = getElement('#save-button');
@@ -25,6 +27,26 @@ class DocumentUI {
 
         this.saveStatusTimer = null;
         this.bodyOverflowBackup = '';
+    }
+
+    notifySuccess(message) {
+        if (this.feedback && message) {
+            this.feedback.playSuccess();
+            this.feedback.showToast(message, 'success');
+        }
+    }
+
+    notifyError(message) {
+        if (this.feedback && message) {
+            this.feedback.playError();
+            this.feedback.showToast(message, 'error');
+        }
+    }
+
+    notifyInfo(message) {
+        if (this.feedback && message) {
+            this.feedback.showToast(message, 'info');
+        }
     }
 
     bindMicToggle(handler) {
@@ -101,6 +123,7 @@ class DocumentUI {
         this.commandOverlay.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = this.bodyOverflowBackup || '';
         this.bodyOverflowBackup = '';
+        setTextContent(this.statusText, 'Comandos ocultos. Di "mostrar comandos" si los necesitas.');
     }
 
     showUnsupportedMessage() {
@@ -108,6 +131,7 @@ class DocumentUI {
         this.micButton.disabled = true;
         setAriaLabel(this.micButton, 'Reconocimiento no disponible');
         this.micButton.classList.add('opacity-60', 'cursor-not-allowed');
+        this.notifyError('Reconocimiento de voz no disponible');
     }
 
     showCommandMode() {
@@ -194,27 +218,32 @@ class DocumentUI {
 
     applyFontSize(sizeValue) {
         if (!this.sizeSelector) {
-            return;
+            return false;
         }
 
         const exists = Array.from(this.sizeSelector.options).some((option) => option.value === sizeValue);
         if (exists) {
             this.sizeSelector.value = sizeValue;
+            return true;
         }
+
+        return false;
     }
 
     applyFontFamily(fontName) {
         if (!this.fontSelector) {
-            return;
+            return false;
         }
 
         const lower = fontName.toLowerCase();
         for (const option of this.fontSelector.options) {
             if (option.text.toLowerCase() === lower) {
                 this.fontSelector.value = option.value;
-                break;
+                return true;
             }
         }
+
+        return false;
     }
 }
 
@@ -273,6 +302,7 @@ class DocumentDictationHandler {
         if (shouldStop) {
             this.finalHtml = this.ui.captureEditorContent().replace(/terminar redacción/gi, '').trim();
             this.ui.commitEditorContent(this.finalHtml);
+            this.ui.notifySuccess('Dictado detenido');
             if (callbacks.onStop) {
                 callbacks.onStop();
             }
@@ -286,44 +316,68 @@ class DocumentDictationHandler {
         }
 
         if (/\b(mostrar|ver)\b.*\bcomandos?\b/.test(normalized) || /\bmostrar\b.*\bayuda\b/.test(normalized) || /\bayuda\b/.test(normalized)) {
-            this.ui.showCommandsOverlay();
+            if (this.ui.isCommandsOverlayVisible()) {
+                this.ui.notifyInfo('La guía de comandos ya está abierta');
+            } else {
+                this.ui.showCommandsOverlay();
+                this.ui.notifySuccess('Guía de comandos abierta');
+            }
             return;
         }
 
         if (/\b(ocultar|cerrar)\b.*\bcomandos?\b/.test(normalized) || /\bocultar\b.*\bayuda\b/.test(normalized) || /\bcerrar\b.*\bayuda\b/.test(normalized)) {
-            this.ui.hideCommandsOverlay();
+            if (this.ui.isCommandsOverlayVisible()) {
+                this.ui.hideCommandsOverlay();
+                this.ui.notifySuccess('Comandos ocultos');
+            } else {
+                this.ui.notifyInfo('La guía de comandos ya está oculta');
+            }
             return;
         }
 
         const sizeMatch = normalized.match(/poner tamaño (\d+)/);
         if (sizeMatch?.[1]) {
-            this.ui.applyFontSize(sizeMatch[1]);
+            const sizeValue = sizeMatch[1];
+            if (this.ui.applyFontSize(sizeValue)) {
+                this.ui.notifySuccess(`Tamaño ajustado a ${sizeValue}`);
+            } else {
+                this.ui.notifyError('Tamaño solicitado no disponible');
+            }
             return;
         }
 
         const fontMatch = normalized.match(/poner fuente (.+)/);
         if (fontMatch?.[1]) {
-            this.ui.applyFontFamily(fontMatch[1].trim());
+            const fontName = fontMatch[1].trim();
+            if (this.ui.applyFontFamily(fontName)) {
+                this.ui.notifySuccess(`Fuente cambiada a ${fontName}`);
+            } else {
+                this.ui.notifyError('Fuente no disponible');
+            }
             return;
         }
 
         if (normalized.includes('justificar texto')) {
             this.ui.applyAlignment('justify');
+            this.ui.notifySuccess('Texto justificado');
             return;
         }
 
         if (normalized.includes('alinear izquierda')) {
             this.ui.applyAlignment('left');
+            this.ui.notifySuccess('Texto alineado a la izquierda');
             return;
         }
 
         if (normalized.includes('alinear derecha')) {
             this.ui.applyAlignment('right');
+            this.ui.notifySuccess('Texto alineado a la derecha');
             return;
         }
 
         if (normalized.includes('centrar texto') || normalized.includes('alinear centro')) {
             this.ui.applyAlignment('center');
+            this.ui.notifySuccess('Texto centrado');
             return;
         }
 
@@ -351,6 +405,9 @@ class DocumentDictationHandler {
             if (!this.isBoldActive) {
                 this.isBoldActive = true;
                 this.finalHtml += '<b>';
+                this.ui.notifySuccess('Negrita activada');
+            } else {
+                this.ui.notifyInfo('La negrita ya está activa');
             }
             return;
         }
@@ -359,6 +416,9 @@ class DocumentDictationHandler {
             if (this.isBoldActive) {
                 this.isBoldActive = false;
                 this.finalHtml += '</b>';
+                this.ui.notifySuccess('Negrita desactivada');
+            } else {
+                this.ui.notifyInfo('La negrita ya está desactivada');
             }
             return;
         }
@@ -367,6 +427,9 @@ class DocumentDictationHandler {
             if (!this.isItalicActive) {
                 this.isItalicActive = true;
                 this.finalHtml += '<i>';
+                this.ui.notifySuccess('Cursiva activada');
+            } else {
+                this.ui.notifyInfo('La cursiva ya está activa');
             }
             return;
         }
@@ -375,12 +438,16 @@ class DocumentDictationHandler {
             if (this.isItalicActive) {
                 this.isItalicActive = false;
                 this.finalHtml += '</i>';
+                this.ui.notifySuccess('Cursiva desactivada');
+            } else {
+                this.ui.notifyInfo('La cursiva ya está desactivada');
             }
             return;
         }
 
         if (normalized.includes('borrar última palabra')) {
             this.removeLastWord();
+            this.ui.notifySuccess('Última palabra eliminada');
             return;
         }
 
@@ -436,18 +503,30 @@ class DocumentCommandProcessor {
 
     handleCommand(command) {
         if (/\b(mostrar|ver)\b.*\bcomandos?\b/.test(command) || /\bmostrar\b.*\bayuda\b/.test(command) || /\bayuda\b/.test(command)) {
-            this.ui.showCommandsOverlay();
+            if (this.ui.isCommandsOverlayVisible()) {
+                setTextContent(this.ui.statusText, 'La guía de comandos ya está abierta.');
+                this.ui.notifyInfo('La guía de comandos ya está abierta');
+            } else {
+                this.ui.showCommandsOverlay();
+                this.ui.notifySuccess('Guía de comandos abierta');
+            }
             return;
         }
 
         if (/\b(ocultar|cerrar)\b.*\bcomandos?\b/.test(command) || /\bocultar\b.*\bayuda\b/.test(command) || /\bcerrar\b.*\bayuda\b/.test(command)) {
-            this.ui.hideCommandsOverlay();
-            setTextContent(this.ui.statusText, 'Comandos ocultos. Di "mostrar comandos" si los necesitas.');
+            if (this.ui.isCommandsOverlayVisible()) {
+                this.ui.hideCommandsOverlay();
+                this.ui.notifySuccess('Comandos ocultos');
+            } else {
+                setTextContent(this.ui.statusText, 'La guía de comandos ya está oculta.');
+                this.ui.notifyInfo('La guía de comandos ya está oculta');
+            }
             return;
         }
 
         if (command.includes('comenzar redacción')) {
             this.onStartDictation();
+            this.ui.notifySuccess('Dictado activado');
             return;
         }
 
@@ -464,18 +543,25 @@ class DocumentCommandProcessor {
         if (command.includes('guardar documento')) {
             this.ui.showSaveStatus('Guardado', true);
             setTextContent(this.ui.statusText, 'Documento guardado');
+            this.ui.notifySuccess('Documento guardado');
             return;
         }
 
         if (command.includes('exportar')) {
             setTextContent(this.ui.statusText, 'Exportando...');
+            this.ui.notifySuccess('Exportando documento');
             return;
         }
 
         if (command.includes('volver al inicio')) {
             setTextContent(this.ui.statusText, 'Volviendo al inicio...');
+            this.ui.notifySuccess('Volviendo al inicio');
             window.location.href = 'PantallaPrincipal.html';
+            return;
         }
+
+        setTextContent(this.ui.statusText, 'No se reconoció el comando.');
+        this.ui.notifyError('No se reconoció el comando');
     }
 
     applyTitleUpdate(command) {
@@ -483,6 +569,8 @@ class DocumentCommandProcessor {
         newTitle = newTitle.replace(/^[,\.\s]+/, '');
 
         if (!newTitle) {
+            setTextContent(this.ui.statusText, 'No se detectó un título.');
+            this.ui.notifyError('No se detectó un título');
             return;
         }
 
@@ -490,6 +578,7 @@ class DocumentCommandProcessor {
         this.ui.titleInput.value = formatted;
         this.ui.showSaveStatus('Cambios sin guardar');
         setTextContent(this.ui.statusText, 'Título actualizado');
+        this.ui.notifySuccess('Título actualizado');
     }
 
     readDocument() {
@@ -500,14 +589,17 @@ class DocumentCommandProcessor {
         try {
             this.speechService.speak(fullText);
             setTextContent(this.ui.statusText, 'Leyendo documento...');
+            this.ui.notifySuccess('Leyendo documento');
         } catch (error) {
             alert('Tu navegador no soporta la síntesis de voz.');
+            this.ui.notifyError('No se pudo reproducir el documento');
         }
     }
 }
 
 function bootstrapDocumentPage() {
-    const ui = new DocumentUI();
+    const feedback = new FeedbackService();
+    const ui = new DocumentUI(feedback);
 
     if (!isSpeechRecognitionSupported()) {
         alert('Tu navegador no soporta la API de Voz.');
