@@ -50,6 +50,13 @@ class DocumentUI {
         this.commandChips = Array.from(document.querySelectorAll('[data-command-chip]'));
         this.commandHelpMap = new Map();
 
+        // === NUEVOS SELECTORES ===
+        this.helpBox = getOptionalElement('#help-box');
+        this.helpBoxCloseButton = getOptionalElement('#help-box-close');
+        this.tabButtons = document.querySelectorAll('#sidebar-state-dictating .tab-button');
+        this.tabPanels = document.querySelectorAll('#sidebar-state-dictating .tab-panel');
+        // =========================
+
         this.saveStatusTimer = null;
         this.commandHighlightTimer = null;
         this.currentSidebarMode = 'inactive';
@@ -69,6 +76,57 @@ class DocumentUI {
         this.activeHighlightChips = [];
 
         this.initializeCommandHelp();
+    }
+
+    // === NUEVO: Lógica del panel de ayuda ===
+    initHelpBox() {
+        if (localStorage.getItem('vozdoc_help_hidden') === 'true' && this.helpBox) {
+            this.helpBox.classList.add('hidden');
+        }
+        if (this.helpBoxCloseButton) {
+            this.helpBoxCloseButton.addEventListener('click', () => this.toggleHelpBox(false));
+        }
+    }
+
+    toggleHelpBox(show) {
+        if (!this.helpBox) return;
+        const isHidden = this.helpBox.classList.contains('hidden');
+
+        if (show === false || (show !== true && !isHidden)) { // Ocultar
+            this.helpBox.classList.add('hidden');
+            localStorage.setItem('vozdoc_help_hidden', 'true');
+            if (show === false) this.notifySuccess('Panel de ayuda oculto.');
+        } else { // Mostrar
+            this.helpBox.classList.remove('hidden');
+            localStorage.removeItem('vozdoc_help_hidden');
+            if (show === true) this.notifyInfo('Mostrando panel de ayuda.');
+        }
+    }
+
+    // === NUEVO: Lógica de pestañas ===
+    initTabs() {
+        this.tabButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                this.activateTab(e.currentTarget.dataset.tabTarget);
+            });
+        });
+    }
+
+    activateTab(targetId, notify = false) {
+        let tabName = '';
+        this.tabButtons.forEach(btn => {
+            const isActive = btn.dataset.tabTarget === targetId;
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-selected', isActive.toString());
+            if (isActive) tabName = btn.textContent;
+        });
+        this.tabPanels.forEach(panel => {
+            panel.classList.toggle('hidden', panel.id !== targetId);
+        });
+
+        if (notify && tabName) {
+            this.notifyInfo(`Mostrando comandos de ${tabName.toLowerCase()}`);
+        }
     }
 
     bindMicToggle(handler) {
@@ -332,6 +390,16 @@ class DocumentUI {
             return null;
         }
 
+        // Excepciones para comandos de ayuda
+        if (normalized === 'ocultar ayuda' || normalized === 'entendido') {
+            this.toggleHelpBox(false);
+            return { state: 'hidden', label: 'Panel de ayuda' };
+        }
+        if (normalized === 'mostrar ayuda') {
+            this.toggleHelpBox(true);
+            return { state: 'shown', label: 'Panel de ayuda' };
+        }
+
         const entry = this.commandHelpMap.get(normalized);
         if (!entry) {
             return null;
@@ -467,35 +535,37 @@ class DocumentUI {
 
         if (this.recognitionState === 'dictation') {
             this.updateBadge('Dictando', 'dictating');
-            this.updateHelpText('Di "Terminar redacción" para volver al modo comandos.');
+            this.updateHelpText('Di "Terminar redacción" para parar.');
         } else if (this.recognitionState === 'command') {
             this.updateBadge('Comandos', 'listening');
-            this.updateHelpText('Di "Comenzar redacción" o usa un comando del panel lateral.');
+            this.updateHelpText('Di "Comenzar redacción" o un comando.');
         } else {
             this.updateBadge('Inactivo', 'idle');
-            this.updateHelpText('Presiona el micrófono o di "Comenzar redacción".');
+            this.updateHelpText('Presiona el micrófono para empezar.');
         }
     }
 
     showDictationMode() {
         this.recognitionState = 'dictation';
         this.clearCommandHighlight();
-        setTextContent(this.statusText, 'Dictando... Di "Terminar redacción" para volver a comandos.');
-        this.updateHelpText('Di "Terminar redacción" cuando quieras detener el dictado.');
+        setTextContent(this.statusText, 'Dictando...');
+        this.updateHelpText('Di "Terminar redacción" para parar.');
         this.updateBadge('Dictando', 'dictating');
         this.micButton.classList.remove('bg-primary', 'text-white', 'bg-slate-200', 'text-primary');
         this.micButton.classList.add('animate-pulse', 'bg-rose-500', 'text-white');
         this.micIcon.classList.add('animate-pulse');
         this.editorWrapper.classList.add('listening-active');
         this.setSidebarMode('dictating');
+        // === MODIFICADO: Activa la primera pestaña ===
+        this.activateTab('tab-panel-punctuation');
         setAriaLabel(this.micButton, 'Detener dictado');
     }
 
     showCommandMode() {
         this.recognitionState = 'command';
         this.clearCommandHighlight();
-        setTextContent(this.statusText, 'Escuchando comandos. Di "Comenzar redacción" para dictar.');
-        this.updateHelpText('Di "Comenzar redacción" o usa un comando del panel lateral.');
+        setTextContent(this.statusText, 'Escuchando comandos.');
+        this.updateHelpText('Di "Comenzar redacción" o un comando.');
         this.updateBadge('Comandos', 'listening');
         this.micButton.classList.remove('animate-pulse', 'bg-rose-500', 'bg-slate-200', 'text-primary');
         this.micButton.classList.add('bg-primary', 'text-white');
@@ -508,8 +578,8 @@ class DocumentUI {
     showIdleStatus() {
         this.recognitionState = 'idle';
         this.clearCommandHighlight();
-        setTextContent(this.statusText, 'Haz clic para activar el micrófono.');
-        this.updateHelpText('Presiona el micrófono o di "Comenzar redacción".');
+        setTextContent(this.statusText, 'Haz clic para activar.');
+        this.updateHelpText('Presiona el micrófono para empezar.');
         this.updateBadge('Inactivo', 'idle');
         this.micButton.classList.remove('bg-primary', 'text-white', 'bg-rose-500', 'animate-pulse');
         this.micButton.classList.add('bg-slate-200', 'text-primary');
@@ -525,8 +595,8 @@ class DocumentUI {
     }
 
     showUnsupportedMessage() {
-        setTextContent(this.statusText, 'Tu navegador no soporta la API de voz.');
-        this.updateHelpText('Prueba en Chrome o Edge para activar el dictado por voz.');
+        setTextContent(this.statusText, 'Navegador no compatible.');
+        this.updateHelpText('Usa Chrome o Edge para el dictado.');
         this.updateBadge('No disponible', 'idle');
         this.micButton.disabled = true;
         this.micButton.classList.add('opacity-60', 'cursor-not-allowed');
@@ -682,6 +752,33 @@ class DocumentDictationHandler {
             return;
         }
 
+        // === NUEVO: Comandos de Ayuda y Pestañas ===
+        if (/(ocultar|quitar|cerrar) ayuda/.test(normalized) || normalized.includes('entendido')) {
+            this.ui.toggleHelpBox(false);
+            return;
+        }
+        if (/(mostrar|ver) ayuda/.test(normalized)) {
+            this.ui.toggleHelpBox(true);
+            return;
+        }
+        if (/(mostrar|ver|ir a) puntuacion/.test(normalized)) {
+            this.ui.activateTab('tab-panel-punctuation', true);
+            return;
+        }
+        if (/(mostrar|ver|ir a) formato/.test(normalized)) {
+            this.ui.activateTab('tab-panel-formatting', true);
+            return;
+        }
+        if (/(mostrar|ver|ir a) correccion/.test(normalized) || /(mostrar|ver|ir a) editar/.test(normalized)) {
+            this.ui.activateTab('tab-panel-editing', true);
+            return;
+        }
+        if (/(mostrar|ver|ir a) acciones/.test(normalized)) {
+            this.ui.activateTab('tab-panel-actions', true);
+            return;
+        }
+        // ======================================
+
         const helpTarget = extractHelpTarget(normalized);
         if (helpTarget) {
             const result = this.ui.toggleCommandDescription(helpTarget);
@@ -832,6 +929,23 @@ class DocumentDictationHandler {
             return;
         }
 
+        // Comandos de acciones (guardar, exportar) que también están en modo comando
+        if (normalized.includes('guardar documento')) {
+            this.ui.showSaveStatus('Guardado', true);
+            setTextContent(this.ui.statusText, 'Documento guardado');
+            this.ui.notifySuccess('Documento guardado');
+            return;
+        }
+
+        if (normalized.includes('exportar')) {
+            // No podemos llamar a this.commandProcessor.executeExport, así que replicamos la lógica
+            this.ui.notifyError('Función no disponible en dictado. Di "Terminar redacción" y luego "Exportar".');
+            // O, si commandProcessor fuera accesible:
+            // commandProcessor.handleCommand(normalized);
+            return;
+        }
+
+
         if (normalized.endsWith('.')) {
             normalized = normalized.slice(0, -1);
         }
@@ -899,6 +1013,17 @@ class DocumentCommandProcessor {
             }
             return;
         }
+
+        // === NUEVO: Comandos de Ayuda ===
+        if (/(ocultar|quitar|cerrar) ayuda/.test(command) || command.includes('entendido')) {
+            this.ui.toggleHelpBox(false);
+            return;
+        }
+        if (/(mostrar|ver) ayuda/.test(command)) {
+            this.ui.toggleHelpBox(true);
+            return;
+        }
+        // ============================
 
         const helpTarget = extractHelpTarget(command);
         if (helpTarget) {
@@ -1078,6 +1203,11 @@ class DocumentCommandProcessor {
 function bootstrapDocumentPage() {
     const feedback = new FeedbackService();
     const ui = new DocumentUI(feedback);
+
+    // === NUEVO: Inicializar UI ===
+    ui.initTabs();
+    ui.initHelpBox();
+    // ============================
 
     if (!isSpeechRecognitionSupported()) {
         alert('Tu navegador no soporta la API de Voz.');

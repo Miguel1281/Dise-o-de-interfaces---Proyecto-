@@ -95,6 +95,55 @@
         min-width: 320px;
       }
     }
+
+    /* === ESTILOS PARA LAS PESTAÑAS === */
+    .tab-button {
+      padding: 8px 8px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      /* text-xs */
+      font-weight: 600;
+      /* font-semibold */
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1.5px;
+      color: #6b7280;
+      /* text-gray-500 */
+      transition: all 0.15s ease-in-out;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex-shrink: 1;
+    }
+
+    .tab-button:hover {
+      color: #333333;
+      /* text-text-light */
+    }
+
+    .tab-button.active {
+      border-color: #005A9C;
+      /* border-primary */
+      color: #005A9C;
+      /* text-primary */
+    }
+
+    .dark .tab-button {
+      color: #9ca3af;
+      /* dark:text-gray-400 */
+    }
+
+    .dark .tab-button:hover {
+      color: #E0E0E0;
+      /* dark:text-text-dark */
+    }
+
+    .dark .tab-button.active {
+      border-color: #005A9C;
+      /* dark:border-primary */
+      color: #E0E0E0;
+      /* dark:text-text-dark */
+    }
   </style>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
     crossorigin="anonymous"></script>
@@ -104,38 +153,58 @@
 
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
   <div class="flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
+
     <header
-      class="flex w-full items-center justify-between border-b border-border-light bg-background-light px-8 py-6 dark:border-border-dark dark:bg-background-dark">
-      <div class="flex items-center gap-3">
-        <svg class="h-10 w-10 text-primary" fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      class="flex w-full items-center justify-between border-b border-solid border-border-light bg-background-light px-6 md:px-10 py-3 dark:border-border-dark dark:bg-background-dark">
+      <div class="flex items-center gap-4">
+        <svg class="h-6 w-6 text-primary" fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
           <path clip-rule="evenodd"
             d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z"
             fill-rule="evenodd"></path>
         </svg>
         <div>
-          <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">VozDoc</h1>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Editor de documentos guiado por voz</p>
+          <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">VozDoc</h1>
         </div>
       </div>
-      <div id="save-status" class="text-sm font-medium text-gray-500 dark:text-gray-300"></div>
-    </header>
-    <div class="flex w-full flex-1 flex-col gap-8 px-6 py-8 lg:flex-row lg:items-start lg:gap-10 lg:px-10">
-      <main class="flex flex-1 flex-col">
-        <section class="flex-1 overflow-y-auto">
-          <div class="mx-auto flex w-full max-w-3xl flex-col gap-8">
 
-            <div
-              class="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-6 text-sm text-primary dark:border-primary/40 dark:bg-primary/10">
+      <div class="flex items-center gap-4">
+        <div id="save-status" class="text-sm font-medium text-gray-500 dark:text-gray-300"></div>
+
+        <button aria-label="Configuración"
+          class="flex cursor-pointer items-center justify-center rounded-lg h-10 bg-slate-100 text-slate-900 px-2.5 transition-colors hover:bg-slate-200 dark:bg-surface-dark dark:text-white dark:hover:bg-border-dark">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+
+        <div class="h-10 w-10 rounded-full bg-cover bg-center"
+          style="background-image: url('https://i.pravatar.cc/40');" data-alt="Avatar de usuario">
+        </div>
+      </div>
+    </header>
+
+    <div class="flex w-full flex-1 flex-col gap-8 px-6 py-8 lg:flex-row lg:items-stretch lg:gap-10 lg:px-10">
+      <main class="flex flex-1 flex-col">
+        <section class="flex-1 overflow-y-auto h-full">
+          <div class="mx-auto flex w-full max-w-3xl flex-col gap-8 h-full">
+
+            <div id="help-box"
+              class="relative rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-6 text-sm text-primary dark:border-primary/40 dark:bg-primary/10 flex-shrink-0">
+              <button id="help-box-close" type="button" aria-label="Ocultar ayuda"
+                class="absolute top-3 right-3 p-1 text-primary/60 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-xl">close</span>
+              </button>
               <h2 class="text-base font-semibold tracking-tight text-primary">¿Cómo funciona?</h2>
               <p class="mt-2 text-primary/80">
-                El panel de la derecha te muestra los comandos disponibles según tu contexto. Solo necesitas decirlos en
+                El panel de la derecha te muestra los comandos disponibles. Solo necesitas decirlos en
                 voz alta para que VozDoc ejecute la acción por ti.
+              </p>
+              <p class="mt-2 text-primary/80">
+                Di <strong>"Ocultar ayuda"</strong> o <strong>"Entendido"</strong> para cerrar este panel.
               </p>
             </div>
 
             <div
-              class="rounded-3xl border border-border-light bg-surface-light p-8 shadow-sm dark:border-border-dark dark:bg-surface-dark">
-              <div class="space-y-6">
+              class="rounded-3xl border border-border-light bg-surface-light p-8 shadow-sm dark:border-border-dark dark:bg-surface-dark flex-1 flex flex-col">
+              <div class="space-y-6 flex-1 flex flex-col">
                 <div>
                   <label class="sr-only" for="doc-title">Título del documento</label>
                   <input id="doc-title" aria-label="Título del documento"
@@ -143,10 +212,10 @@
                     placeholder="Documento sin título" value="" />
                 </div>
                 <div id="editor-wrapper"
-                  class="rounded-2xl border-2 border-transparent bg-white p-6 transition-all duration-300 ease-in-out dark:bg-surface-dark">
+                  class="rounded-2xl border-2 border-transparent bg-white p-6 transition-all duration-300 ease-in-out dark:bg-surface-dark flex-1 flex flex-col">
                   <div id="doc-editor" contenteditable="true" role="textbox" aria-multiline="true"
                     placeholder="Di 'Comenzar redacción' para iniciar el dictado."
-                    class="min-h-[360px] text-base leading-relaxed text-text-light focus:outline-none dark:text-text-dark">
+                    class="min-h-[360px] text-base leading-relaxed text-text-light focus:outline-none dark:text-text-dark flex-1">
                   </div>
                 </div>
               </div>
@@ -157,11 +226,11 @@
       </main>
 
       <aside id="voice-sidebar"
-        class="flex w-full flex-col border-t border-border-light bg-white/80 backdrop-blur dark:border-border-dark dark:bg-surface-dark/90 lg:w-[360px] lg:border-l lg:border-t-0">
+        class="flex w-full flex-col border border-border-light bg-white/80 backdrop-blur dark:border-border-dark dark:bg-surface-dark/90 lg:w-[380px] rounded-2xl shadow-sm flex-shrink-0">
 
-        <div class="sticky top-4 flex max-h-screen flex-col gap-4 px-6 py-6">
+        <div class="sticky top-6 flex h-full flex-col gap-4 px-6 py-6">
 
-          <div class="flex flex-col items-center gap-4 text-center">
+          <div class="flex flex-col items-center gap-4 text-center flex-shrink-0">
             <div class="relative">
               <button id="dictation-toggle" aria-label="Activar dictado"
                 class="flex h-20 w-20 items-center justify-center rounded-full bg-slate-200 text-primary shadow-sm transition-colors duration-200 ease-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/40">
@@ -177,344 +246,396 @@
             </div>
           </div>
 
-          <div id="sidebar-state-inactive" class="space-y-4">
-            <section class="space-y-3">
-              <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones
-                principales</h2>
-              <div class="space-y-2">
-                <div data-command-chip data-command-label="Comenzar redacción"
-                  data-command-trigger="comenzar redacción|iniciar redacción|activar dictado"
-                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Comenzar redacción"</h3>
-                    <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Comenzar redacción" aria-expanded="false"
-                      aria-label="Mostrar descripción de Comenzar redacción">
-                      <span class="material-symbols-outlined text-sm">help</span>
-                    </button>
+          <div class="flex-1 overflow-y-auto min-h-0 space-y-4">
+
+            <div id="sidebar-state-inactive" class="space-y-4">
+              <section class="space-y-3">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones
+                  principales</h2>
+                <div class="space-y-2">
+
+                  <div data-command-chip data-command-label="Comenzar redacción"
+                    data-command-trigger="comenzar redacción|iniciar redacción|activar dictado"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Comenzar redacción"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Comenzar redacción" aria-expanded="false"
+                        aria-label="Mostrar descripción de Comenzar redacción">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inicia el
+                      dictado y activa el micrófono.</p>
                   </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inicia el
-                    dictado y
-                    activa el micrófono.</p>
+
+                  <div data-command-chip data-command-label="Abrir documento" data-command-trigger="abrir documento"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Abrir documento"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Abrir documento" aria-expanded="false"
+                        aria-label="Mostrar descripción de Abrir documento">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Recupera
+                      un
+                      archivo reciente usando tu voz.</p>
+                  </div>
+
+                  <div data-command-chip data-command-label="Guardar documento"
+                    data-command-trigger="guardar documento|guardar cambios"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Guardar documento"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Guardar documento" aria-expanded="false"
+                        aria-label="Mostrar descripción de Guardar documento">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Guarda tu
+                      progreso de manera segura.</p>
+                  </div>
+
+                  <div data-command-chip data-command-label="Exportar documento"
+                    data-command-trigger="exportar documento"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Exportar documento"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Exportar documento" aria-expanded="false"
+                        aria-label="Mostrar descripción de Exportar documento">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Prepara
+                      una
+                      copia en Word o PDF.</p>
+                  </div>
+
+                  <div data-command-chip data-command-label="Imprimir documento"
+                    data-command-trigger="imprimir documento"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Imprimir documento"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Imprimir documento" aria-expanded="false"
+                        aria-label="Mostrar descripción de Imprimir documento">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Envía el
+                      documento a la impresora.</p>
+                  </div>
+
+                  <div data-command-chip data-command-label="Ocultar ayuda"
+                    data-command-trigger="ocultar ayuda|entendido|quitar ayuda|cerrar ayuda"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Ocultar ayuda"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Ocultar ayuda" aria-expanded="false"
+                        aria-label="Mostrar descripción de Ocultar ayuda">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Oculta el
+                      panel
+                      de '¿Cómo funciona?'.</p>
+                  </div>
+
                 </div>
-                <div data-command-chip data-command-label="Abrir documento" data-command-trigger="abrir documento"
+              </section>
+
+              <div class="pt-4 border-t border-border-light dark:border-border-dark">
+                <div data-command-chip data-command-label="Mostrar ayuda" data-command-trigger="mostrar ayuda|ver ayuda"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                   <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Abrir documento"</h3>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Mostrar ayuda"</h3>
                     <button type="button"
                       class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Abrir documento" aria-expanded="false"
-                      aria-label="Mostrar descripción de Abrir documento">
+                      data-command-toggle data-command-label="Mostrar ayuda" aria-expanded="false"
+                      aria-label="Mostrar descripción de Mostrar ayuda">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Recupera un
-                    archivo
-                    reciente usando tu voz.</p>
-                </div>
-                <div data-command-chip data-command-label="Guardar documento"
-                  data-command-trigger="guardar documento|guardar cambios"
-                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Guardar documento"</h3>
-                    <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Guardar documento" aria-expanded="false"
-                      aria-label="Mostrar descripción de Guardar documento">
-                      <span class="material-symbols-outlined text-sm">help</span>
-                    </button>
-                  </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Guarda tu
-                    progreso
-                    de manera segura.</p>
-                </div>
-                <div data-command-chip data-command-label="Exportar documento" data-command-trigger="exportar documento"
-                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Exportar documento"</h3>
-                    <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Exportar documento" aria-expanded="false"
-                      aria-label="Mostrar descripción de Exportar documento">
-                      <span class="material-symbols-outlined text-sm">help</span>
-                    </button>
-                  </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Prepara una
-                    copia en
-                    Word o PDF.</p>
-                </div>
-                <div data-command-chip data-command-label="Imprimir documento" data-command-trigger="imprimir documento"
-                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Imprimir documento"</h3>
-                    <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Imprimir documento" aria-expanded="false"
-                      aria-label="Mostrar descripción de Imprimir documento">
-                      <span class="material-symbols-outlined text-sm">help</span>
-                    </button>
-                  </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Envía el
-                    documento a
-                    la impresora predeterminada.</p>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Vuelve a
+                    mostrar el panel de '¿Cómo funciona?'.</p>
                 </div>
               </div>
-            </section>
-          </div>
+            </div>
 
-          <div id="sidebar-state-dictating" class="hidden space-y-4">
-            <section class="space-y-3">
-              <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Puntuación y
-                formato</h2>
-              <div class="space-y-2">
+            <div id="sidebar-state-dictating" class="hidden space-y-4">
 
+              <div class="border-b border-border-light dark:border-border-dark flex">
+                <button id="tab-btn-punctuation" data-tab-target="tab-panel-punctuation"
+                  class="tab-button active flex-1 text-center" aria-selected="true">Puntuación</button>
+                <button id="tab-btn-formatting" data-tab-target="tab-panel-formatting"
+                  class="tab-button flex-1 text-center" aria-selected="false">Formato</button>
+                <button id="tab-btn-editing" data-tab-target="tab-panel-editing" class="tab-button flex-1 text-center"
+                  aria-selected="false">Corrección</button>
+                <button id="tab-btn-actions" data-tab-target="tab-panel-actions" class="tab-button flex-1 text-center"
+                  aria-selected="false">Acciones</button>
+              </div>
+
+              <div id="tab-panel-punctuation" class="space-y-2 tab-panel">
                 <div data-command-chip data-command-label="Agrega coma"
                   data-command-trigger="agrega coma|agregar coma|inserta coma"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agrega coma"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Agrega coma" aria-expanded="false"
-                      aria-label="Mostrar descripción de Agrega coma">
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Agrega coma" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
                   <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inserta una
-                    coma
-                    justo
-                    donde estás dictando.</p>
+                    coma.</p>
                 </div>
-
                 <div data-command-chip data-command-label="Agrega punto"
                   data-command-trigger="agrega punto|agregar punto|inserta punto"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agrega punto"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Agrega punto" aria-expanded="false"
-                      aria-label="Mostrar descripción de Agrega punto">
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Agrega punto" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
                   <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Cierra la
-                    oración
-                    actual.</p>
+                    oración actual.</p>
                 </div>
-
                 <div data-command-chip data-command-label="Nuevo párrafo"
                   data-command-trigger="nuevo párrafo|párrafo nuevo|punto y aparte"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Nuevo párrafo"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Nuevo párrafo" aria-expanded="false"
-                      aria-label="Mostrar descripción de Nuevo párrafo">
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Nuevo párrafo" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
                   <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Salta dos
-                    líneas
-                    para
-                    comenzar una idea nueva.</p>
+                    líneas.</p>
                 </div>
+              </div>
 
+              <div id="tab-panel-formatting" class="space-y-2 tab-panel hidden">
                 <div data-command-chip data-command-label="Negrita"
                   data-command-trigger="negrita|activar negrita|texto en negrita"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Negrita"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Negrita" aria-expanded="false"
-                      aria-label="Mostrar descripción de Negrita">
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Negrita" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Pone en
-                    negrita
-                    las palabras
-                    siguientes.</p>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">
+                    Activa/desactiva la negrita.</p>
                 </div>
-
                 <div data-command-chip data-command-label="Subrayado" data-command-trigger="subrayado|activar subrayado"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Subrayado"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Subrayado" aria-expanded="false"
-                      aria-label="Mostrar descripción de Subrayado">
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Subrayado" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Subraya las
-                    palabras siguientes.</p>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">
+                    Activa/desactiva el subrayado.</p>
+                </div>
+                <div data-command-chip data-command-label="Poner título" data-command-trigger="poner título"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Poner título [texto]"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Poner título" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Cambia el
+                    título del documento.</p>
                 </div>
               </div>
-            </section>
 
-            <section class="space-y-3">
-              <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Corrección
-              </h2>
-              <div class="space-y-2">
-
+              <div id="tab-panel-editing" class="space-y-2 tab-panel hidden">
                 <div data-command-chip data-command-label="Deshacer" data-command-trigger="deshacer|undo"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Deshacer"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Deshacer" aria-expanded="false"
-                      aria-label="Mostrar descripción de Deshacer">
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Deshacer" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
                   <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Revierte la
-                    última
-                    acción realizada.</p>
+                    última acción.</p>
                 </div>
-
                 <div data-command-chip data-command-label="Borrar última palabra"
                   data-command-trigger="borrar última palabra|eliminar última palabra"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar última palabra"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Borrar última palabra" aria-expanded="false"
-                      aria-label="Mostrar descripción de Borrar última palabra">
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Borrar última palabra" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
                   <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Elimina la
-                    última
-                    palabra dictada.</p>
+                    última palabra.</p>
                 </div>
-
                 <div data-command-chip data-command-label="Borrar oración"
                   data-command-trigger="borrar oración|eliminar oración"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar oración"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Borrar oración" aria-expanded="false"
-                      aria-label="Mostrar descripción de Borrar oración">
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Borrar oración" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
                   <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Elimina la
-                    oración completa más reciente.</p>
+                    oración más reciente.</p>
                 </div>
-
                 <div data-command-chip data-command-label="Borrar último párrafo"
                   data-command-trigger="borrar último párrafo|eliminar último párrafo"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar último párrafo"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Borrar último párrafo" aria-expanded="false"
-                      aria-label="Mostrar descripción de Borrar último párrafo">
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Borrar último párrafo" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
                   <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Quita el
-                    párrafo
-                    anterior por completo.</p>
+                    párrafo anterior.</p>
                 </div>
               </div>
-            </section>
 
-            <section class="space-y-3">
-              <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones
-                secundarias</h2>
-              <div class="space-y-2">
-
+              <div id="tab-panel-actions" class="space-y-2 tab-panel hidden">
                 <div data-command-chip data-command-label="Terminar redacción"
                   data-command-trigger="terminar redacción|detener dictado|parar redacción"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Terminar redacción"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Terminar redacción" aria-expanded="false"
-                      aria-label="Mostrar descripción de Terminar redacción">
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Terminar redacción" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Cierra el
-                    dictado y
-                    vuelve al modo comandos.</p>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Vuelve al
+                    modo comandos.</p>
+                </div>
+                <div data-command-chip data-command-label="Guardar documento"
+                  data-command-trigger="guardar documento|guardar cambios"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Guardar documento"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Guardar documento" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Guarda tu
+                    progreso.</p>
+                </div>
+                <div data-command-chip data-command-label="Exportar documento" data-command-trigger="exportar documento"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Exportar documento"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Exportar documento" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inicia la
+                    exportación a PDF/Word.</p>
                 </div>
               </div>
-            </section>
-          </div>
 
-          <div id="sidebar-export-options"
-            class="hidden space-y-2 rounded-2xl border border-border-light/70 bg-white/90 p-3 shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-            <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Exportar
-              documento</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Di "Exportar en Word" o "Exportar en PDF".</p>
-            <div class="space-y-2">
-              <div data-command-chip data-command-label="Exportar en Word"
-                data-command-trigger="exportar en word|exportar word"
-                class="voice-chip rounded-xl border border-primary/40 bg-primary/10 p-2.5 text-left text-primary">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="flex flex-1 items-center justify-between gap-3">
-                    <span class="text-sm font-semibold">"Exportar en Word"</span>
-                    <span class="material-symbols-outlined text-base">description</span>
+            </div>
+
+            <div id="sidebar-export-options"
+              class="hidden space-y-2 rounded-2xl border border-border-light/70 bg-white/90 p-3 shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Exportar
+                documento</h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Di "Exportar en Word" o "Exportar en PDF".</p>
+              <div class="space-y-2">
+                <div data-command-chip data-command-label="Exportar en Word"
+                  data-command-trigger="exportar en word|exportar word"
+                  class="voice-chip rounded-xl border border-primary/40 bg-primary/10 p-2.5 text-left text-primary">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex flex-1 items-center justify-between gap-3">
+                      <span class="text-sm font-semibold">"Exportar en Word"</span>
+                      <span class="material-symbols-outlined text-base">description</span>
+                    </div>
+                    <button type="button"
+                      class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-transparent text-primary/80 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                      data-command-toggle data-command-label="Exportar en Word" aria-expanded="false"
+                      aria-label="Mostrar descripción de Exportar en Word">
+                      <span class="material-symbols-outlined !text-sm">help</span>
+                    </button>
                   </div>
-                  <button type="button"
-                    class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-transparent text-primary/80 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                    data-command-toggle data-command-label="Exportar en Word" aria-expanded="false"
-                    aria-label="Mostrar descripción de Exportar en Word">
-                    <span class="material-symbols-outlined !text-sm">help</span>
-                  </button>
+                  <p data-command-description class="mt-1 hidden text-xs text-primary/80">Genera un archivo .doc.</p>
                 </div>
-                <p data-command-description class="mt-1 hidden text-xs text-primary/80">Genera un archivo .doc listo
-                  para
-                  editar.</p>
-              </div>
-              <div data-command-chip data-command-label="Exportar en PDF"
-                data-command-trigger="exportar en pdf|exportar pdf"
-                class="voice-chip rounded-xl border border-primary/40 bg-primary/10 p-2.5 text-left text-primary">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="flex flex-1 items-center justify-between gap-3">
-                    <span class="text-sm font-semibold">"Exportar en PDF"</span>
-                    <span class="material-symbols-outlined text-base">picture_as_pdf</span>
+                <div data-command-chip data-command-label="Exportar en PDF"
+                  data-command-trigger="exportar en pdf|exportar pdf"
+                  class="voice-chip rounded-xl border border-primary/40 bg-primary/10 p-2.5 text-left text-primary">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex flex-1 items-center justify-between gap-3">
+                      <span class="text-sm font-semibold">"Exportar en PDF"</span>
+                      <span class="material-symbols-outlined text-base">picture_as_pdf</span>
+                    </div>
+                    <button type="button"
+                      class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-transparent text-primary/80 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                      data-command-toggle data-command-label="Exportar en PDF" aria-expanded="false"
+                      aria-label="Mostrar descripción de Exportar en PDF">
+                      <span class="material-symbols-outlined !text-sm">help</span>
+                    </button>
                   </div>
-                  <button type="button"
-                    class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-transparent text-primary/80 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                    data-command-toggle data-command-label="Exportar en PDF" aria-expanded="false"
-                    aria-label="Mostrar descripción de Exportar en PDF">
-                    <span class="material-symbols-outlined !text-sm">help</span>
-                  </button>
+                  <p data-command-description class="mt-1 hidden text-xs text-primary/80">Crea un PDF final.</p>
                 </div>
-                <p data-command-description class="mt-1 hidden text-xs text-primary/80">Crea un PDF final listo para
-                  compartir.</p>
-              </div>
-              <div data-command-chip data-command-label="Cancelar exportación"
-                data-command-trigger="cancelar exportación|cancelar exportar"
-                class="voice-chip rounded-xl border border-border-light/60 bg-white/80 p-2.5 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/10">
-                <div class="flex items-start justify-between gap-3">
-                  <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Cancelar exportación"</span>
-                  <button type="button"
-                    class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                    data-command-toggle data-command-label="Cancelar exportación" aria-expanded="false"
-                    aria-label="Mostrar descripción de Cancelar exportación">
-                    <span class="material-symbols-outlined !text-sm">help</span>
-                  </button>
+                <div data-command-chip data-command-label="Cancelar exportación"
+                  data-command-trigger="cancelar exportación|cancelar exportar"
+                  class="voice-chip rounded-xl border border-border-light/60 bg-white/80 p-2.5 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/10">
+                  <div class="flex items-start justify-between gap-3">
+                    <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Cancelar exportación"</span>
+                    <button type="button"
+                      class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                      data-command-toggle data-command-label="Cancelar exportación" aria-expanded="false"
+                      aria-label="Mostrar descripción de Cancelar exportación">
+                      <span class="material-symbols-outlined !text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1 hidden text-xs text-gray-600 dark:text-gray-400">Cierra esta
+                    opción.</p>
                 </div>
-                <p data-command-description class="mt-1 hidden text-xs text-gray-600 dark:text-gray-400">Cierra esta
-                  opción sin
-                  descargar nada.</p>
               </div>
             </div>
+
           </div>
         </div>
       </aside>
