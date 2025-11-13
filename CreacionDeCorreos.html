@@ -4,30 +4,11 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>VoiceCompose - Componer Correo</title>
-  <link href="https://fonts.googleapis.com" rel="preconnect" />
-  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <title>VozDoc - Compositor de Correos por Voz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <style>
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border-width: 0;
-    }
-  </style>
-  <script id="tailwind-config">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
     tailwind.config = {
       darkMode: "class",
       theme: {
@@ -36,171 +17,643 @@
             "primary": "#005A9C",
             "background-light": "#f6f7f8",
             "background-dark": "#101922",
-            "danger": "#DC3545",
-            "success": "#28A745",
-            "warning": "#ffc107",
-            "neutral-inactive": "#6C757D"
+            "primary-accent": "#50E3C2",
+            "text-light": "#333333",
+            "text-dark": "#E0E0E0",
+            "surface-light": "#FFFFFF",
+            "surface-dark": "#1A2836",
+            "border-light": "#E0E0E0",
+            "border-dark": "#2C3A47",
+            "danger": "#DC3545"
           },
           fontFamily: {
             "display": ["Inter", "sans-serif"]
           },
-          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-        },
-      },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          }
+        }
+      }
     }
   </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    #mail-body-wrapper {
+      position: relative;
+      transition: border-color 0.25s ease, box-shadow 0.4s ease, background-color 0.25s ease;
+    }
+
+    #mail-body-wrapper.listening-active {
+      border-color: rgba(236, 72, 153, 0.45);
+      box-shadow: 0 0 0 6px rgba(236, 72, 153, 0.18), 0 0 32px rgba(236, 72, 153, 0.28);
+      animation: dictationAura 1.6s ease-in-out infinite;
+    }
+
+    @keyframes dictationAura {
+      0% {
+        box-shadow: 0 0 0 6px rgba(236, 72, 153, 0.18), 0 0 28px rgba(236, 72, 153, 0.22);
+      }
+
+      50% {
+        box-shadow: 0 0 0 16px rgba(236, 72, 153, 0.14), 0 0 44px rgba(236, 72, 153, 0.32);
+      }
+
+      100% {
+        box-shadow: 0 0 0 6px rgba(236, 72, 153, 0.18), 0 0 28px rgba(236, 72, 153, 0.22);
+      }
+    }
+
+    .voice-chip {
+      transition: transform 0.25s ease, box-shadow 0.35s ease, border-color 0.25s ease;
+    }
+
+    .voice-chip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    }
+
+    #voice-sidebar {
+      position: relative;
+    }
+
+    @media (min-width: 1024px) {
+      #voice-sidebar {
+        min-width: 320px;
+      }
+    }
+
+    .tab-button {
+      padding: 8px 8px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1.5px;
+      color: #6b7280;
+      transition: all 0.15s ease-in-out;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex-shrink: 1;
+    }
+
+    .tab-button:hover {
+      color: #333333;
+    }
+
+    .tab-button.active {
+      border-color: #005A9C;
+      color: #005A9C;
+    }
+
+    .dark .tab-button {
+      color: #9ca3af;
+    }
+
+    .dark .tab-button:hover {
+      color: #E0E0E0;
+    }
+
+    .dark .tab-button.active {
+      border-color: #005A9C;
+      color: #E0E0E0;
+    }
+  </style>
 </head>
 
-<body class="font-display">
-  <div
-    class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
-    <div class="layout-container flex h-full grow flex-col">
-      <header
-        class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 px-6 md:px-10 py-3">
-        <div class="flex items-center gap-4 text-slate-900 dark:text-white">
-          <div class="size-6 text-primary">
-            <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M13.8261 17.4264C16.7203 18.1174 20.2244 18.5217 24 18.5217C27.7756 18.5217 31.2797 18.1174 34.1739 17.4264C36.9144 16.7722 39.9967 15.2331 41.3563 14.1648L24.8486 40.6391C24.4571 41.267 23.5429 41.267 23.1514 40.6391L6.64374 14.1648C8.00331 15.2331 11.0856 16.7722 13.8261 17.4264Z"
-                fill="currentColor"></path>
-              <path clip-rule="evenodd"
-                d="M39.998 12.236C39.9944 12.2537 39.9875 12.2845 39.9748 12.3294C39.9436 12.4399 39.8949 12.5741 39.8346 12.7175C39.8168 12.7597 39.7989 12.8007 39.7813 12.8398C38.5103 13.7113 35.9788 14.9393 33.7095 15.4811C30.9875 16.131 27.6413 16.5217 24 16.5217C20.3587 16.5217 17.0125 16.131 14.2905 15.4811C12.0012 14.9346 9.44505 13.6897 8.18538 12.8168C8.17384 12.7925 8.16216 12.767 8.15052 12.7408C8.09919 12.6249 8.05721 12.5114 8.02977 12.411C8.00356 12.3152 8.00039 12.2667 8.00004 12.2612C8.00004 12.261 8 12.2607 8.00004 12.2612C8.00004 12.2359 8.0104 11.9233 8.68485 11.3686C9.34546 10.8254 10.4222 10.2469 11.9291 9.72276C14.9242 8.68098 19.1919 8 24 8C28.8081 8 33.0758 8.68098 36.0709 9.72276C37.5778 10.2469 38.6545 10.8254 39.3151 11.3686C39.9006 11.8501 39.9857 12.1489 39.998 12.236ZM4.95178 15.2312L21.4543 41.6973C22.6288 43.5809 25.3712 43.5809 26.5457 41.6973L43.0534 15.223C43.0709 15.1948 43.0878 15.1662 43.104 15.1371L41.3563 14.1648C43.104 15.1371 43.1038 15.1374 43.104 15.1371L43.1051 15.135L43.1065 15.1325L43.1101 15.1261L43.1199 15.1082C43.1276 15.094 43.1377 15.0754 43.1497 15.0527C43.1738 15.0075 43.2062 14.9455 43.244 14.8701C43.319 14.7208 43.4196 14.511 43.5217 14.2683C43.6901 13.8679 44 13.0689 44 12.2609C44 10.5573 43.003 9.22254 41.8558 8.2791C40.6947 7.32427 39.1354 6.55361 37.385 5.94477C33.8654 4.72057 29.133 4 24 4C18.867 4 14.1346 4.72057 10.615 5.94478C8.86463 6.55361 7.30529 7.32428 6.14419 8.27911C4.99695 9.22255 3.99999 10.5573 3.99999 12.2609C3.99999 13.1275 4.29264 13.9078 4.49321 14.3607C4.60375 14.6102 4.71348 14.8196 4.79687 14.9689C4.83898 15.0444 4.87547 15.1065 4.9035 15.1529C4.91754 15.1762 4.92954 15.1957 4.93916 15.2111L4.94662 15.223L4.95178 15.2312ZM35.9868 18.996L24 38.22L12.0131 18.996C12.4661 19.1391 12.9179 19.2658 13.3617 19.3718C16.4281 20.1039 20.0901 20.5217 24 20.5217C27.9099 20.5217 31.5719 20.1039 34.6383 19.3718C35.082 19.2658 35.5339 19.1391 35.9868 18.996Z"
-                fill="currentColor" fill-rule="evenodd"></path>
-            </svg>
-          </div>
-          <h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">VoiceCompose
-          </h2>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+  <div class="flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
+
+    <header
+      class="flex w-full items-center justify-between border-b border-solid border-border-light bg-background-light px-6 py-3 md:px-10 dark:border-border-dark dark:bg-background-dark">
+      <div class="flex items-center gap-4">
+        <svg class="h-6 w-6 text-primary" fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path clip-rule="evenodd"
+            d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z"
+            fill-rule="evenodd"></path>
+        </svg>
+        <div>
+          <h1 class="text-lg font-bold text-gray-900 dark:text-gray-100">VozDoc</h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Compositor de correos por voz</p>
         </div>
-        <div class="flex flex-1 justify-end items-center gap-4">
-          <button aria-label="Ayuda"
-            class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
-            <span class="material-symbols-outlined">help</span>
-          </button>
-          <button aria-label="Configuración"
-            class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
-            <span class="material-symbols-outlined">settings</span>
-          </button>
-          <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Avatar de usuario"
-            style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCm-Dq-u4wtDCndVnk147L2XWtVWfc82cz5kF17tIm23fVSs9KdywGUvT25ppfjX6CQK1hsZ-8_5IhhtwTNvrqn7Oete1CfwBtZyHYNz3fFqOAPyHt4Pk4kDxYaq9Gvq1Vc3k-PWIqLrn4RjUk6XBY8wW355gVq7o2o3Au6AhM9SLy4aPYbW5soM0Pb0K5Ii4d4W5nu8xzFavp3fw4tQSSw0kBqmjY1Lk99nSW6nE1vx0vNdKf0WHoDyKoOn4QxjXN_pON3Y2BIKmOk");'>
-          </div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div id="save-status" class="text-sm font-medium text-gray-500 dark:text-gray-300"></div>
+
+        <button aria-label="Configuración"
+          class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg bg-slate-100 text-slate-900 transition-colors hover:bg-slate-200 dark:bg-surface-dark dark:text-white dark:hover:bg-border-dark">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+
+        <div class="h-10 w-10 rounded-full bg-cover bg-center"
+          style="background-image: url('https://i.pravatar.cc/40');" data-alt="Avatar de usuario">
         </div>
-      </header>
-      <main class="flex flex-1 justify-center py-5 px-4 sm:px-6 lg:px-8">
-        <div class="layout-content-container flex flex-col w-full max-w-5xl flex-1">
-          <div class="flex flex-wrap justify-between items-center gap-3 p-4">
-            <p class="text-slate-900 dark:text-white tracking-tight text-[32px] font-bold leading-tight min-w-72">
-              Componer nuevo correo</p>
-          </div>
-          <div class="flex flex-col lg:flex-row gap-8 p-4">
-            <div class="flex-1 flex flex-col gap-6">
-              <div class="flex flex-col sm:flex-row gap-4">
-                <div class="flex flex-col min-w-40 flex-1">
-                  <label for="email-to"
-                    class="text-slate-900 dark:text-slate-200 text-base font-medium leading-normal pb-2">Para:</label>
-                  <input id="email-to"
-                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary h-14 placeholder:text-slate-500 dark:placeholder:text-slate-400 p-[15px] text-base font-normal leading-normal"
-                    placeholder="Diga 'Añadir destinatario' seguido de un email" value="" />
+      </div>
+    </header>
+
+    <div class="flex w-full flex-1 flex-col gap-8 px-6 py-8 lg:flex-row lg:items-stretch lg:gap-10 lg:px-10">
+      <main class="flex flex-1 flex-col">
+        <section class="flex-1 overflow-y-auto">
+          <div class="mx-auto flex h-full w-full max-w-3xl flex-col gap-8">
+
+            <div id="help-box"
+              class="relative flex-shrink-0 rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-6 text-sm text-primary dark:border-primary/40 dark:bg-primary/10">
+              <button id="help-box-close" type="button" aria-label="Ocultar ayuda"
+                class="absolute right-3 top-3 p-1 text-primary/60 transition-colors hover:text-primary">
+                <span class="material-symbols-outlined text-xl">close</span>
+              </button>
+              <h2 class="text-base font-semibold tracking-tight text-primary">¿Cómo funciona?</h2>
+              <p class="mt-2 text-primary/80">
+                El panel lateral te muestra los comandos disponibles para redactar y gestionar tu correo con la voz.
+                Pronúncialos tal como aparecen para que VozDoc ejecute la acción.
+              </p>
+              <p class="mt-2 text-primary/80">
+                Di <strong>"Ocultar ayuda"</strong> o <strong>"Entendido"</strong> para cerrar este panel.
+              </p>
+            </div>
+
+            <div
+              class="flex flex-1 flex-col rounded-3xl border border-border-light bg-surface-light p-8 shadow-sm dark:border-border-dark dark:bg-surface-dark">
+              <div class="flex flex-1 flex-col space-y-6">
+                <div class="space-y-2">
+                  <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Componer nuevo correo
+                  </h2>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Dicta los datos principales y VozDoc se encarga
+                    del resto.</p>
                 </div>
-                <div class="flex items-end gap-2">
-                  <button class="text-primary font-semibold text-sm h-14">Cc</button>
-                  <button class="text-primary font-semibold text-sm h-14">Cco</button>
+
+                <div class="grid gap-5">
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="email-to">Para</label>
+                    <input id="email-to" type="email" autocomplete="off"
+                      class="w-full rounded-xl border border-border-light bg-white px-4 py-3 text-base text-gray-900 shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border-dark dark:bg-surface-dark dark:text-text-dark"
+                      placeholder="Di 'Añadir destinatario'..." />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                      for="email-subject">Asunto</label>
+                    <input id="email-subject" type="text" autocomplete="off"
+                      class="w-full rounded-xl border border-border-light bg-white px-4 py-3 text-base text-gray-900 shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border-dark dark:bg-surface-dark dark:text-text-dark"
+                      placeholder="Di 'Añadir asunto'..." />
+                  </div>
+
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="email-body">Mensaje</label>
+                    <div id="mail-body-wrapper"
+                      class="rounded-2xl border-2 border-transparent bg-white transition dark:bg-surface-dark">
+                      <textarea id="email-body" rows="12"
+                        class="w-full resize-none rounded-2xl bg-transparent px-5 py-5 text-base leading-relaxed text-text-light focus:outline-none dark:text-text-dark"
+                        placeholder="Di 'Comenzar redacción' para dictar el cuerpo del correo..."></textarea>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" id="attachment-trigger"
+                      class="inline-flex items-center gap-2 rounded-xl border border-border-light bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-primary hover:text-primary dark:border-border-dark dark:bg-surface-dark dark:text-gray-300">
+                      <span class="material-symbols-outlined text-base">attach_file_add</span>
+                      <span>Adjuntar archivo</span>
+                    </button>
+                    <input id="attachment-input" type="file" class="hidden" aria-hidden="true" tabindex="-1" />
+                    <button type="button"
+                      class="inline-flex items-center gap-2 rounded-xl border border-border-light bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-primary hover:text-primary dark:border-border-dark dark:bg-surface-dark dark:text-gray-300">
+                      <span class="material-symbols-outlined text-base">event</span>
+                      <span>Proponer reunión</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div class="flex flex-col min-w-40 flex-1">
-                <label for="email-subject"
-                  class="text-slate-900 dark:text-slate-200 text-base font-medium leading-normal pb-2">Asunto:</label>
-                <input id="email-subject"
-                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary h-14 placeholder:text-slate-500 dark:placeholder:text-slate-400 p-[15px] text-base font-normal leading-normal"
-                  placeholder="Diga 'Añadir asunto' seguido del asunto" value="" />
-              </div>
-              <div class="flex flex-col min-w-40 flex-1">
-                <label for="email-body" class="sr-only">Cuerpo del correo</label>
-                <textarea id="email-body"
-                  class="form-input flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-background-light dark:bg-background-dark focus:border-primary min-h-72 placeholder:text-slate-500 dark:placeholder:text-slate-400 p-[15px] text-base font-normal leading-normal"
-                  placeholder="Di 'Comenzar redacción' para dictar el cuerpo..."></textarea>
-              </div>
-              <div
-                class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-                <div class="flex gap-2">
-                  <button aria-label="Enviar correo"
-                    class="flex items-center justify-center gap-2 h-11 px-4 rounded-lg bg-primary text-white font-semibold text-sm">
-                    <span class="material-symbols-outlined">send</span>
-                    <span>Enviar</span>
-                  </button>
-                  <button aria-label="Guardar borrador"
-                    class="flex items-center justify-center gap-2 h-11 px-4 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white font-semibold text-sm">
-                    <span class="material-symbols-outlined">draft</span>
-                    <span>Guardar Borrador</span>
-                  </button>
-                  <button aria-label="Adjuntar archivo"
-                    class="flex items-center justify-center gap-2 h-11 px-4 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white font-semibold text-sm">
-                    <span class="material-symbols-outlined">attach_file</span>
-                    <span>Adjuntar</span>
+
+                <div
+                  class="flex flex-col gap-3 border-t border-border-light pt-6 dark:border-border-dark sm:flex-row sm:items-center sm:justify-between">
+                  <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" aria-label="Enviar correo"
+                      class="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90">
+                      <span class="material-symbols-outlined text-base">send</span>
+                      <span>Enviar correo</span>
+                    </button>
+                    <button type="button" aria-label="Guardar borrador"
+                      class="inline-flex items-center gap-2 rounded-xl bg-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-300 dark:bg-border-dark dark:text-text-dark dark:hover:bg-surface-dark/80">
+                      <span class="material-symbols-outlined text-base">draft</span>
+                      <span>Guardar borrador</span>
+                    </button>
+                  </div>
+                  <button type="button" aria-label="Descartar correo"
+                    class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-slate-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-surface-dark/70">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                    <span>Descartar</span>
                   </button>
                 </div>
-                <button aria-label="Descartar correo"
-                  class="flex items-center justify-center h-11 px-4 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-sm">
-                  <span class="material-symbols-outlined">delete</span>
-                </button>
               </div>
             </div>
-            <aside class="w-full lg:w-72 flex flex-col gap-6">
-              <div class="p-6 rounded-xl bg-slate-100 dark:bg-slate-800 flex flex-col items-center text-center">
-                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 uppercase">Estado de Voz</p>
-                <button aria-label="Activar dictado"
-                  class="w-24 h-24 rounded-full flex items-center justify-center bg-primary/10 text-primary mb-3">
-                  <span class="material-symbols-outlined !text-5xl">mic</span>
-                </button>
-                <p class="status-text text-lg font-bold text-primary" aria-live="polite" aria-atomic="true">
-                  Escuchando...</p>
-                <p class="status-subtext text-sm text-slate-600 dark:text-slate-300">Di "comenzar redacción" para
-                  dictar.</p>
-              </div>
-              <div class="p-6 rounded-xl bg-slate-100 dark:bg-slate-800">
-                <div class="flex flex-col gap-4 text-sm">
-                  <h1 class="text-lg font-bold text-slate-900 dark:text-white">Comandos de Voz</h1>
-                  <div>
-                    <h2 class="font-bold text-primary">Acciones de Correo</h2>
-                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
-                      <li><b>"Añadir destinatario [email]"</b></li>
-                      <li><b>"Añadir asunto [texto]"</b></li>
-                      <li><b>"Borrar destinatario"</b></li>
-                      <li><b>"Borrar asunto"</b></li>
-                      <li><b>"Enviar correo"</b></li>
-                      <li><b>"Guardar borrador"</b></li>
-                      <li><b>"Leer correo"</b></li>
-                      <li><b>"Volver al inicio"</b></li>
-                    </ul>
+
+          </div>
+        </section>
+      </main>
+
+      <aside id="voice-sidebar"
+        class="flex w-full flex-col rounded-2xl border border-border-light bg-white/80 shadow-sm backdrop-blur dark:border-border-dark dark:bg-surface-dark/90 lg:w-[380px]">
+        <div class="sticky top-6 flex h-full flex-col gap-4 px-6 py-6">
+
+          <div class="flex flex-col items-center gap-4 text-center">
+            <div class="relative">
+              <button id="dictation-toggle" aria-label="Activar dictado"
+                class="flex h-20 w-20 items-center justify-center rounded-full bg-slate-200 text-primary shadow-sm transition-colors duration-200 ease-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/40">
+                <span class="material-symbols-outlined text-4xl">mic</span>
+              </button>
+              <span id="sidebar-status-badge"
+                class="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-border-light bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-600 shadow-sm dark:border-border-dark dark:bg-surface-dark dark:text-gray-300">Inactivo</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <p class="status-text text-base font-semibold text-gray-900 dark:text-gray-100">No estoy escuchando</p>
+              <p class="status-subtext text-sm text-gray-600 dark:text-gray-400">Di "Comenzar redacción"</p>
+            </div>
+          </div>
+
+          <div class="min-h-0 flex-1 space-y-4 overflow-y-auto">
+
+            <div id="sidebar-state-inactive" class="space-y-4">
+              <section class="space-y-3">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones
+                  principales</h2>
+                <div class="space-y-2">
+
+                  <div data-command-chip data-command-label="Comenzar redacción"
+                    data-command-trigger="comenzar redacción|activar dictado|iniciar dictado"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Comenzar redacción"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Comenzar redacción" aria-expanded="false"
+                        aria-label="Mostrar descripción de Comenzar redacción">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Activa el
+                      dictado y comienza a escribir el correo.</p>
                   </div>
-                  <div>
-                    <h2 class="font-bold text-primary">Comandos de Dictado</h2>
-                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
-                      <li><b>"Comenzar redacción"</b></li>
-                      <li><b>"Terminar redacción"</b></li>
-                    </ul>
+
+                  <div data-command-chip data-command-label="Añadir destinatario"
+                    data-command-trigger="añadir destinatario|modificar destinatario"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Añadir destinatario"
+                      </h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Añadir destinatario" aria-expanded="false"
+                        aria-label="Mostrar descripción de Añadir destinatario">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Activa la
+                      escucha para el campo 'Para'.</p>
                   </div>
-                  <div>
-                    <h2 class="font-bold text-primary">Puntuación (en dictado)</h2>
-                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
-                      <li><b>"Coma"</b> (Inserta ,)</li>
-                      <li><b>"Punto"</b> (Inserta .)</li>
-                      <li><b>"Punto y aparte"</b></li>
-                      <li><b>"Nuevo párrafo"</b></li>
-                      <li><b>"Nueva línea"</b></li>
-                    </ul>
+
+                  <div data-command-chip data-command-label="Borrar destinatario"
+                    data-command-trigger="borrar destinatario|eliminar destinatario"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar destinatario"
+                      </h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Borrar destinatario" aria-expanded="false"
+                        aria-label="Mostrar descripción de Borrar destinatario">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Limpia el
+                      campo 'Para'.</p>
                   </div>
-                  <div>
-                    <h2 class="font-bold text-primary">Edición (en dictado)</h2>
-                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
-                      <li><b>"Borrar última palabra"</b></li>
-                    </ul>
+
+                  <div data-command-chip data-command-label="Añadir asunto"
+                    data-command-trigger="añadir asunto|modificar asunto"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Añadir asunto"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Añadir asunto" aria-expanded="false"
+                        aria-label="Mostrar descripción de Añadir asunto">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Activa la
+                      escucha para el campo 'Asunto'.</p>
                   </div>
+
+                  <div data-command-chip data-command-label="Borrar asunto"
+                    data-command-trigger="borrar asunto|eliminar asunto"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar asunto"
+                      </h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Borrar asunto" aria-expanded="false"
+                        aria-label="Mostrar descripción de Borrar asunto">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Limpia el
+                      campo 'Asunto'.</p>
+                  </div>
+
+                  <div data-command-chip data-command-label="Adjuntar archivo"
+                    data-command-trigger="adjuntar archivo|agregar archivo"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Adjuntar archivo"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Adjuntar archivo" aria-expanded="false"
+                        aria-label="Mostrar descripción de Adjuntar archivo">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Abre el
+                      selector de archivos para adjuntar documentos al correo.</p>
+                  </div>
+
+                  <div data-command-chip data-command-label="Enviar correo" data-command-trigger="enviar correo"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Enviar correo"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Enviar correo" aria-expanded="false"
+                        aria-label="Mostrar descripción de Enviar correo">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Confirma
+                      el envío del mensaje actual.</p>
+                  </div>
+
+                  <div data-command-chip data-command-label="Guardar borrador" data-command-trigger="guardar borrador"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Guardar borrador"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Guardar borrador" aria-expanded="false"
+                        aria-label="Mostrar descripción de Guardar borrador">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Guarda tu
+                      trabajo sin enviarlo todavía.</p>
+                  </div>
+
+                  <div data-command-chip data-command-label="Descartar correo"
+                    data-command-trigger="descartar correo|eliminar correo|borrar correo"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Descartar correo"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Descartar correo" aria-expanded="false"
+                        aria-label="Mostrar descripción de Descartar correo">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Limpia
+                      todos los campos del formulario.</p>
+                  </div>
+
+                  <div data-command-chip data-command-label="Volver al inicio" data-command-trigger="volver al inicio"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Volver al inicio"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Volver al inicio" aria-expanded="false"
+                        aria-label="Mostrar descripción de Volver al inicio">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Regresa
+                      al panel principal del sistema.</p>
+                  </div>
+
+                  <div data-command-chip data-command-label="Ocultar ayuda"
+                    data-command-trigger="ocultar ayuda|entendido|quitar ayuda|cerrar ayuda"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Ocultar ayuda"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Ocultar ayuda" aria-expanded="false"
+                        aria-label="Mostrar descripción de Ocultar ayuda">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Cierra la
+                      tarjeta de consejos inicial.</p>
+                  </div>
+
+                </div>
+              </section>
+
+              <div class="border-t border-border-light pt-4 dark:border-border-dark">
+                <div data-command-chip data-command-label="Mostrar ayuda" data-command-trigger="mostrar ayuda|ver ayuda"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Mostrar ayuda"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                      data-command-toggle data-command-label="Mostrar ayuda" aria-expanded="false"
+                      aria-label="Mostrar descripción de Mostrar ayuda">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Vuelve a
+                    abrir la sección de consejos para recordar los comandos básicos.</p>
                 </div>
               </div>
-            </aside>
+            </div>
+
+            <div id="sidebar-state-dictating" class="hidden space-y-4">
+
+              <div class="flex border-b border-border-light dark:border-border-dark">
+                <button id="tab-btn-punctuation" data-tab-target="tab-panel-punctuation"
+                  class="tab-button active flex-1 text-center" aria-selected="true">Puntuación</button>
+                <button id="tab-btn-formatting" data-tab-target="tab-panel-formatting"
+                  class="tab-button flex-1 text-center" aria-selected="false">Formato</button>
+                <button id="tab-btn-editing" data-tab-target="tab-panel-editing" class="tab-button flex-1 text-center"
+                  aria-selected="false">Corrección</button>
+                <button id="tab-btn-actions" data-tab-target="tab-panel-actions" class="tab-button flex-1 text-center"
+                  aria-selected="false">Acciones</button>
+              </div>
+
+              <div id="tab-panel-punctuation" class="space-y-2 tab-panel">
+                <div data-command-chip data-command-label="Inserta coma" data-command-trigger="coma|inserta coma"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Coma"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Inserta coma" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inserta una
+                    coma en la posición actual.</p>
+                </div>
+
+                <div data-command-chip data-command-label="Inserta punto" data-command-trigger="punto|inserta punto"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Punto"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Inserta punto" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Cierra la
+                    oración que estás dictando.</p>
+                </div>
+
+                <div data-command-chip data-command-label="Nuevo párrafo"
+                  data-command-trigger="nuevo párrafo|punto y aparte"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Nuevo párrafo"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Nuevo párrafo" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inserta una
+                    línea en blanco para cambiar de idea.</p>
+                </div>
+
+                <div data-command-chip data-command-label="Nueva línea"
+                  data-command-trigger="nueva línea|salto de línea"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Nueva línea"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Nueva línea" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Salta a la
+                    línea siguiente sin separar párrafos.</p>
+                </div>
+              </div>
+
+              <div id="tab-panel-formatting" class="hidden space-y-2 tab-panel">
+                <div data-command-chip data-command-label="Negritas" data-command-trigger="activar negritas|negritas"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Activar negritas"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Negritas" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Resalta la
+                    próxima frase que dictes.</p>
+                </div>
+
+                <div data-command-chip data-command-label="Listas" data-command-trigger="crear lista|nueva viñeta"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark-text-gray-100">"Crear lista"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Listas" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Comienza
+                    una lista con viñetas para detallar ideas.</p>
+                </div>
+              </div>
+
+              <div id="tab-panel-editing" class="hidden space-y-2 tab-panel">
+                <div data-command-chip data-command-label="Borrar última palabra"
+                  data-command-trigger="borrar última palabra"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar última palabra"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Borrar última palabra" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Corrige
+                    rápidamente dictados erróneos.</p>
+                </div>
+
+                <div data-command-chip data-command-label="Reemplazar frase" data-command-trigger="reemplazar frase"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Reemplazar frase"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Reemplazar frase" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Sustituye
+                    la última oración que dictaste.</p>
+                </div>
+              </div>
+
+              <div id="tab-panel-actions" class="hidden space-y-2 tab-panel">
+                <div data-command-chip data-command-label="Terminar redacción"
+                  data-command-trigger="terminar redacción|detener dictado"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Terminar redacción"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Terminar redacción" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Detiene el
+                    dictado y vuelve al modo de comandos.</p>
+                </div>
+
+                <div data-command-chip data-command-label="Reanudar dictado"
+                  data-command-trigger="reanudar dictado|continuar dictado"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Reanudar dictado"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Reanudar dictado" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Vuelve al
+                    modo dictado para seguir escribiendo.</p>
+                </div>
+              </div>
+
+            </div>
           </div>
+
         </div>
-      </main>
+      </aside>
+
     </div>
   </div>
   <script type="module" src="assets/js/pages/mailComposerPage.js"></script>

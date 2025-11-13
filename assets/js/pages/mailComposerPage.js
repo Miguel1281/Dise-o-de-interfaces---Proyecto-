@@ -2,19 +2,50 @@ import { createSpeechRecognition, isSpeechRecognitionSupported } from '../core/s
 import { RecognitionModeManager } from '../core/recognitionModeManager.js';
 import { SpeechSynthesisService } from '../core/speechSynthesisService.js';
 import { FeedbackService } from '../core/feedbackService.js';
-import { getElement, setTextContent, setAriaLabel } from '../utils/dom.js';
+import { getElement, getOptionalElement, setTextContent, setAriaLabel } from '../utils/dom.js';
 
 class MailComposerUI {
     constructor(feedbackService) {
         this.feedback = feedbackService;
+        this.sidebarRoot = getElement('#voice-sidebar');
         this.emailBody = getElement('#email-body');
+        this.emailBodyWrapper = getOptionalElement('#mail-body-wrapper');
         this.emailTo = getElement('#email-to');
         this.emailSubject = getElement('#email-subject');
-        this.micButton = getElement('button[aria-label="Activar dictado"]');
-        this.micIcon = this.micButton.querySelector('span');
-        this.statusContainer = this.micButton.closest('.p-6');
-        this.statusText = getElement('.status-text', this.statusContainer);
-        this.statusSubtext = getElement('.status-subtext', this.statusContainer);
+        this.emailCc = getOptionalElement('#email-cc');
+        this.emailBcc = getOptionalElement('#email-bcc');
+        this.attachmentTrigger = getOptionalElement('#attachment-trigger');
+        this.attachmentInput = getOptionalElement('#attachment-input');
+        this.micButton = getElement('#dictation-toggle');
+        this.micIcon = this.micButton.querySelector('.material-symbols-outlined') || this.micButton.querySelector('span');
+        this.statusBadge = getOptionalElement('#sidebar-status-badge');
+        this.statusText = getElement('.status-text', this.sidebarRoot);
+        this.statusSubtext = getElement('.status-subtext', this.sidebarRoot);
+        this.helpBox = getOptionalElement('#help-box');
+        this.helpBoxCloseButton = getOptionalElement('#help-box-close');
+        this.tabButtons = this.sidebarRoot.querySelectorAll('#sidebar-state-dictating .tab-button');
+        this.tabPanels = this.sidebarRoot.querySelectorAll('#sidebar-state-dictating .tab-panel');
+        this.commandChips = Array.from(this.sidebarRoot.querySelectorAll('[data-command-chip]'));
+        this.commandHighlightClasses = ['ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-surface-dark'];
+        this.helpStorageKey = 'vozdoc_mail_help_hidden';
+
+        this.sendButton = getElement('button[aria-label="Enviar correo"]');
+        this.saveButton = getElement('button[aria-label="Guardar borrador"]');
+        this.storageKey = 'vozdoc_mail_drafts';
+        this.currentDraftId = null;
+
+        try {
+            this.storage = typeof window !== 'undefined' ? window.localStorage : null;
+        } catch (error) {
+            this.storage = null;
+        }
+
+        this.initHelpBox();
+        this.initTabs();
+        this.initCommandChips();
+        this.initAttachments();
+        this.initSendButton();
+        this.initSaveButton();
     }
 
     notifySuccess(message) {
@@ -47,28 +78,56 @@ class MailComposerUI {
         this.micButton.disabled = true;
         setAriaLabel(this.micButton, 'Reconocimiento no disponible');
         this.notifyError('Reconocimiento de voz no disponible');
+        this.updateBadge('Error', 'error');
+        this.setDictationAura(false);
     }
 
     showCommandMode() {
-        setTextContent(this.statusText, 'Escuchando...');
-        setTextContent(this.statusSubtext, 'Di "comenzar redacción" para dictar.');
-        this.micButton.classList.remove('text-danger', 'bg-danger/10');
-        this.micButton.classList.add('text-primary', 'bg-primary/10');
-        this.micIcon.classList.remove('animate-pulse');
+        setTextContent(this.statusText, 'No estoy escuchando');
+        setTextContent(this.statusSubtext, 'Di "Comenzar redacción" o un comando');
+        this.updateMicVisualState('command');
         setAriaLabel(this.micButton, 'Activar dictado');
+        this.updateBadge('Comandos', 'command');
+        this.setDictationAura(false);
     }
 
     showDictationMode() {
-        setTextContent(this.statusText, 'Dictando...');
-        setTextContent(this.statusSubtext, 'Di "terminar redacción" para parar.');
-        this.micButton.classList.add('text-danger', 'bg-danger/10');
-        this.micButton.classList.remove('text-primary', 'bg-primary/10');
-        this.micIcon.classList.add('animate-pulse');
+        setTextContent(this.statusText, 'Dictando cuerpo del correo...');
+        setTextContent(this.statusSubtext, 'Di "Terminar redacción" para parar');
+        this.updateMicVisualState('dictation');
         setAriaLabel(this.micButton, 'Detener dictado');
+        this.updateBadge('Dictando', 'dictation');
+        this.setDictationAura(true);
+        this.emailBody.focus();
     }
+
+    showDictatingRecipient() {
+        setTextContent(this.statusText, 'Dictando Destinatario...');
+        setTextContent(this.statusSubtext, 'Di el correo electrónico ahora');
+        this.updateMicVisualState('dictation');
+        setAriaLabel(this.micButton, 'Dictando destinatario');
+        this.updateBadge('Dictando', 'dictation');
+        this.setDictationAura(false);
+        this.emailTo.focus();
+    }
+
+    showDictatingSubject() {
+        setTextContent(this.statusText, 'Dictando Asunto...');
+        setTextContent(this.statusSubtext, 'Di el asunto del correo ahora');
+        this.updateMicVisualState('dictation');
+        setAriaLabel(this.micButton, 'Dictando asunto');
+        this.updateBadge('Dictando', 'dictation');
+        this.setDictationAura(false);
+        this.emailSubject.focus();
+    }
+
 
     setStatusText(message) {
         setTextContent(this.statusText, message);
+    }
+
+    setStatusSubtext(message) {
+        setTextContent(this.statusSubtext, message);
     }
 
     setRecipient(email) {
@@ -77,6 +136,18 @@ class MailComposerUI {
 
     setSubject(subject) {
         this.emailSubject.value = subject;
+    }
+
+    setCc(value) {
+        if (this.emailCc) {
+            this.emailCc.value = value || '';
+        }
+    }
+
+    setBcc(value) {
+        if (this.emailBcc) {
+            this.emailBcc.value = value || '';
+        }
     }
 
     clearRecipient() {
@@ -101,7 +172,405 @@ class MailComposerUI {
     }
 
     captureBodyContent() {
-        return this.emailBody.value.trim();
+        // [CORREGIDO] Quitado el .trim() para capturar espacios si el usuario los puso
+        return this.emailBody.value;
+    }
+
+    clearForm() {
+        this.setRecipient('');
+        this.setSubject('');
+        this.setCc('');
+        this.setBcc('');
+        this.commitBodyContent('');
+        if (this.attachmentInput) {
+            try {
+                this.attachmentInput.value = '';
+            } catch (e) {
+                console.warn("No se pudo limpiar el input de archivo.", e);
+            }
+        }
+        this.currentDraftId = null;
+    }
+
+    initAttachments() {
+        if (this.attachmentTrigger && this.attachmentInput) {
+            this.attachmentTrigger.addEventListener('click', () => {
+                this.openAttachmentPicker({ fromCommand: false });
+            });
+        }
+
+        if (this.attachmentInput) {
+            this.attachmentInput.addEventListener('change', () => {
+                const { files } = this.attachmentInput;
+                if (files && files.length > 0) {
+                    const fileName = files[0].name;
+                    this.setStatusText('Archivo adjuntado');
+                    this.setStatusSubtext(fileName);
+                    this.notifySuccess(`Adjuntado: ${fileName}`);
+                } else {
+                    this.setStatusText('No se adjuntó ningún archivo');
+                    this.setStatusSubtext('Puedes intentarlo nuevamente');
+                    this.notifyInfo('No se seleccionó archivo');
+                }
+            });
+        }
+    }
+
+    openAttachmentPicker({ fromCommand = true } = {}) {
+        const picker = this.attachmentInput || this.attachmentTrigger;
+        if (!picker || typeof picker.click !== 'function') {
+            this.setStatusText('No se encontró el selector de archivos');
+            this.setStatusSubtext('Adjunta el archivo manualmente');
+            this.notifyError('No se pudo abrir el explorador de archivos');
+            return;
+        }
+
+        try {
+            picker.click();
+            if (fromCommand) {
+                this.setStatusText('Selecciona el archivo a adjuntar');
+                this.setStatusSubtext('Se abrió el explorador de archivos');
+                this.notifyInfo('Elige el archivo que necesitas adjuntar');
+            }
+        } catch (error) {
+            this.setStatusText('No se pudo abrir el explorador');
+            this.setStatusSubtext('Adjunta el archivo manualmente');
+            this.notifyError('No se pudo abrir el explorador de archivos');
+        }
+    }
+
+    toggleHelpBox(show, { persist = true, notify = false } = {}) {
+        if (!this.helpBox) {
+            return;
+        }
+
+        const shouldShow = show === true || (show !== false && this.helpBox.classList.contains('hidden'));
+
+        if (shouldShow) {
+            this.helpBox.classList.remove('hidden');
+            if (persist && this.storage) {
+                this.storage.removeItem(this.helpStorageKey);
+            }
+            if (notify) {
+                this.notifyInfo('Mostrando panel de ayuda');
+            }
+            return;
+        }
+
+        this.helpBox.classList.add('hidden');
+        if (persist && this.storage) {
+            this.storage.setItem(this.helpStorageKey, 'true');
+        }
+        if (notify) {
+            this.notifySuccess('Panel de ayuda oculto');
+        }
+    }
+
+    initHelpBox() {
+        if (!this.helpBox) {
+            return;
+        }
+
+        if (this.storage && this.storage.getItem(this.helpStorageKey) === 'true') {
+            this.helpBox.classList.add('hidden');
+        }
+
+        if (this.helpBoxCloseButton) {
+            this.helpBoxCloseButton.addEventListener('click', () => {
+                this.toggleHelpBox(false, { notify: true });
+            });
+        }
+    }
+
+    initTabs() {
+        if (!this.tabButtons.length) {
+            return;
+        }
+
+        const initialButton = Array.from(this.tabButtons).find((button) => button.classList.contains('active')) || this.tabButtons[0];
+
+        if (initialButton) {
+            const target = initialButton.dataset.tabTarget;
+            if (target) {
+                this.activateTab(target);
+            }
+        }
+
+        this.tabButtons.forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                const target = button.dataset.tabTarget;
+                if (target) {
+                    this.activateTab(target, { notify: true });
+                }
+            });
+        });
+    }
+
+    activateTab(targetId, { notify = false } = {}) {
+        if (!targetId) {
+            return;
+        }
+
+        let tabLabel = '';
+
+        this.tabButtons.forEach((button) => {
+            const isActive = button.dataset.tabTarget === targetId;
+            button.classList.toggle('active', isActive);
+            button.setAttribute('aria-selected', isActive.toString());
+            if (isActive) {
+                tabLabel = button.textContent?.trim() || '';
+            }
+        });
+
+        this.tabPanels.forEach((panel) => {
+            panel.classList.toggle('hidden', panel.id !== targetId);
+        });
+
+        if (notify && tabLabel) {
+            this.notifyInfo(`Mostrando comandos de ${tabLabel.toLowerCase()}`);
+        }
+    }
+
+    initCommandChips() {
+        this.commandChips = Array.from(this.sidebarRoot.querySelectorAll('[data-command-chip]'));
+
+        this.commandChips.forEach((chip) => {
+            const description = chip.querySelector('[data-command-description]');
+            const toggleButton = chip.querySelector('[data-command-toggle]');
+
+            if (description) {
+                description.classList.add('hidden');
+                description.setAttribute('aria-hidden', 'true');
+            }
+
+            if (toggleButton && description) {
+                toggleButton.setAttribute('aria-expanded', 'false');
+                toggleButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const isHidden = description.classList.contains('hidden');
+                    description.classList.toggle('hidden', !isHidden);
+                    description.setAttribute('aria-hidden', (!isHidden).toString());
+                    toggleButton.setAttribute('aria-expanded', isHidden.toString());
+                });
+            }
+        });
+    }
+
+    getMailtoLink() {
+        const to = encodeURIComponent(this.emailTo.value);
+        const subject = encodeURIComponent(this.emailSubject.value);
+        const body = encodeURIComponent(this.emailBody.value);
+
+        if (!to) {
+            this.notifyError('Por favor, añade un destinatario primero.');
+            this.setStatusText('Falta destinatario');
+            this.setStatusSubtext('Di "Añadir destinatario"');
+            return null;
+        }
+
+        const cc = this.emailCc ? encodeURIComponent(this.emailCc.value) : '';
+        const bcc = this.emailBcc ? encodeURIComponent(this.emailBcc.value) : '';
+
+        let mailtoLink = `mailto:${to}?subject=${subject}&body=${body}`;
+        if (cc) mailtoLink += `&cc=${cc}`;
+        if (bcc) mailtoLink += `&bcc=${bcc}`;
+
+        return mailtoLink;
+    }
+
+    sendEmail() {
+        const mailtoLink = this.getMailtoLink();
+
+        if (mailtoLink) {
+            this.notifySuccess('Abriendo tu cliente de correo...');
+            this.setStatusText('Abriendo cliente de correo...');
+            this.setStatusSubtext('Confirma el envío allí.');
+
+            if (this.currentDraftId && this.storage) {
+                this.deleteDraft(this.currentDraftId);
+            }
+
+            window.location.href = mailtoLink;
+        }
+    }
+
+    initSendButton() {
+        if (this.sendButton) {
+            this.sendButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.sendEmail();
+            });
+        }
+    }
+
+    saveDraft() {
+        if (!this.storage) {
+            this.notifyError('No se pudo acceder a localStorage.');
+            return;
+        }
+
+        const draft = {
+            id: this.currentDraftId || new Date().getTime(),
+            para: this.emailTo.value,
+            asunto: this.emailSubject.value,
+            cuerpo: this.emailBody.value, // <--- Esta es la línea clave
+            cc: this.emailCc ? this.emailCc.value : '',
+            bcc: this.emailBcc ? this.emailBcc.value : '',
+            fecha: new Date().toISOString()
+        };
+
+        if (!draft.para && !draft.asunto && !draft.cuerpo) {
+            this.notifyInfo('No hay nada que guardar.');
+            return;
+        }
+
+        let drafts = JSON.parse(this.storage.getItem(this.storageKey) || '[]');
+
+        const existingIndex = drafts.findIndex(d => d.id === draft.id);
+        if (existingIndex > -1) {
+            drafts[existingIndex] = draft;
+        } else {
+            drafts.unshift(draft);
+            this.currentDraftId = draft.id;
+        }
+
+        this.storage.setItem(this.storageKey, JSON.stringify(drafts));
+        this.notifySuccess('Borrador guardado');
+        this.setStatusText('Borrador guardado');
+        this.setStatusSubtext(draft.asunto || 'Sin asunto');
+    }
+
+    loadDraftFromURL() {
+        if (!this.storage) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const draftId = params.get('draftId');
+        if (!draftId) return;
+
+        const drafts = JSON.parse(this.storage.getItem(this.storageKey) || '[]');
+        const draft = drafts.find(d => d.id == draftId);
+
+        if (draft) {
+            this.currentDraftId = draft.id;
+            this.setRecipient(draft.para || '');
+            this.setSubject(draft.asunto || '');
+            this.commitBodyContent(draft.cuerpo || ''); // <--- Esta es la línea clave
+            this.setCc(draft.cc || '');
+            this.setBcc(draft.bcc || '');
+
+            this.notifyInfo('Borrador cargado');
+            this.setStatusText('Borrador cargado');
+            this.setStatusSubtext(draft.asunto || 'Sin asunto');
+        } else {
+            this.notifyError('No se encontró el borrador.');
+        }
+    }
+
+    deleteDraft(draftId) {
+        if (!this.storage || !draftId) return;
+        let drafts = JSON.parse(this.storage.getItem(this.storageKey) || '[]');
+        drafts = drafts.filter(d => d.id != draftId);
+        this.storage.setItem(this.storageKey, JSON.stringify(drafts));
+    }
+
+    initSaveButton() {
+        if (this.saveButton) {
+            this.saveButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.saveDraft();
+            });
+        }
+    }
+
+
+    updateMicVisualState(state) {
+        const baseClasses = ['bg-slate-200', 'text-primary'];
+        const commandClasses = ['bg-primary/10', 'text-primary'];
+        const dictationClasses = ['bg-danger/10', 'text-danger'];
+
+        this.micButton.classList.remove(...baseClasses, ...commandClasses, ...dictationClasses);
+        this.micIcon.classList.remove('animate-pulse');
+
+        if (state === 'dictation') {
+            this.micButton.classList.add(...dictationClasses);
+            this.micIcon.classList.add('animate-pulse');
+            return;
+        }
+
+        if (state === 'command') {
+            this.micButton.classList.add(...commandClasses);
+            return;
+        }
+
+        this.micButton.classList.add(...baseClasses);
+    }
+
+    updateBadge(text, variant = 'command') {
+        if (!this.statusBadge) {
+            return;
+        }
+
+        const baseClasses = ['bg-white', 'text-gray-600', 'border-border-light'];
+        const dictationClasses = ['bg-primary', 'text-white', 'border-primary'];
+        const errorClasses = ['bg-rose-500', 'text-white', 'border-rose-400'];
+
+        this.statusBadge.classList.remove(...baseClasses, ...dictationClasses, ...errorClasses);
+
+        if (variant === 'dictation') {
+            this.statusBadge.classList.add(...dictationClasses);
+        } else if (variant === 'error') {
+            this.statusBadge.classList.add(...errorClasses);
+        } else {
+            this.statusBadge.classList.add(...baseClasses);
+        }
+
+        this.statusBadge.textContent = text;
+    }
+
+    setDictationAura(active) {
+        if (!this.emailBodyWrapper) {
+            return;
+        }
+
+        this.emailBodyWrapper.classList.toggle('listening-active', Boolean(active));
+    }
+
+    normalizeCommandKey(value) {
+        return (value || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9\s]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    flashCommandChip(commandKey) {
+        const normalized = this.normalizeCommandKey(commandKey);
+        if (!normalized) {
+            return;
+        }
+
+        if (this.commandChips.length === 0) {
+            this.commandChips = Array.from(this.sidebarRoot.querySelectorAll('[data-command-chip]'));
+        }
+
+        const targetChip = this.commandChips.find((chip) => {
+            const raw = chip.dataset.commandTrigger || chip.dataset.commandLabel || '';
+            const triggers = raw.split('|').map((value) => this.normalizeCommandKey(value));
+            return triggers.includes(normalized);
+        });
+
+        if (!targetChip) {
+            console.warn(`No se encontró el chip para flashear: ${commandKey} (normalizado: ${normalized})`);
+            return;
+        }
+
+        targetChip.classList.add(...this.commandHighlightClasses);
+        window.setTimeout(() => {
+            targetChip.classList.remove(...this.commandHighlightClasses);
+        }, 900);
     }
 }
 
@@ -113,14 +582,16 @@ class MailDictationHandler {
 
     onEnterDictationMode() {
         this.finalText = this.ui.captureBodyContent();
-        if (this.finalText.length > 0 && !this.finalText.endsWith(' ')) {
-            this.finalText += ' ';
+        if (this.finalText.length > 0 && !/(\s|\n)$/.test(this.finalText)) {
+            this.finalText += ' '; // Añade espacio solo si no termina en espacio o salto de línea
         }
+        this.ui.showDictationMode();
     }
 
     onEnterCommandMode() {
-        this.finalText = this.finalText.trim();
+        this.finalText = this.ui.captureBodyContent().trim(); // Limpia espacios extra al salir
         this.ui.commitBodyContent(this.finalText);
+        this.ui.showCommandMode();
     }
 
     handleDictationEvent(event, callbacks = {}) {
@@ -170,12 +641,12 @@ class MailDictationHandler {
         }
 
         if (normalized.includes('nuevo párrafo') || normalized.includes('punto y aparte')) {
-            this.finalText += '\n\n';
+            this.finalText = this.finalText.trimEnd() + '\n\n';
             return;
         }
 
         if (normalized.includes('nueva línea')) {
-            this.finalText += '\n';
+            this.finalText = this.finalText.trimEnd() + '\n';
             return;
         }
 
@@ -216,69 +687,91 @@ class MailDictationHandler {
 
 class MailCommandProcessor {
     constructor(options) {
-        const { ui, speechService, onStartDictation } = options;
+        const { ui, speechService } = options;
         this.ui = ui;
         this.speechService = speechService;
-        this.onStartDictation = onStartDictation;
-    }
-
-    handleRecognitionEvent(event) {
-        const command = event.results[0][0].transcript.toLowerCase().trim();
-        this.handleCommand(command);
+        this.normalize = (value) => this.ui.normalizeCommandKey(value);
     }
 
     handleCommand(command) {
-        if (command.includes('comenzar redacción')) {
-            this.onStartDictation();
-            this.ui.notifySuccess('Dictado activado');
-            return;
-        }
+        const normalized = this.normalize(command);
 
-        if (command.startsWith('añadir destinatario') || command.startsWith('modificar destinatario')) {
-            this.applyRecipient(command);
-            return;
-        }
-
-        if (command.includes('borrar destinatario')) {
+        if (normalized.includes('borrar destinatario') || normalized.includes('eliminar destinatario')) {
             this.ui.clearRecipient();
             this.ui.setStatusText('Destinatario borrado');
+            this.ui.setStatusSubtext('Puedes añadir otro cuando quieras');
             this.ui.notifySuccess('Destinatario borrado');
+            this.ui.flashCommandChip('borrar destinatario');
             return;
         }
 
-        if (command.startsWith('añadir asunto') || command.startsWith('modificar asunto')) {
-            this.applySubject(command);
-            return;
-        }
-
-        if (command.includes('borrar asunto')) {
+        if (normalized.includes('borrar asunto') || normalized.includes('eliminar asunto')) {
             this.ui.clearSubject();
             this.ui.setStatusText('Asunto borrado');
+            this.ui.setStatusSubtext('Añade un nuevo asunto cuando quieras');
             this.ui.notifySuccess('Asunto borrado');
+            this.ui.flashCommandChip('borrar asunto');
             return;
         }
 
-        if (command.includes('leer correo')) {
+        if (normalized.includes('leer correo')) {
             this.readMail();
+            this.ui.flashCommandChip('leer correo');
             return;
         }
 
-        if (command.includes('enviar correo')) {
-            this.ui.setStatusText('Enviando...');
-            this.ui.notifySuccess('Enviando correo');
+        if (normalized.includes('adjuntar archivo') || normalized.includes('agregar archivo') || normalized.includes('anadir archivo')) {
+            this.ui.openAttachmentPicker({ fromCommand: true });
+            this.ui.flashCommandChip('adjuntar archivo');
             return;
         }
 
-        if (command.includes('guardar borrador')) {
-            this.ui.setStatusText('Guardado.');
-            this.ui.notifySuccess('Borrador guardado');
+        if (normalized.includes('descartar correo') || normalized.includes('eliminar correo') || normalized.includes('borrar correo')) {
+            this.ui.clearForm();
+            this.ui.setStatusText('Correo descartado');
+            this.ui.setStatusSubtext('Se han borrado todos los campos.');
+            this.ui.notifySuccess('Correo descartado');
+            this.ui.flashCommandChip('descartar correo');
             return;
         }
 
-        if (command.includes('volver al inicio')) {
+        if (normalized.includes('enviar correo')) {
+            this.ui.sendEmail();
+            this.ui.flashCommandChip('enviar correo');
+            return;
+        }
+
+        if (normalized.includes('guardar borrador')) {
+            this.ui.saveDraft();
+            this.ui.flashCommandChip('guardar borrador');
+            return;
+        }
+
+        if (normalized.includes('volver al inicio') || normalized.includes('ir al inicio') || normalized.includes('regresar al inicio')) {
             this.ui.setStatusText('Volviendo...');
+            this.ui.setStatusSubtext('Abriendo la pantalla principal');
             this.ui.notifySuccess('Volviendo al inicio');
+            this.ui.flashCommandChip('volver al inicio');
             window.location.href = 'PantallaPrincipal.html';
+            return;
+        }
+
+        if (normalized.includes('ocultar ayuda') || normalized.includes('entendido') || normalized.includes('quitar ayuda') || normalized.includes('cerrar ayuda')) {
+            this.ui.toggleHelpBox(false, { notify: true });
+            this.ui.setStatusSubtext('Di "Mostrar ayuda" para volver a verla');
+            this.ui.flashCommandChip('ocultar ayuda');
+            return;
+        }
+
+        if (normalized.includes('mostrar ayuda') || normalized.includes('ver ayuda')) {
+            this.ui.toggleHelpBox(true, { notify: true });
+            this.ui.setStatusSubtext('Consulta los comandos destacados en el panel');
+            this.ui.flashCommandChip('mostrar ayuda');
+            return;
+        }
+
+        if (normalized.includes('reanudar dictado') || normalized.includes('continuar dictado')) {
+            this.ui.notifyInfo('Di "Comenzar redacción" para dictar.');
             return;
         }
 
@@ -286,34 +779,36 @@ class MailCommandProcessor {
         this.ui.notifyError('No se reconoció el comando');
     }
 
-    applyRecipient(command) {
-        let email = command.replace('añadir destinatario', '').replace('modificar destinatario', '').trim();
-        email = email.replace(/^[,\.\s]+/, '');
-        email = email.replace(/\s+/g, '');
-        if (!email) {
-            this.ui.setStatusText('No se detectó destinatario');
-            this.ui.notifyError('No se detectó destinatario');
-            return;
-        }
-        this.ui.setRecipient(email);
-        this.ui.setStatusText('Destinatario añadido');
-        this.ui.notifySuccess('Destinatario actualizado');
-    }
-
-    applySubject(command) {
-        let subject = command.replace('añadir asunto', '').replace('modificar asunto', '').trim();
-        subject = subject.replace(/^[,\.\s]+/, '');
-
-        if (!subject) {
-            this.ui.setStatusText('No se detectó asunto');
-            this.ui.notifyError('No se detectó asunto');
-            return;
+    transformSpokenEmail(rawValue) {
+        if (!rawValue) {
+            return '';
         }
 
-        const formatted = subject.charAt(0).toUpperCase() + subject.slice(1);
-        this.ui.setSubject(formatted);
-        this.ui.setStatusText('Asunto añadido');
-        this.ui.notifySuccess('Asunto actualizado');
+        let value = rawValue
+            .toLowerCase()
+            .replace(/\s?arroba\s?/gi, '@')
+            .replace(/\s?punto\s?/gi, '.')
+            .replace(/\s?guion medio\s?/gi, '-')
+            .replace(/\s?guion bajo\s?/gi, '_')
+            .replace(/\s?guion\s?/gi, '-')
+            .replace(/\s?mas\s?/gi, '+');
+
+        const compactPatterns = [
+            { regex: /\s*@\s*/g, symbol: '@' },
+            { regex: /\s*\.\s*/g, symbol: '.' },
+            { regex: /\s*-\s*/g, symbol: '-' },
+            { regex: /\s*_\s*/g, symbol: '_' },
+            { regex: /\s*\+\s*/g, symbol: '+' },
+        ];
+
+        compactPatterns.forEach(({ regex, symbol }) => {
+            value = value.replace(regex, symbol);
+        });
+
+        value = value.replace(/\s+/g, '');
+        value = value.replace(/[,;]/g, '');
+
+        return value;
     }
 
     readMail() {
@@ -326,6 +821,7 @@ class MailCommandProcessor {
         try {
             this.speechService.speak(text);
             this.ui.setStatusText('Leyendo correo...');
+            this.ui.setStatusSubtext('Escucha la lectura en voz alta');
             this.ui.notifySuccess('Leyendo correo');
         } catch (error) {
             alert('Tu navegador no soporta la síntesis de voz.');
@@ -338,6 +834,8 @@ function bootstrapMailComposer() {
     const feedback = new FeedbackService();
     const ui = new MailComposerUI(feedback);
 
+    ui.loadDraftFromURL();
+
     if (!isSpeechRecognitionSupported()) {
         alert('Tu navegador no soporta la API de Voz.');
         ui.showUnsupportedMessage();
@@ -347,25 +845,48 @@ function bootstrapMailComposer() {
     const recognition = createSpeechRecognition({ lang: 'es-ES' });
     const modeManager = new RecognitionModeManager(recognition);
     const dictationHandler = new MailDictationHandler(ui);
-    const speechService = new SpeechSynthesisService({ lang: 'es-ES' });
 
-    let dictationModeConfig;
+    // [CORREGIDO] Esta es la línea que faltaba
+    dictationHandler.finalText = ui.captureBodyContent(); // Sincroniza el handler con el texto cargado del borrador
+
+    const speechService = new SpeechSynthesisService({ lang: 'es-ES' });
 
     const commandProcessor = new MailCommandProcessor({
         ui,
         speechService,
-        onStartDictation: () => modeManager.switchTo(dictationModeConfig),
     });
 
-    const commandModeConfig = {
+    let commandModeConfig, dictationModeConfig, dictateRecipientModeConfig, dictateSubjectModeConfig;
+
+    commandModeConfig = {
         name: 'command',
         continuous: false,
         interimResults: false,
         onEnter: () => {
             dictationHandler.onEnterCommandMode();
-            ui.showCommandMode();
         },
-        onResult: (event) => commandProcessor.handleRecognitionEvent(event),
+        onResult: (event) => {
+            const command = event.results[0][0].transcript.toLowerCase().trim();
+            const normalized = ui.normalizeCommandKey(command);
+
+            if (normalized.startsWith('anadir destinatario') || normalized.startsWith('modificar destinatario') || normalized.startsWith('anade destinatario') || normalized.startsWith('agregar destinatario')) {
+                modeManager.switchTo(dictateRecipientModeConfig);
+
+            } else if (normalized.startsWith('anadir asunto') || normalized.startsWith('modificar asunto') || normalized.startsWith('anade asunto') || normalized.startsWith('agregar asunto')) {
+                modeManager.switchTo(dictateSubjectModeConfig);
+
+            } else if (normalized.includes('comenzar redaccion') || normalized.includes('iniciar dictado') || normalized.includes('activar dictado')) {
+                modeManager.switchTo(dictationModeConfig);
+
+            } else {
+                commandProcessor.handleCommand(command);
+            }
+        },
+        onEnd: () => {
+            if (!modeManager.manualStop && !modeManager.pendingMode) {
+                modeManager.safeStart();
+            }
+        }
     };
 
     dictationModeConfig = {
@@ -374,17 +895,65 @@ function bootstrapMailComposer() {
         interimResults: true,
         onEnter: () => {
             dictationHandler.onEnterDictationMode();
-            ui.showDictationMode();
         },
         onResult: (event) => {
             dictationHandler.handleDictationEvent(event, {
                 onStop: () => modeManager.switchTo(commandModeConfig),
             });
         },
+        onEnd: () => {
+            if (modeManager.isModeActive('dictation')) {
+                modeManager.switchTo(commandModeConfig);
+            }
+        }
+    };
+
+    dictateRecipientModeConfig = {
+        name: 'dictateRecipient',
+        continuous: false,
+        interimResults: false,
+        onEnter: () => {
+            ui.showDictatingRecipient();
+        },
+        onResult: (event) => {
+            const transcript = event.results[0][0].transcript;
+            const email = commandProcessor.transformSpokenEmail(transcript);
+            ui.setRecipient(email);
+            ui.notifySuccess('Destinatario añadido');
+            modeManager.switchTo(commandModeConfig);
+        },
+        onEnd: () => {
+            if (modeManager.isModeActive('dictateRecipient')) {
+                modeManager.switchTo(commandModeConfig);
+            }
+        }
+    };
+
+    dictateSubjectModeConfig = {
+        name: 'dictateSubject',
+        continuous: false,
+        interimResults: false,
+        onEnter: () => {
+            ui.showDictatingSubject();
+        },
+        onResult: (event) => {
+            const transcript = event.results[0][0].transcript.trim();
+            const subject = transcript.charAt(0).toUpperCase() + transcript.slice(1);
+            ui.setSubject(subject);
+            ui.notifySuccess('Asunto añadido');
+            modeManager.switchTo(commandModeConfig);
+        },
+        onEnd: () => {
+            if (modeManager.isModeActive('dictateSubject')) {
+                modeManager.switchTo(commandModeConfig);
+            }
+        }
     };
 
     ui.bindMicToggle(() => {
         if (modeManager.isModeActive('dictation')) {
+            modeManager.switchTo(commandModeConfig);
+        } else if (modeManager.isModeActive('dictateRecipient') || modeManager.isModeActive('dictateSubject')) {
             modeManager.switchTo(commandModeConfig);
         } else {
             modeManager.switchTo(dictationModeConfig);
