@@ -25,6 +25,8 @@ class MailComposerUI {
         this.statusSubtext = getElement('.status-subtext', this.sidebarRoot);
         this.helpBox = getOptionalElement('#help-box');
         this.helpBoxCloseButton = getOptionalElement('#help-box-close');
+        this.startCommandChip = getOptionalElement('#chip-command-start');
+        this.stopCommandChip = getOptionalElement('#chip-command-stop');
 
         this.commandChips = Array.from(this.sidebarRoot.querySelectorAll('[data-command-chip]'));
         this.commandHighlightClasses = ['ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-surface-dark'];
@@ -71,7 +73,6 @@ class MailComposerUI {
     notifySuccess(message) {
         if (this.feedback && message) {
             this.feedback.playSuccess();
-            this.feedback.showToast(message, 'success');
         }
     }
 
@@ -100,24 +101,27 @@ class MailComposerUI {
         this.notifyError('Reconocimiento de voz no disponible');
         this.updateBadge('Error', 'error');
         this.setDictationAura(false);
+        this.updatePrimaryCommandChip('start');
     }
 
     showCommandMode() {
-        setTextContent(this.statusText, 'No estoy escuchando');
+        setTextContent(this.statusText, 'Escuchando comandos.');
         this.setStatusSubtext('');
         this.updateMicVisualState('command');
         setAriaLabel(this.micButton, 'Activar dictado');
         this.updateBadge('Comandos', 'command');
         this.setDictationAura(false);
+        this.updatePrimaryCommandChip('start');
     }
 
     showDictationMode() {
         setTextContent(this.statusText, 'Dictando cuerpo del correo...');
-        this.setStatusSubtext('Di "Terminar redacción" para parar');
+        this.setStatusSubtext('');
         this.updateMicVisualState('dictation');
         setAriaLabel(this.micButton, 'Detener dictado');
         this.updateBadge('Dictando', 'dictation');
         this.setDictationAura(true);
+        this.updatePrimaryCommandChip('stop');
         this.emailBody.focus();
     }
 
@@ -128,6 +132,7 @@ class MailComposerUI {
         setAriaLabel(this.micButton, 'Dictando destinatario');
         this.updateBadge('Dictando', 'dictation');
         this.setDictationAura(false);
+        this.updatePrimaryCommandChip('start');
         this.emailTo.focus();
     }
 
@@ -138,6 +143,7 @@ class MailComposerUI {
         setAriaLabel(this.micButton, 'Dictando asunto');
         this.updateBadge('Dictando', 'dictation');
         this.setDictationAura(false);
+        this.updatePrimaryCommandChip('start');
         this.emailSubject.focus();
     }
 
@@ -152,6 +158,16 @@ class MailComposerUI {
         setTextContent(this.statusSubtext, text);
         const hasContent = text.trim().length > 0;
         this.statusSubtext.classList.toggle('hidden', !hasContent);
+    }
+
+    updatePrimaryCommandChip(mode = 'start') {
+        const showStop = mode === 'stop';
+        if (this.startCommandChip) {
+            this.startCommandChip.classList.toggle('hidden', showStop);
+        }
+        if (this.stopCommandChip) {
+            this.stopCommandChip.classList.toggle('hidden', !showStop);
+        }
     }
 
     setRecipient(email) {
@@ -969,9 +985,11 @@ function bootstrapMailComposer() {
             });
         },
         onEnd: () => {
-            if (modeManager.isModeActive('dictation')) {
-                modeManager.switchTo(commandModeConfig);
+            if (modeManager.pendingMode || modeManager.manualStop) {
+                return;
             }
+            // Mantener el modo de dictado activo ante silencios breves; el auto-restart del
+            // RecognitionModeManager volverá a iniciar la escucha sin salir a comandos.
         }
     };
 
