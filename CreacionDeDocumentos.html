@@ -87,7 +87,9 @@
     }
 
     #voice-sidebar {
-      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     @media (min-width: 1024px) {
@@ -151,8 +153,8 @@
     crossorigin="anonymous"></script>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
-  <div class="flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
+<body class="h-screen bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+  <div class="flex h-full w-full flex-col overflow-hidden bg-background-light dark:bg-background-dark">
 
     <header
       class="flex w-full items-center justify-between border-b border-solid border-border-light bg-background-light px-6 md:px-10 py-3 dark:border-border-dark dark:bg-background-dark">
@@ -181,52 +183,50 @@
       </div>
     </header>
 
-    <div class="flex w-full flex-1 flex-col gap-8 px-6 py-8 lg:flex-row lg:items-stretch lg:gap-10 lg:px-10">
-      <main class="flex flex-1 flex-col">
-        <section class="flex-1 overflow-y-auto h-full">
-          <div class="mx-auto flex w-full max-w-3xl flex-col gap-8 h-full">
+    <div class="flex w-full flex-1 overflow-hidden lg:flex-row lg:gap-10">
+      <main class="flex flex-1 flex-col overflow-y-auto p-8">
+        <div class="mx-auto flex h-full w-full max-w-3xl flex-col gap-8">
 
-            <div id="help-box"
-              class="relative rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-6 text-sm text-primary dark:border-primary/40 dark:bg-primary/10 flex-shrink-0">
-              <button id="help-box-close" type="button" aria-label="Ocultar ayuda"
-                class="absolute top-3 right-3 p-1 text-primary/60 hover:text-primary transition-colors">
-                <span class="material-symbols-outlined text-xl">close</span>
-              </button>
-              <h2 class="text-base font-semibold tracking-tight text-primary">¿Cómo funciona?</h2>
-              <p class="mt-2 text-primary/80">
-                El panel de la derecha te muestra los comandos disponibles. Solo necesitas decirlos en
-                voz alta para que VozDoc ejecute la acción por ti.
-              </p>
-              <p class="mt-2 text-primary/80">
-                Di <strong>"Ocultar ayuda"</strong> o <strong>"Entendido"</strong> para cerrar este panel.
-              </p>
-            </div>
+          <div id="help-box"
+            class="relative rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-6 text-sm text-primary dark:border-primary/40 dark:bg-primary/10 flex-shrink-0">
+            <button id="help-box-close" type="button" aria-label="Ocultar ayuda"
+              class="absolute top-3 right-3 p-1 text-primary/60 hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-xl">close</span>
+            </button>
+            <h2 class="text-base font-semibold tracking-tight text-primary">¿Cómo funciona?</h2>
+            <p class="mt-2 text-primary/80">
+              El panel de la derecha te muestra los comandos disponibles. Solo necesitas decirlos en
+              voz alta para que VozDoc ejecute la acción por ti.
+            </p>
+            <p class="mt-2 text-primary/80">
+              Di <strong>"Ocultar ayuda"</strong> o <strong>"Entendido"</strong> para cerrar este panel.
+            </p>
+          </div>
 
-            <div
-              class="rounded-3xl border border-border-light bg-surface-light p-8 shadow-sm dark:border-border-dark dark:bg-surface-dark flex-1 flex flex-col">
-              <div class="space-y-6 flex-1 flex flex-col">
-                <div>
-                  <label class="sr-only" for="doc-title">Título del documento</label>
-                  <input id="doc-title" aria-label="Título del documento"
-                    class="w-full border-none bg-transparent p-0 text-3xl font-bold leading-tight tracking-tight text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-0 dark:text-gray-100 dark:placeholder:text-gray-400"
-                    placeholder="Documento sin título" value="" />
-                </div>
-                <div id="editor-wrapper"
-                  class="rounded-2xl border-2 border-transparent bg-white p-6 transition-all duration-300 ease-in-out dark:bg-surface-dark flex-1 flex flex-col">
-                  <div id="doc-editor" contenteditable="true" role="textbox" aria-multiline="true"
-                    placeholder="Di 'Comenzar redacción' para iniciar el dictado."
-                    class="min-h-[360px] text-base leading-relaxed text-text-light focus:outline-none dark:text-text-dark flex-1">
-                  </div>
+          <div
+            class="rounded-3xl border border-border-light bg-surface-light p-8 shadow-sm dark:border-border-dark dark:bg-surface-dark flex-1 flex flex-col">
+            <div class="space-y-6 flex-1 flex flex-col">
+              <div>
+                <label class="sr-only" for="doc-title">Título del documento</label>
+                <input id="doc-title" aria-label="Título del documento"
+                  class="w-full border-none bg-transparent p-0 text-3xl font-bold leading-tight tracking-tight text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-0 dark:text-gray-100 dark:placeholder:text-gray-400"
+                  placeholder="Documento sin título" value="" />
+              </div>
+              <div id="editor-wrapper"
+                class="rounded-2xl border-2 border-transparent bg-white p-6 transition-all duration-300 ease-in-out dark:bg-surface-dark flex-1 flex flex-col">
+                <div id="doc-editor" contenteditable="true" role="textbox" aria-multiline="true"
+                  placeholder="Di 'Comenzar redacción' para iniciar el dictado."
+                  class="min-h-[360px] text-base leading-relaxed text-text-light focus:outline-none dark:text-text-dark flex-1">
                 </div>
               </div>
             </div>
-
           </div>
-        </section>
+
+        </div>
       </main>
 
       <aside id="voice-sidebar"
-        class="flex w-full flex-col border border-border-light bg-white/80 backdrop-blur dark:border-border-dark dark:bg-surface-dark/90 lg:w-[380px] rounded-2xl shadow-sm flex-shrink-0">
+        class="flex w-full flex-col rounded-2xl border border-border-light bg-white/80 shadow-sm backdrop-blur dark:border-border-dark dark:bg-surface-dark/90 lg:w-[380px]">
 
         <div class="sticky top-6 flex h-full flex-col gap-4 px-6 py-6">
 
@@ -242,36 +242,35 @@
             <div class="flex flex-col gap-1">
               <p id="dictation-status-text" class="text-base font-semibold text-gray-900 dark:text-gray-100">No estoy
                 escuchando</p>
-              <p id="dictation-help-text" class="text-sm text-gray-600 dark:text-gray-400">Di "Comenzar redacción"</p>
+              <p id="dictation-help-text" class="status-subtext hidden text-sm text-gray-600 dark:text-gray-400"></p>
             </div>
           </div>
 
           <div class="flex-1 overflow-y-auto min-h-0 space-y-4">
 
             <div id="sidebar-state-inactive" class="space-y-4">
+              <div data-command-chip data-command-label="Comenzar redacción"
+                data-command-trigger="comenzar redacción|iniciar redacción|activar dictado"
+                class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-2.5 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                <div class="flex items-start justify-between gap-3">
+                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Comenzar redacción"</h3>
+                  <button type="button"
+                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    data-command-toggle data-command-label="Comenzar redacción" aria-expanded="false"
+                    aria-label="Mostrar descripción de Comenzar redacción">
+                    <span class="material-symbols-outlined text-sm">help</span>
+                  </button>
+                </div>
+                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inicia el
+                  dictado y activa el micrófono.</p>
+              </div>
+
               <section class="space-y-3">
                 <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones
                   principales</h2>
-                <div class="space-y-2">
-
-                  <div data-command-chip data-command-label="Comenzar redacción"
-                    data-command-trigger="comenzar redacción|iniciar redacción|activar dictado"
-                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                    <div class="flex items-start justify-between gap-3">
-                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Comenzar redacción"</h3>
-                      <button type="button"
-                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                        data-command-toggle data-command-label="Comenzar redacción" aria-expanded="false"
-                        aria-label="Mostrar descripción de Comenzar redacción">
-                        <span class="material-symbols-outlined text-sm">help</span>
-                      </button>
-                    </div>
-                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inicia el
-                      dictado y activa el micrófono.</p>
-                  </div>
-
+                <div class="space-y-1.5">
                   <div data-command-chip data-command-label="Abrir documento" data-command-trigger="abrir documento"
-                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-2.5 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                     <div class="flex items-start justify-between gap-3">
                       <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Abrir documento"</h3>
                       <button type="button"
@@ -288,7 +287,7 @@
 
                   <div data-command-chip data-command-label="Guardar documento"
                     data-command-trigger="guardar documento|guardar cambios"
-                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-2.5 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                     <div class="flex items-start justify-between gap-3">
                       <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Guardar documento"</h3>
                       <button type="button"
@@ -304,7 +303,7 @@
 
                   <div data-command-chip data-command-label="Exportar documento"
                     data-command-trigger="exportar documento"
-                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-2.5 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                     <div class="flex items-start justify-between gap-3">
                       <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Exportar documento"</h3>
                       <button type="button"
@@ -321,7 +320,7 @@
 
                   <div data-command-chip data-command-label="Imprimir documento"
                     data-command-trigger="imprimir documento"
-                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-2.5 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                     <div class="flex items-start justify-between gap-3">
                       <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Imprimir documento"</h3>
                       <button type="button"
@@ -335,9 +334,16 @@
                       documento a la impresora.</p>
                   </div>
 
+                </div>
+              </section>
+
+              <section class="space-y-3">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Gestión de
+                  ayuda</h2>
+                <div class="space-y-1.5">
                   <div data-command-chip data-command-label="Ocultar ayuda"
                     data-command-trigger="ocultar ayuda|entendido|quitar ayuda|cerrar ayuda"
-                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-2.5 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                     <div class="flex items-start justify-between gap-3">
                       <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Ocultar ayuda"</h3>
                       <button type="button"
@@ -348,32 +354,45 @@
                       </button>
                     </div>
                     <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Oculta el
-                      panel
-                      de '¿Cómo funciona?'.</p>
+                      panel de '¿Cómo funciona?'.</p>
                   </div>
 
+                  <div data-command-chip data-command-label="Mostrar ayuda"
+                    data-command-trigger="mostrar ayuda|ver ayuda"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-2.5 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Mostrar ayuda"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Mostrar ayuda" aria-expanded="false"
+                        aria-label="Mostrar descripción de Mostrar ayuda">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Vuelve a
+                      mostrar el panel de '¿Cómo funciona?'.</p>
+                  </div>
                 </div>
               </section>
-
-              <div class="pt-4 border-t border-border-light dark:border-border-dark">
-                <div data-command-chip data-command-label="Mostrar ayuda" data-command-trigger="mostrar ayuda|ver ayuda"
-                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Mostrar ayuda"</h3>
-                    <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      data-command-toggle data-command-label="Mostrar ayuda" aria-expanded="false"
-                      aria-label="Mostrar descripción de Mostrar ayuda">
-                      <span class="material-symbols-outlined text-sm">help</span>
-                    </button>
-                  </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Vuelve a
-                    mostrar el panel de '¿Cómo funciona?'.</p>
-                </div>
-              </div>
             </div>
 
             <div id="sidebar-state-dictating" class="hidden space-y-4">
+
+              <div id="dictation-quick-command" data-command-chip data-command-label="Terminar redacción"
+                data-command-trigger="terminar redacción|detener dictado|poner punto final"
+                class="voice-chip hidden rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                <div class="flex items-start justify-between gap-3">
+                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Terminar redacción"</h3>
+                  <button type="button"
+                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    data-command-toggle data-command-label="Terminar redacción" aria-expanded="false"
+                    aria-label="Mostrar descripción de Terminar redacción">
+                    <span class="material-symbols-outlined text-sm">help</span>
+                  </button>
+                </div>
+                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Detiene el
+                  dictado y cierra la sesión de escucha.</p>
+              </div>
 
               <div class="border-b border-border-light dark:border-border-dark flex">
                 <button id="tab-btn-punctuation" data-tab-target="tab-panel-punctuation"

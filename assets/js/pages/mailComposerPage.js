@@ -14,8 +14,10 @@ class MailComposerUI {
         this.emailSubject = getElement('#email-subject');
         this.emailCc = getOptionalElement('#email-cc');
         this.emailBcc = getOptionalElement('#email-bcc');
-        this.attachmentTrigger = getOptionalElement('#attachment-trigger');
+
+        // MODIFICADO: Eliminada la referencia al botón visible
         this.attachmentInput = getOptionalElement('#attachment-input');
+
         this.micButton = getElement('#dictation-toggle');
         this.micIcon = this.micButton.querySelector('.material-symbols-outlined') || this.micButton.querySelector('span');
         this.statusBadge = getOptionalElement('#sidebar-status-badge');
@@ -23,14 +25,15 @@ class MailComposerUI {
         this.statusSubtext = getElement('.status-subtext', this.sidebarRoot);
         this.helpBox = getOptionalElement('#help-box');
         this.helpBoxCloseButton = getOptionalElement('#help-box-close');
-        this.tabButtons = this.sidebarRoot.querySelectorAll('#sidebar-state-dictating .tab-button');
-        this.tabPanels = this.sidebarRoot.querySelectorAll('#sidebar-state-dictating .tab-panel');
+
         this.commandChips = Array.from(this.sidebarRoot.querySelectorAll('[data-command-chip]'));
         this.commandHighlightClasses = ['ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-surface-dark'];
         this.helpStorageKey = 'vozdoc_mail_help_hidden';
 
-        this.sendButton = getElement('button[aria-label="Enviar correo"]');
-        this.saveButton = getElement('button[aria-label="Guardar borrador"]');
+        // MODIFICADO: Eliminadas las referencias a los botones de acción
+        // this.sendButton = ...
+        // this.saveButton = ...
+
         this.storageKey = 'vozdoc_mail_drafts';
         this.currentDraftId = null;
 
@@ -41,11 +44,28 @@ class MailComposerUI {
         }
 
         this.initHelpBox();
-        this.initTabs();
+
+        // Se mantiene la inicialización de pestañas
+        this.initTabs('#sidebar-state-inactive');
+        this.initTabs('#sidebar-state-dictating');
+
         this.initCommandChips();
-        this.initAttachments();
-        this.initSendButton();
-        this.initSaveButton();
+        this.initAttachments(); // Mantenido para el listener del input
+
+        // MODIFICADO: Eliminadas las llamadas a init de los botones
+        // this.initSendButton();
+        // this.initSaveButton();
+
+        // Se mantiene la lógica del textarea del asunto
+        if (this.emailSubject && this.emailSubject.tagName === 'TEXTAREA') {
+            this.emailSubject.addEventListener('input', () => this.adjustSubjectHeight());
+        }
+    }
+
+    adjustSubjectHeight() {
+        if (!this.emailSubject || this.emailSubject.tagName !== 'TEXTAREA') return;
+        this.emailSubject.style.height = 'auto';
+        this.emailSubject.style.height = `${this.emailSubject.scrollHeight}px`;
     }
 
     notifySuccess(message) {
@@ -74,7 +94,7 @@ class MailComposerUI {
 
     showUnsupportedMessage() {
         setTextContent(this.statusText, 'Tu navegador no soporta la API de voz.');
-        setTextContent(this.statusSubtext, '');
+        this.setStatusSubtext('');
         this.micButton.disabled = true;
         setAriaLabel(this.micButton, 'Reconocimiento no disponible');
         this.notifyError('Reconocimiento de voz no disponible');
@@ -84,7 +104,7 @@ class MailComposerUI {
 
     showCommandMode() {
         setTextContent(this.statusText, 'No estoy escuchando');
-        setTextContent(this.statusSubtext, 'Di "Comenzar redacción" o un comando');
+        this.setStatusSubtext('');
         this.updateMicVisualState('command');
         setAriaLabel(this.micButton, 'Activar dictado');
         this.updateBadge('Comandos', 'command');
@@ -93,7 +113,7 @@ class MailComposerUI {
 
     showDictationMode() {
         setTextContent(this.statusText, 'Dictando cuerpo del correo...');
-        setTextContent(this.statusSubtext, 'Di "Terminar redacción" para parar');
+        this.setStatusSubtext('Di "Terminar redacción" para parar');
         this.updateMicVisualState('dictation');
         setAriaLabel(this.micButton, 'Detener dictado');
         this.updateBadge('Dictando', 'dictation');
@@ -103,7 +123,7 @@ class MailComposerUI {
 
     showDictatingRecipient() {
         setTextContent(this.statusText, 'Dictando Destinatario...');
-        setTextContent(this.statusSubtext, 'Di el correo electrónico ahora');
+        this.setStatusSubtext('Di el correo electrónico ahora');
         this.updateMicVisualState('dictation');
         setAriaLabel(this.micButton, 'Dictando destinatario');
         this.updateBadge('Dictando', 'dictation');
@@ -113,7 +133,7 @@ class MailComposerUI {
 
     showDictatingSubject() {
         setTextContent(this.statusText, 'Dictando Asunto...');
-        setTextContent(this.statusSubtext, 'Di el asunto del correo ahora');
+        this.setStatusSubtext('Di el asunto del correo ahora');
         this.updateMicVisualState('dictation');
         setAriaLabel(this.micButton, 'Dictando asunto');
         this.updateBadge('Dictando', 'dictation');
@@ -127,7 +147,11 @@ class MailComposerUI {
     }
 
     setStatusSubtext(message) {
-        setTextContent(this.statusSubtext, message);
+        if (!this.statusSubtext) return;
+        const text = typeof message === 'string' ? message : '';
+        setTextContent(this.statusSubtext, text);
+        const hasContent = text.trim().length > 0;
+        this.statusSubtext.classList.toggle('hidden', !hasContent);
     }
 
     setRecipient(email) {
@@ -136,6 +160,7 @@ class MailComposerUI {
 
     setSubject(subject) {
         this.emailSubject.value = subject;
+        this.adjustSubjectHeight();
     }
 
     setCc(value) {
@@ -156,6 +181,7 @@ class MailComposerUI {
 
     clearSubject() {
         this.emailSubject.value = '';
+        this.adjustSubjectHeight();
     }
 
     readOnlyStatus(message) {
@@ -172,13 +198,12 @@ class MailComposerUI {
     }
 
     captureBodyContent() {
-        // [CORREGIDO] Quitado el .trim() para capturar espacios si el usuario los puso
         return this.emailBody.value;
     }
 
     clearForm() {
-        this.setRecipient('');
-        this.setSubject('');
+        this.clearRecipient();
+        this.clearSubject();
         this.setCc('');
         this.setBcc('');
         this.commitBodyContent('');
@@ -193,12 +218,10 @@ class MailComposerUI {
     }
 
     initAttachments() {
-        if (this.attachmentTrigger && this.attachmentInput) {
-            this.attachmentTrigger.addEventListener('click', () => {
-                this.openAttachmentPicker({ fromCommand: false });
-            });
-        }
+        // MODIFICADO: Eliminado el bloque if (this.attachmentTrigger ...)
+        // El comando de voz 'Adjuntar archivo' llama a openAttachmentPicker directamente.
 
+        // Mantenido: Este listener es para cuando el usuario *selecciona* un archivo
         if (this.attachmentInput) {
             this.attachmentInput.addEventListener('change', () => {
                 const { files } = this.attachmentInput;
@@ -217,7 +240,8 @@ class MailComposerUI {
     }
 
     openAttachmentPicker({ fromCommand = true } = {}) {
-        const picker = this.attachmentInput || this.attachmentTrigger;
+        // MODIFICADO: 'picker' ahora solo apunta al input oculto
+        const picker = this.attachmentInput;
         if (!picker || typeof picker.click !== 'function') {
             this.setStatusText('No se encontró el selector de archivos');
             this.setStatusSubtext('Adjunta el archivo manualmente');
@@ -282,39 +306,48 @@ class MailComposerUI {
         }
     }
 
-    initTabs() {
-        if (!this.tabButtons.length) {
+    // Se mantiene la lógica de pestañas
+    initTabs(containerSelector) {
+        const container = this.sidebarRoot.querySelector(containerSelector);
+        if (!container) {
             return;
         }
 
-        const initialButton = Array.from(this.tabButtons).find((button) => button.classList.contains('active')) || this.tabButtons[0];
+        const tabButtons = container.querySelectorAll('.tab-button');
+        const tabPanels = container.querySelectorAll('.tab-panel');
+
+        if (!tabButtons.length || !tabPanels.length) {
+            return;
+        }
+
+        const initialButton = Array.from(tabButtons).find((button) => button.classList.contains('active')) || tabButtons[0];
 
         if (initialButton) {
             const target = initialButton.dataset.tabTarget;
             if (target) {
-                this.activateTab(target);
+                this.activateTab(target, tabButtons, tabPanels, { notify: false });
             }
         }
 
-        this.tabButtons.forEach((button) => {
+        tabButtons.forEach((button) => {
             button.addEventListener('click', (event) => {
                 event.preventDefault();
                 const target = button.dataset.tabTarget;
                 if (target) {
-                    this.activateTab(target, { notify: true });
+                    this.activateTab(target, tabButtons, tabPanels, { notify: true });
                 }
             });
         });
     }
 
-    activateTab(targetId, { notify = false } = {}) {
-        if (!targetId) {
+    activateTab(targetId, tabButtons, tabPanels, { notify = false } = {}) {
+        if (!targetId || !tabButtons || !tabPanels) {
             return;
         }
 
         let tabLabel = '';
 
-        this.tabButtons.forEach((button) => {
+        tabButtons.forEach((button) => {
             const isActive = button.dataset.tabTarget === targetId;
             button.classList.toggle('active', isActive);
             button.setAttribute('aria-selected', isActive.toString());
@@ -323,7 +356,7 @@ class MailComposerUI {
             }
         });
 
-        this.tabPanels.forEach((panel) => {
+        tabPanels.forEach((panel) => {
             panel.classList.toggle('hidden', panel.id !== targetId);
         });
 
@@ -348,6 +381,7 @@ class MailComposerUI {
                 toggleButton.setAttribute('aria-expanded', 'false');
                 toggleButton.addEventListener('click', (event) => {
                     event.preventDefault();
+                    event.stopPropagation();
                     const isHidden = description.classList.contains('hidden');
                     description.classList.toggle('hidden', !isHidden);
                     description.setAttribute('aria-hidden', (!isHidden).toString());
@@ -357,6 +391,8 @@ class MailComposerUI {
         });
     }
 
+    // La lógica de 'getMailtoLink' y 'sendEmail' es llamada por voz
+    // y no depende de los botones, por lo que se mantiene intacta.
     getMailtoLink() {
         const to = encodeURIComponent(this.emailTo.value);
         const subject = encodeURIComponent(this.emailSubject.value);
@@ -395,15 +431,10 @@ class MailComposerUI {
         }
     }
 
-    initSendButton() {
-        if (this.sendButton) {
-            this.sendButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.sendEmail();
-            });
-        }
-    }
+    // MODIFICADO: Eliminada la función initSendButton()
 
+    // La lógica de 'saveDraft' es llamada por voz
+    // y no depende de los botones, por lo que se mantiene intacta.
     saveDraft() {
         if (!this.storage) {
             this.notifyError('No se pudo acceder a localStorage.');
@@ -414,7 +445,7 @@ class MailComposerUI {
             id: this.currentDraftId || new Date().getTime(),
             para: this.emailTo.value,
             asunto: this.emailSubject.value,
-            cuerpo: this.emailBody.value, // <--- Esta es la línea clave
+            cuerpo: this.emailBody.value,
             cc: this.emailCc ? this.emailCc.value : '',
             bcc: this.emailBcc ? this.emailBcc.value : '',
             fecha: new Date().toISOString()
@@ -433,6 +464,10 @@ class MailComposerUI {
         } else {
             drafts.unshift(draft);
             this.currentDraftId = draft.id;
+        }
+
+        if (drafts.length > 10) {
+            drafts = drafts.slice(0, 10);
         }
 
         this.storage.setItem(this.storageKey, JSON.stringify(drafts));
@@ -455,7 +490,7 @@ class MailComposerUI {
             this.currentDraftId = draft.id;
             this.setRecipient(draft.para || '');
             this.setSubject(draft.asunto || '');
-            this.commitBodyContent(draft.cuerpo || ''); // <--- Esta es la línea clave
+            this.commitBodyContent(draft.cuerpo || '');
             this.setCc(draft.cc || '');
             this.setBcc(draft.bcc || '');
 
@@ -474,22 +509,15 @@ class MailComposerUI {
         this.storage.setItem(this.storageKey, JSON.stringify(drafts));
     }
 
-    initSaveButton() {
-        if (this.saveButton) {
-            this.saveButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.saveDraft();
-            });
-        }
-    }
+    // MODIFICADO: Eliminada la función initSaveButton()
 
-
+    // El resto de la UI (micrófono, badges, etc.) se mantiene sin cambios
     updateMicVisualState(state) {
         const baseClasses = ['bg-slate-200', 'text-primary'];
         const commandClasses = ['bg-primary/10', 'text-primary'];
         const dictationClasses = ['bg-danger/10', 'text-danger'];
 
-        this.micButton.classList.remove(...baseClasses, ...commandClasses, ...dictationClasses);
+        this.micButton.classList.remove(...baseClasses, ...commandClasses, ...dictationClasses, 'bg-rose-500', 'text-white');
         this.micIcon.classList.remove('animate-pulse');
 
         if (state === 'dictation') {
@@ -499,7 +527,7 @@ class MailComposerUI {
         }
 
         if (state === 'command') {
-            this.micButton.classList.add(...commandClasses);
+            this.micButton.classList.add(...baseClasses);
             return;
         }
 
@@ -512,16 +540,20 @@ class MailComposerUI {
         }
 
         const baseClasses = ['bg-white', 'text-gray-600', 'border-border-light'];
-        const dictationClasses = ['bg-primary', 'text-white', 'border-primary'];
+        const dictationClasses = ['bg-danger', 'text-white', 'border-danger'];
         const errorClasses = ['bg-rose-500', 'text-white', 'border-rose-400'];
+        const commandClasses = ['bg-primary', 'text-white', 'border-primary'];
 
-        this.statusBadge.classList.remove(...baseClasses, ...dictationClasses, ...errorClasses);
+        this.statusBadge.classList.remove(...baseClasses, ...dictationClasses, ...errorClasses, ...commandClasses);
 
         if (variant === 'dictation') {
             this.statusBadge.classList.add(...dictationClasses);
         } else if (variant === 'error') {
             this.statusBadge.classList.add(...errorClasses);
-        } else {
+        } else if (variant === 'command') {
+            this.statusBadge.classList.add(...commandClasses);
+        }
+        else { // idle
             this.statusBadge.classList.add(...baseClasses);
         }
 
@@ -574,6 +606,13 @@ class MailComposerUI {
     }
 }
 
+// ==================================================================
+//  El resto del archivo (MailDictationHandler, MailCommandProcessor,
+//  y bootstrapMailComposer) no necesita cambios, ya que la lógica
+//  de comandos de voz ya llamaba a las funciones de la UI 
+//  directamente (ej. ui.sendEmail()) sin depender de los botones.
+// ==================================================================
+
 class MailDictationHandler {
     constructor(ui) {
         this.ui = ui;
@@ -583,13 +622,13 @@ class MailDictationHandler {
     onEnterDictationMode() {
         this.finalText = this.ui.captureBodyContent();
         if (this.finalText.length > 0 && !/(\s|\n)$/.test(this.finalText)) {
-            this.finalText += ' '; // Añade espacio solo si no termina en espacio o salto de línea
+            this.finalText += ' ';
         }
         this.ui.showDictationMode();
     }
 
     onEnterCommandMode() {
-        this.finalText = this.ui.captureBodyContent().trim(); // Limpia espacios extra al salir
+        this.finalText = this.ui.captureBodyContent().trim();
         this.ui.commitBodyContent(this.finalText);
         this.ui.showCommandMode();
     }
@@ -716,7 +755,7 @@ class MailCommandProcessor {
 
         if (normalized.includes('leer correo')) {
             this.readMail();
-            this.ui.flashCommandChip('leer correo');
+            // No existe un chip para "leer correo", así que no flasheamos nada
             return;
         }
 
@@ -772,7 +811,36 @@ class MailCommandProcessor {
 
         if (normalized.includes('reanudar dictado') || normalized.includes('continuar dictado')) {
             this.ui.notifyInfo('Di "Comenzar redacción" para dictar.');
+            this.ui.flashCommandChip('reanudar dictado'); // Asumiendo que existe en el modo dictado
             return;
+        }
+
+        // Comandos de pestañas
+        if (this.ui.statusBadge.textContent === 'Comandos') { // Solo activa si estamos en modo comando
+            if (normalized.includes('campos') || normalized.includes('ver campos')) {
+                this.ui.activateTab('inactive-tab-panel-fields',
+                    this.ui.sidebarRoot.querySelectorAll('#sidebar-state-inactive .tab-button'),
+                    this.ui.sidebarRoot.querySelectorAll('#sidebar-state-inactive .tab-panel'),
+                    { notify: true }
+                );
+                return;
+            }
+            if (normalized.includes('acciones') || normalized.includes('ver acciones')) {
+                this.ui.activateTab('inactive-tab-panel-actions',
+                    this.ui.sidebarRoot.querySelectorAll('#sidebar-state-inactive .tab-button'),
+                    this.ui.sidebarRoot.querySelectorAll('#sidebar-state-inactive .tab-panel'),
+                    { notify: true }
+                );
+                return;
+            }
+            if (normalized.includes('ayuda') || normalized.includes('ver ayuda')) {
+                this.ui.activateTab('inactive-tab-panel-help',
+                    this.ui.sidebarRoot.querySelectorAll('#sidebar-state-inactive .tab-button'),
+                    this.ui.sidebarRoot.querySelectorAll('#sidebar-state-inactive .tab-panel'),
+                    { notify: true }
+                );
+                return;
+            }
         }
 
         this.ui.setStatusText('No se reconoció el comando');
@@ -846,8 +914,7 @@ function bootstrapMailComposer() {
     const modeManager = new RecognitionModeManager(recognition);
     const dictationHandler = new MailDictationHandler(ui);
 
-    // [CORREGIDO] Esta es la línea que faltaba
-    dictationHandler.finalText = ui.captureBodyContent(); // Sincroniza el handler con el texto cargado del borrador
+    dictationHandler.finalText = ui.captureBodyContent();
 
     const speechService = new SpeechSynthesisService({ lang: 'es-ES' });
 

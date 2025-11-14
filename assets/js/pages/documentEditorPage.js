@@ -43,6 +43,7 @@ class DocumentUI {
         this.sidebarInactive = getElement('#sidebar-state-inactive');
         this.sidebarDictating = getElement('#sidebar-state-dictating');
         this.sidebarExport = getElement('#sidebar-export-options');
+        this.dictationQuickCommand = getOptionalElement('#dictation-quick-command');
         this.saveStatus = getElement('#save-status');
         this.fontSelector = getOptionalElement('#font-select');
         this.sizeSelector = getOptionalElement('#size-select');
@@ -76,6 +77,20 @@ class DocumentUI {
         this.activeHighlightChips = [];
 
         this.initializeCommandHelp();
+    }
+
+    injectDictationQuickCommand() {
+        if (!this.dictationQuickCommand) {
+            return;
+        }
+        this.dictationQuickCommand.classList.remove('hidden');
+    }
+
+    hideDictationQuickCommand() {
+        if (!this.dictationQuickCommand) {
+            return;
+        }
+        this.dictationQuickCommand.classList.add('hidden');
     }
 
     // === NUEVO: Lógica del panel de ayuda ===
@@ -480,9 +495,14 @@ class DocumentUI {
     }
 
     updateHelpText(message) {
-        if (this.helpText) {
-            setTextContent(this.helpText, message);
+        if (!this.helpText) {
+            return;
         }
+
+        const text = typeof message === 'string' ? message : '';
+        setTextContent(this.helpText, text);
+        const hasContent = text.trim().length > 0;
+        this.helpText.classList.toggle('hidden', !hasContent);
     }
 
     highlightCommandHints() {
@@ -535,13 +555,16 @@ class DocumentUI {
 
         if (this.recognitionState === 'dictation') {
             this.updateBadge('Dictando', 'dictating');
-            this.updateHelpText('Di "Terminar redacción" para parar.');
+            this.injectDictationQuickCommand();
+            this.updateHelpText('');
         } else if (this.recognitionState === 'command') {
             this.updateBadge('Comandos', 'listening');
-            this.updateHelpText('Di "Comenzar redacción" o un comando.');
+            this.updateHelpText('');
+            this.hideDictationQuickCommand();
         } else {
             this.updateBadge('Inactivo', 'idle');
             this.updateHelpText('Presiona el micrófono para empezar.');
+            this.hideDictationQuickCommand();
         }
     }
 
@@ -549,8 +572,9 @@ class DocumentUI {
         this.recognitionState = 'dictation';
         this.clearCommandHighlight();
         setTextContent(this.statusText, 'Dictando...');
-        this.updateHelpText('Di "Terminar redacción" para parar.');
+        this.updateHelpText('');
         this.updateBadge('Dictando', 'dictating');
+        this.injectDictationQuickCommand();
         this.micButton.classList.remove('bg-primary', 'text-white', 'bg-slate-200', 'text-primary');
         this.micButton.classList.add('animate-pulse', 'bg-rose-500', 'text-white');
         this.micIcon.classList.add('animate-pulse');
@@ -565,8 +589,9 @@ class DocumentUI {
         this.recognitionState = 'command';
         this.clearCommandHighlight();
         setTextContent(this.statusText, 'Escuchando comandos.');
-        this.updateHelpText('Di "Comenzar redacción" o un comando.');
+        this.updateHelpText('');
         this.updateBadge('Comandos', 'listening');
+        this.hideDictationQuickCommand();
         this.micButton.classList.remove('animate-pulse', 'bg-rose-500', 'bg-slate-200', 'text-primary');
         this.micButton.classList.add('bg-primary', 'text-white');
         this.micIcon.classList.remove('animate-pulse');
@@ -581,6 +606,7 @@ class DocumentUI {
         setTextContent(this.statusText, 'Haz clic para activar.');
         this.updateHelpText('Presiona el micrófono para empezar.');
         this.updateBadge('Inactivo', 'idle');
+        this.hideDictationQuickCommand();
         this.micButton.classList.remove('bg-primary', 'text-white', 'bg-rose-500', 'animate-pulse');
         this.micButton.classList.add('bg-slate-200', 'text-primary');
         this.micIcon.classList.remove('animate-pulse');
@@ -598,6 +624,7 @@ class DocumentUI {
         setTextContent(this.statusText, 'Navegador no compatible.');
         this.updateHelpText('Usa Chrome o Edge para el dictado.');
         this.updateBadge('No disponible', 'idle');
+        this.hideDictationQuickCommand();
         this.micButton.disabled = true;
         this.micButton.classList.add('opacity-60', 'cursor-not-allowed');
         setAriaLabel(this.micButton, 'Reconocimiento de voz no disponible');
