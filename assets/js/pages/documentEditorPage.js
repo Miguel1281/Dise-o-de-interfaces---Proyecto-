@@ -1007,12 +1007,11 @@ class DocumentDictationHandler {
             return;
         }
 
-        // === LÓGICA CORREGIDA: PRIMERO VERIFICAR "QUITAR/DESACTIVAR" ===
-        // Importante: Se verifica "desactivar" antes que "activar" porque "subrayado"
-        // podría estar contenido dentro de "quitar subrayado".
+        // === LÓGICA CORREGIDA ===
+        // Se han agregado variaciones con "el/la" para mejorar la detección.
 
         // --- NEGRITA ---
-        const unboldTriggers = ['desactivar negrita', 'quitar negrita'];
+        const unboldTriggers = ['desactivar negrita', 'quitar negrita', 'desactivar la negrita', 'quitar la negrita'];
         const unboldCmd = unboldTriggers.find(t => normalized.includes(t));
         if (unboldCmd) {
             if (this.isBoldActive) {
@@ -1039,7 +1038,7 @@ class DocumentDictationHandler {
         }
 
         // --- CURSIVA ---
-        const unitalicTriggers = ['desactivar cursiva', 'quitar cursiva'];
+        const unitalicTriggers = ['desactivar cursiva', 'quitar cursiva', 'desactivar la cursiva', 'quitar la cursiva'];
         const unitalicCmd = unitalicTriggers.find(t => normalized.includes(t));
         if (unitalicCmd) {
             if (this.isItalicActive) {
@@ -1066,8 +1065,14 @@ class DocumentDictationHandler {
         }
 
         // --- SUBRAYADO ---
-        // CORRECCIÓN: Primero detectar "quitar subrayado" antes que "subrayado" a secas.
-        const ununderlineTriggers = ['desactivar subrayado', 'quitar subrayado'];
+        // CORRECCIÓN: Se agregan variantes con 'el' para evitar que quede "quitar" como texto.
+        const ununderlineTriggers = [
+            'desactivar subrayado',
+            'quitar subrayado',
+            'desactivar el subrayado',
+            'quitar el subrayado',
+            'eliminar subrayado'
+        ];
         const ununderlineCmd = ununderlineTriggers.find(t => normalized.includes(t));
         if (ununderlineCmd) {
             if (this.isUnderlineActive) {
