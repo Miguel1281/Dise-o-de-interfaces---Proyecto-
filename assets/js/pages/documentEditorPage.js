@@ -1007,24 +1007,11 @@ class DocumentDictationHandler {
             return;
         }
 
-        // === LÓGICA CORREGIDA: NO DESTRUCTIVA ===
-        // Si el comando está presente, lo ejecutamos, lo removemos del texto
-        // y permitimos que el resto del texto se escriba.
+        // === LÓGICA CORREGIDA: PRIMERO VERIFICAR "QUITAR/DESACTIVAR" ===
+        // Importante: Se verifica "desactivar" antes que "activar" porque "subrayado"
+        // podría estar contenido dentro de "quitar subrayado".
 
-        // Negrita
-        const boldTriggers = ['activar negrita', 'agregar negrita', 'poner negrita'];
-        const boldCmd = boldTriggers.find(t => normalized.includes(t));
-        if (boldCmd) {
-            if (!this.isBoldActive) {
-                this.isBoldActive = true;
-                this.finalHtml += '<b>';
-                this.ui.notifySuccess('Negrita activada');
-            } else {
-                this.ui.notifyInfo('La negrita ya está activa');
-            }
-            normalized = normalized.replace(boldCmd, '').trim();
-        }
-
+        // --- NEGRITA ---
         const unboldTriggers = ['desactivar negrita', 'quitar negrita'];
         const unboldCmd = unboldTriggers.find(t => normalized.includes(t));
         if (unboldCmd) {
@@ -1038,20 +1025,20 @@ class DocumentDictationHandler {
             normalized = normalized.replace(unboldCmd, '').trim();
         }
 
-        // Cursiva
-        const italicTriggers = ['activar cursiva', 'poner cursiva'];
-        const italicCmd = italicTriggers.find(t => normalized.includes(t));
-        if (italicCmd) {
-            if (!this.isItalicActive) {
-                this.isItalicActive = true;
-                this.finalHtml += '<i>';
-                this.ui.notifySuccess('Cursiva activada');
+        const boldTriggers = ['activar negrita', 'agregar negrita', 'poner negrita'];
+        const boldCmd = boldTriggers.find(t => normalized.includes(t));
+        if (boldCmd) {
+            if (!this.isBoldActive) {
+                this.isBoldActive = true;
+                this.finalHtml += '<b>';
+                this.ui.notifySuccess('Negrita activada');
             } else {
-                this.ui.notifyInfo('La cursiva ya está activa');
+                this.ui.notifyInfo('La negrita ya está activa');
             }
-            normalized = normalized.replace(italicCmd, '').trim();
+            normalized = normalized.replace(boldCmd, '').trim();
         }
 
+        // --- CURSIVA ---
         const unitalicTriggers = ['desactivar cursiva', 'quitar cursiva'];
         const unitalicCmd = unitalicTriggers.find(t => normalized.includes(t));
         if (unitalicCmd) {
@@ -1065,20 +1052,21 @@ class DocumentDictationHandler {
             normalized = normalized.replace(unitalicCmd, '').trim();
         }
 
-        // Subrayado
-        const underlineTriggers = ['activar subrayado', 'agregar subrayado', 'poner subrayado', 'subrayado'];
-        const underlineCmd = underlineTriggers.find(t => normalized.includes(t));
-        if (underlineCmd) {
-            if (!this.isUnderlineActive) {
-                this.isUnderlineActive = true;
-                this.finalHtml += '<u>';
-                this.ui.notifySuccess('Subrayado activado');
+        const italicTriggers = ['activar cursiva', 'poner cursiva'];
+        const italicCmd = italicTriggers.find(t => normalized.includes(t));
+        if (italicCmd) {
+            if (!this.isItalicActive) {
+                this.isItalicActive = true;
+                this.finalHtml += '<i>';
+                this.ui.notifySuccess('Cursiva activada');
             } else {
-                this.ui.notifyInfo('El subrayado ya está activo');
+                this.ui.notifyInfo('La cursiva ya está activa');
             }
-            normalized = normalized.replace(underlineCmd, '').trim();
+            normalized = normalized.replace(italicCmd, '').trim();
         }
 
+        // --- SUBRAYADO ---
+        // CORRECCIÓN: Primero detectar "quitar subrayado" antes que "subrayado" a secas.
         const ununderlineTriggers = ['desactivar subrayado', 'quitar subrayado'];
         const ununderlineCmd = ununderlineTriggers.find(t => normalized.includes(t));
         if (ununderlineCmd) {
@@ -1090,6 +1078,19 @@ class DocumentDictationHandler {
                 this.ui.notifyInfo('El subrayado ya está desactivado');
             }
             normalized = normalized.replace(ununderlineCmd, '').trim();
+        }
+
+        const underlineTriggers = ['activar subrayado', 'agregar subrayado', 'poner subrayado', 'subrayado'];
+        const underlineCmd = underlineTriggers.find(t => normalized.includes(t));
+        if (underlineCmd) {
+            if (!this.isUnderlineActive) {
+                this.isUnderlineActive = true;
+                this.finalHtml += '<u>';
+                this.ui.notifySuccess('Subrayado activado');
+            } else {
+                this.ui.notifyInfo('El subrayado ya está activo');
+            }
+            normalized = normalized.replace(underlineCmd, '').trim();
         }
 
         // Comandos especiales de edición
