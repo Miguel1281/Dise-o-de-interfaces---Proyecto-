@@ -76,7 +76,12 @@ class DocumentUI {
         this.commandHighlightClasses = ['ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-surface-dark'];
         this.activeHighlightChips = [];
 
+        // === GESTIÓN DE GUARDADO ===
+        this.storageKey = 'vozdoc_documents';
+        this.currentDocId = null;
+
         this.initializeCommandHelp();
+        this.loadDocumentFromURL();
     }
 
     injectDictationQuickCommand() {
@@ -146,6 +151,73 @@ class DocumentUI {
 
     bindMicToggle(handler) {
         this.micButton.addEventListener('click', handler);
+    }
+
+    // === GESTIÓN DE GUARDADO ===
+    saveDocument() {
+        const storage = typeof window !== 'undefined' ? window.localStorage : null;
+        if (!storage) {
+            this.notifyError('No se pudo acceder al almacenamiento local.');
+            return;
+        }
+
+        const title = (this.titleInput.value || '').trim() || 'Documento sin título';
+        const contentHTML = this.docEditor.innerHTML;
+        const contentText = this.docEditor.innerText;
+
+        // Si está vacío, avisamos pero permitimos guardar si tiene título
+        if (contentText.trim() === '' && title === 'Documento sin título') {
+            this.notifyInfo('El documento está vacío.');
+            return;
+        }
+
+        const docData = {
+            id: this.currentDocId || new Date().getTime(),
+            title: title,
+            contentHTML: contentHTML,
+            contentText: contentText,
+            lastModified: new Date().toISOString(),
+            preview: contentText.substring(0, 100)
+        };
+
+        let documents = JSON.parse(storage.getItem(this.storageKey) || '[]');
+
+        const existingIndex = documents.findIndex(d => d.id === docData.id);
+        if (existingIndex > -1) {
+            documents[existingIndex] = docData;
+        } else {
+            documents.unshift(docData);
+            this.currentDocId = docData.id; // Asignar ID si es nuevo
+        }
+
+        // Limitar a los últimos 20 documentos
+        if (documents.length > 20) {
+            documents = documents.slice(0, 20);
+        }
+
+        storage.setItem(this.storageKey, JSON.stringify(documents));
+
+        this.showSaveStatus('Guardado exitosamente', true);
+        this.notifySuccess('Documento guardado');
+    }
+
+    loadDocumentFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        const docId = params.get('docId');
+        if (!docId) return;
+
+        const storage = typeof window !== 'undefined' ? window.localStorage : null;
+        if (!storage) return;
+
+        const documents = JSON.parse(storage.getItem(this.storageKey) || '[]');
+        const doc = documents.find(d => d.id == docId);
+
+        if (doc) {
+            this.currentDocId = doc.id;
+            this.titleInput.value = doc.title || '';
+            this.docEditor.innerHTML = doc.contentHTML || '';
+            this.notifyInfo('Documento cargado');
+        }
     }
 
     promptExportFormat() {
@@ -779,7 +851,7 @@ class DocumentDictationHandler {
             return;
         }
 
-        // === NUEVO: Comandos de Ayuda y Pestañas ===
+        // === NUEVO: Comandos de Ayuda y Pestañas (CORREGIDO CON ACENTOS) ===
         if (/(ocultar|quitar|cerrar) ayuda/.test(normalized) || normalized.includes('entendido')) {
             this.ui.toggleHelpBox(false);
             return;
@@ -788,7 +860,8 @@ class DocumentDictationHandler {
             this.ui.toggleHelpBox(true);
             return;
         }
-        if (/(mostrar|ver|ir a) puntuacion/.test(normalized)) {
+        // Se agregan opciones con tilde para mejorar el reconocimiento
+        if (/(mostrar|ver|ir a) puntuaci[oó]n/.test(normalized)) {
             this.ui.activateTab('tab-panel-punctuation', true);
             return;
         }
@@ -796,7 +869,8 @@ class DocumentDictationHandler {
             this.ui.activateTab('tab-panel-formatting', true);
             return;
         }
-        if (/(mostrar|ver|ir a) correccion/.test(normalized) || /(mostrar|ver|ir a) editar/.test(normalized)) {
+        // Se agrega 'corrección' con tilde
+        if (/(mostrar|ver|ir a) correcci[oó]n/.test(normalized) || /(mostrar|ver|ir a) editar/.test(normalized)) {
             this.ui.activateTab('tab-panel-editing', true);
             return;
         }
@@ -956,11 +1030,10 @@ class DocumentDictationHandler {
             return;
         }
 
-        // Comandos de acciones (guardar, exportar) que también están en modo comando
+        // === MODIFICADO: Implementación real de guardar documento ===
         if (normalized.includes('guardar documento')) {
-            this.ui.showSaveStatus('Guardado', true);
+            this.ui.saveDocument(); // Llama al nuevo método real
             setTextContent(this.ui.statusText, 'Documento guardado');
-            this.ui.notifySuccess('Documento guardado');
             return;
         }
 
@@ -1103,10 +1176,10 @@ class DocumentCommandProcessor {
             return;
         }
 
+        // === MODIFICADO: Guardado Real ===
         if (command.includes('guardar documento')) {
-            this.ui.showSaveStatus('Guardado', true);
+            this.ui.saveDocument(); // Ejecuta el guardado en localStorage
             setTextContent(this.ui.statusText, 'Documento guardado');
-            this.ui.notifySuccess('Documento guardado');
             return;
         }
 
