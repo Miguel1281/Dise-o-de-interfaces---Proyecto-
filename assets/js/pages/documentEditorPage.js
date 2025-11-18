@@ -247,8 +247,8 @@ class DocumentUI {
     }
 
     promptExportFormat() {
-        setTextContent(this.statusText, '¿En qué formato deseas exportar? Di "Exportar en Word" o "Exportar en PDF".');
-        this.updateHelpText('Di "Exportar en Word" o "Exportar en PDF" para elegir un formato.');
+        setTextContent(this.statusText, '¿En qué formato deseas exportar?');
+        this.updateHelpText('');
         if (this.currentSidebarMode !== 'export') {
             this.previousSidebarMode = this.currentSidebarMode;
         }
@@ -987,7 +987,7 @@ class DocumentDictationHandler {
             return;
         }
 
-        if (normalized.includes('nuevo párrafo') || normalized.includes('punto y aparte')) {
+        if (normalized.includes('agregar nuevo párrafo') || normalized.includes('punto y aparte')) {
             this.finalHtml += '<br><br>';
             return;
         }
@@ -997,21 +997,22 @@ class DocumentDictationHandler {
             return;
         }
 
-        if (normalized.includes('coma')) {
+        if (normalized.includes('agregar coma')) {
             this.finalHtml = `${this.finalHtml.trim()}, `;
             return;
         }
 
-        if (normalized.includes('punto')) {
+        if (normalized.includes('agregar punto')) {
             this.finalHtml = `${this.finalHtml.trim()}. `;
             return;
         }
 
-        // === LÓGICA CORREGIDA ===
-        // Se han agregado variaciones con "el/la" para mejorar la detección.
+        // === LÓGICA CORREGIDA: PRIMERO VERIFICAR "QUITAR/DESACTIVAR" ===
+        // Importante: Se verifica "desactivar" antes que "activar" porque "subrayado"
+        // podría estar contenido dentro de "quitar subrayado".
 
         // --- NEGRITA ---
-        const unboldTriggers = ['desactivar negrita', 'quitar negrita', 'desactivar la negrita', 'quitar la negrita'];
+        const unboldTriggers = ['desactivar negrita', 'quitar negrita'];
         const unboldCmd = unboldTriggers.find(t => normalized.includes(t));
         if (unboldCmd) {
             if (this.isBoldActive) {
@@ -1024,7 +1025,7 @@ class DocumentDictationHandler {
             normalized = normalized.replace(unboldCmd, '').trim();
         }
 
-        const boldTriggers = ['activar negrita', 'agregar negrita', 'poner negrita'];
+        const boldTriggers = ['agregar negrita'];
         const boldCmd = boldTriggers.find(t => normalized.includes(t));
         if (boldCmd) {
             if (!this.isBoldActive) {
@@ -1038,7 +1039,7 @@ class DocumentDictationHandler {
         }
 
         // --- CURSIVA ---
-        const unitalicTriggers = ['desactivar cursiva', 'quitar cursiva', 'desactivar la cursiva', 'quitar la cursiva'];
+        const unitalicTriggers = ['desactivar cursiva', 'quitar cursiva'];
         const unitalicCmd = unitalicTriggers.find(t => normalized.includes(t));
         if (unitalicCmd) {
             if (this.isItalicActive) {
@@ -1065,14 +1066,8 @@ class DocumentDictationHandler {
         }
 
         // --- SUBRAYADO ---
-        // CORRECCIÓN: Se agregan variantes con 'el' para evitar que quede "quitar" como texto.
-        const ununderlineTriggers = [
-            'desactivar subrayado',
-            'quitar subrayado',
-            'desactivar el subrayado',
-            'quitar el subrayado',
-            'eliminar subrayado'
-        ];
+        // CORRECCIÓN: Primero detectar "quitar subrayado" antes que "subrayado" a secas.
+        const ununderlineTriggers = ['desactivar subrayado', 'quitar subrayado'];
         const ununderlineCmd = ununderlineTriggers.find(t => normalized.includes(t));
         if (ununderlineCmd) {
             if (this.isUnderlineActive) {
@@ -1280,15 +1275,10 @@ class DocumentCommandProcessor {
             return;
         }
 
-        if (command.includes('exportar')) {
-            const format = this.detectExportFormat(command);
-            if (format) {
-                this.executeExport(format);
-            } else {
-                this.awaitingExportFormat = true;
-                this.ui.notifySuccess('Exportar documento');
-                this.ui.promptExportFormat();
-            }
+        if (command.includes('exportar documento')) {
+            this.awaitingExportFormat = true;
+            this.ui.notifySuccess('¿En qué formato?');
+            this.ui.promptExportFormat();
             return;
         }
 
