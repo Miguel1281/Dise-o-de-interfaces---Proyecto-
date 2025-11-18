@@ -1,7 +1,6 @@
 import { createSpeechRecognition, isSpeechRecognitionSupported } from '../core/speechRecognitionFactory.js';
 import { RecognitionModeManager } from '../core/recognitionModeManager.js';
 import { FeedbackService } from '../core/feedbackService.js';
-// [MODIFICADO] Importado getOptionalElement
 import { getElement, getOptionalElement, setTextContent, setAriaLabel } from '../utils/dom.js';
 
 class DashboardUI {
@@ -12,9 +11,10 @@ class DashboardUI {
         this.statusText = getElement('.status-text', this.voiceContainer);
         this.pingAnimation = getElement('.ping-animation', this.voiceContainer);
 
-        // [NUEVO] Contenedor para los borradores
+        // [MODIFICADO] Contenedor y claves de almacenamiento múltiples
         this.draftsContainer = getOptionalElement('#drafts-container');
-        this.storageKey = 'vozdoc_mail_drafts';
+        this.mailStorageKey = 'vozdoc_mail_drafts';
+        this.docStorageKey = 'vozdoc_documents'; // Nueva clave para documentos
     }
 
     notifySuccess(message) {
@@ -69,7 +69,7 @@ class DashboardUI {
         setTextContent(this.statusText, message);
     }
 
-    // [NUEVO] Función para leer de localStorage y dibujar los borradores
+    // [MODIFICADO] Función unificada para renderizar correos Y documentos
     renderRecentDrafts() {
         if (!this.draftsContainer) {
             console.warn('No se encontró el contenedor de borradores #drafts-container');
@@ -82,37 +82,74 @@ class DashboardUI {
             return;
         }
 
-        const drafts = JSON.parse(storage.getItem(this.storageKey) || '[]');
+        // 1. Obtener correos
+        const mails = JSON.parse(storage.getItem(this.mailStorageKey) || '[]').map(item => ({
+            type: 'mail',
+            id: item.id,
+            title: item.asunto || 'Sin asunto',
+            snippet: item.cuerpo || 'Correo vacío',
+            dateRaw: item.fecha,
+            link: `CreacionDeCorreos.html?draftId=${item.id}`,
+            icon: 'mail',
+            label: 'Correo'
+        }));
+
+        // 2. Obtener documentos (¡Ahora sí los leemos!)
+        const docs = JSON.parse(storage.getItem(this.docStorageKey) || '[]').map(item => ({
+            type: 'document',
+            id: item.id,
+            title: item.title || 'Documento sin título',
+            snippet: item.contentText || 'Documento vacío', // Usamos el texto plano para la vista previa
+            dateRaw: item.lastModified,
+            link: `CreacionDeDocumentos.html?docId=${item.id}`,
+            icon: 'article',
+            label: 'Documento'
+        }));
+
+        // 3. Combinar y Ordenar por fecha (del más reciente al más antiguo)
+        const allItems = [...mails, ...docs].sort((a, b) => {
+            return new Date(b.dateRaw) - new Date(a.dateRaw);
+        });
+
         this.draftsContainer.innerHTML = ''; // Limpia el contenedor
 
-        if (drafts.length === 0) {
+        if (allItems.length === 0) {
             this.draftsContainer.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-full">No tienes borradores guardados.</p>`;
             return;
         }
 
-        // Dibuja cada borrador
-        drafts.forEach(draft => {
-            const snippet = (draft.cuerpo || 'Correo vacío').substring(0, 70);
-            const title = draft.asunto || 'Sin asunto';
-            // Formatea la fecha de forma amigable
-            const date = new Date(draft.fecha).toLocaleString('es-ES', {
+        // 4. Dibujar las tarjetas
+        allItems.forEach(item => {
+            const snippetText = item.snippet.substring(0, 70);
+
+            const date = new Date(item.dateRaw).toLocaleString('es-ES', {
                 day: 'numeric',
                 month: 'short',
                 hour: 'numeric',
                 minute: '2-digit'
             });
 
-            const draftCardHTML = `
-            <a href="CreacionDeCorreos.html?draftId=${draft.id}" class="flex flex-col gap-3 pb-3 group cursor-pointer">
-                <div class="w-full bg-gray-200 dark:bg-gray-700 aspect-[4/3] rounded-lg overflow-hidden transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2 group-hover:ring-offset-background-light dark:group-hover:ring-offset-background-dark p-4 flex">
-                    <p class="text-sm text-gray-700 dark:text-gray-300 break-words">${snippet}${draft.cuerpo.length > 70 ? '...' : ''}</p>
+            // Diferenciar visualmente documentos de correos (opcional, aquí uso el icono)
+            const iconColorClass = item.type === 'mail' ? 'text-primary' : 'text-emerald-600';
+            const iconBgClass = item.type === 'mail' ? 'bg-primary/10' : 'bg-emerald-600/10';
+
+            const cardHTML = `
+            <a href="${item.link}" class="flex flex-col gap-3 pb-3 group cursor-pointer">
+                <div class="w-full bg-gray-200 dark:bg-gray-700 aspect-[4/3] rounded-lg overflow-hidden relative transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2 group-hover:ring-offset-background-light dark:group-hover:ring-offset-background-dark p-4 flex flex-col">
+                    <div class="absolute top-3 right-3 ${iconBgClass} ${iconColorClass} p-1.5 rounded-md">
+                         <span class="material-symbols-outlined text-lg">${item.icon}</span>
+                    </div>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 break-words line-clamp-5">${snippetText}${item.snippet.length > 70 ? '...' : ''}</p>
                 </div>
                 <div>
-                    <p class="text-[#333333] dark:text-white text-base font-bold leading-normal truncate">${title}</p>
-                    <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Correo: Modificado ${date}</p>
+                    <p class="text-[#333333] dark:text-white text-base font-bold leading-normal truncate">${item.title}</p>
+                    <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal flex items-center gap-2">
+                       ${item.label} • ${date}
+                    </p>
                 </div>
             </a>`;
-            this.draftsContainer.innerHTML += draftCardHTML;
+
+            this.draftsContainer.innerHTML += cardHTML;
         });
     }
 }
@@ -155,7 +192,7 @@ function bootstrapDashboard() {
     const feedback = new FeedbackService();
     const ui = new DashboardUI(feedback);
 
-    // [NUEVO] Llama a la función para renderizar borradores al cargar la página
+    // [MODIFICADO] Llama a la función unificada
     ui.renderRecentDrafts();
 
     if (!isSpeechRecognitionSupported()) {

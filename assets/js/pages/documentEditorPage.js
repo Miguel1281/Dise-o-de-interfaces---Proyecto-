@@ -165,7 +165,6 @@ class DocumentUI {
         const contentHTML = this.docEditor.innerHTML;
         const contentText = this.docEditor.innerText;
 
-        // Si está vacío, avisamos pero permitimos guardar si tiene título
         if (contentText.trim() === '' && title === 'Documento sin título') {
             this.notifyInfo('El documento está vacío.');
             return;
@@ -187,10 +186,9 @@ class DocumentUI {
             documents[existingIndex] = docData;
         } else {
             documents.unshift(docData);
-            this.currentDocId = docData.id; // Asignar ID si es nuevo
+            this.currentDocId = docData.id;
         }
 
-        // Limitar a los últimos 20 documentos
         if (documents.length > 20) {
             documents = documents.slice(0, 20);
         }
@@ -218,6 +216,34 @@ class DocumentUI {
             this.docEditor.innerHTML = doc.contentHTML || '';
             this.notifyInfo('Documento cargado');
         }
+    }
+
+    // === MODIFICADO: Funciones para dictado de título ===
+    showDictatingTitle() {
+        setTextContent(this.statusText, 'Dictando título...');
+        this.updateHelpText('Di el nuevo título del documento.');
+        this.updateBadge('Título', 'listening');
+        this.micButton.classList.remove('bg-slate-200', 'text-primary');
+        this.micButton.classList.add('bg-primary', 'text-white');
+
+        // Enfocar el input del título
+        this.titleInput.focus();
+        this.titleInput.select();
+        this.titleInput.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+    }
+
+    setTitle(text) {
+        if (!text) return;
+        // Capitalizar primera letra
+        const formatted = text.charAt(0).toUpperCase() + text.slice(1);
+        this.titleInput.value = formatted;
+        this.titleInput.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+    }
+
+    returnFocusToEditor() {
+        this.docEditor.focus();
+        // Mover cursor al final
+        this.placeCursorAtEnd();
     }
 
     promptExportFormat() {
@@ -789,6 +815,7 @@ class DocumentDictationHandler {
         this.finalHtml = '';
         this.isBoldActive = false;
         this.isItalicActive = false;
+        this.isUnderlineActive = false; // AÑADIDO: Estado para el subrayado
     }
 
     onEnterDictationMode() {
@@ -851,7 +878,7 @@ class DocumentDictationHandler {
             return;
         }
 
-        // === NUEVO: Comandos de Ayuda y Pestañas (CORREGIDO CON ACENTOS) ===
+        // === NUEVO: Comandos de Ayuda y Pestañas ===
         if (/(ocultar|quitar|cerrar) ayuda/.test(normalized) || normalized.includes('entendido')) {
             this.ui.toggleHelpBox(false);
             return;
@@ -980,7 +1007,8 @@ class DocumentDictationHandler {
             return;
         }
 
-        if (normalized.includes('activar negrita')) {
+        // === MODIFICADO: Lógica corregida para Negrita (Agregar/Poner/Activar) ===
+        if (normalized.includes('activar negrita') || normalized.includes('agregar negrita') || normalized.includes('poner negrita')) {
             if (!this.isBoldActive) {
                 this.isBoldActive = true;
                 this.finalHtml += '<b>';
@@ -988,16 +1016,39 @@ class DocumentDictationHandler {
             } else {
                 this.ui.notifyInfo('La negrita ya está activa');
             }
-            return;
+            return; // IMPORTANTE: El return evita que se escriba el comando
         }
 
-        if (normalized.includes('desactivar negrita')) {
+        if (normalized.includes('desactivar negrita') || normalized.includes('quitar negrita')) {
             if (this.isBoldActive) {
                 this.isBoldActive = false;
                 this.finalHtml += '</b>';
                 this.ui.notifySuccess('Negrita desactivada');
             } else {
                 this.ui.notifyInfo('La negrita ya está desactivada');
+            }
+            return;
+        }
+
+        // === NUEVO: Lógica implementada para Subrayado (Agregar/Poner/Activar) ===
+        if (normalized.includes('activar subrayado') || normalized.includes('agregar subrayado') || normalized.includes('poner subrayado') || normalized.includes('subrayado')) {
+            if (!this.isUnderlineActive) {
+                this.isUnderlineActive = true;
+                this.finalHtml += '<u>';
+                this.ui.notifySuccess('Subrayado activado');
+            } else {
+                this.ui.notifyInfo('El subrayado ya está activo');
+            }
+            return; // IMPORTANTE: El return evita que se escriba el comando
+        }
+
+        if (normalized.includes('desactivar subrayado') || normalized.includes('quitar subrayado')) {
+            if (this.isUnderlineActive) {
+                this.isUnderlineActive = false;
+                this.finalHtml += '</u>';
+                this.ui.notifySuccess('Subrayado desactivado');
+            } else {
+                this.ui.notifyInfo('El subrayado ya está desactivado');
             }
             return;
         }
@@ -1063,6 +1114,12 @@ class DocumentDictationHandler {
             this.finalHtml += '</i>';
             this.isItalicActive = false;
         }
+
+        // === AÑADIDO: Cierre de etiqueta de subrayado ===
+        if (this.isUnderlineActive) {
+            this.finalHtml += '</u>';
+            this.isUnderlineActive = false;
+        }
     }
 
     removeLastWord() {
@@ -1083,11 +1140,13 @@ class DocumentCommandProcessor {
             ui,
             speechService,
             onStartDictation,
+            onDictateTitle // NUEVO CALLBACK
         } = options;
 
         this.ui = ui;
         this.speechService = speechService;
         this.onStartDictation = onStartDictation;
+        this.onDictateTitle = onDictateTitle;
         this.awaitingExportFormat = false;
         this.exportInProgress = false;
     }
@@ -1166,6 +1225,16 @@ class DocumentCommandProcessor {
             return;
         }
 
+        // === MODIFICADO: Lógica inteligente para el título ===
+        // Si el usuario dice EXACTAMENTE "poner título" o "agregar título" -> MODO DICTADO DE TÍTULO
+        if (command === 'poner título' || command === 'agregar título' || command === 'cambiar título') {
+            if (this.onDictateTitle) {
+                this.onDictateTitle();
+                return;
+            }
+        }
+
+        // Si dice "poner título [algo]", usa la lógica rápida antigua
         if (command.startsWith('poner título')) {
             this.applyTitleUpdate(command);
             return;
@@ -1320,12 +1389,14 @@ function bootstrapDocumentPage() {
     const dictationHandler = new DocumentDictationHandler(ui);
     const speechService = new SpeechSynthesisService({ lang: 'es-ES' });
 
-    let dictationModeConfig;
+    let dictationModeConfig, dictateTitleModeConfig;
 
+    // === CONFIGURACIÓN DEL PROCESADOR DE COMANDOS ===
     const commandProcessor = new DocumentCommandProcessor({
         ui,
         speechService,
         onStartDictation: () => modeManager.switchTo(dictationModeConfig),
+        onDictateTitle: () => modeManager.switchTo(dictateTitleModeConfig) // Conectamos el nuevo modo
     });
 
     const commandModeConfig = {
@@ -1355,8 +1426,36 @@ function bootstrapDocumentPage() {
         },
     };
 
+    // === NUEVO MODO: DICTAR TÍTULO ===
+    dictateTitleModeConfig = {
+        name: 'dictateTitle',
+        continuous: false,
+        interimResults: false,
+        onEnter: () => {
+            ui.showDictatingTitle();
+        },
+        onResult: (event) => {
+            const transcript = event.results[0][0].transcript;
+            ui.setTitle(transcript);
+            ui.notifySuccess('Título actualizado');
+
+            // Volver inmediatamente al modo comando y enfocar el editor
+            modeManager.switchTo(commandModeConfig);
+            ui.returnFocusToEditor();
+        },
+        onEnd: () => {
+            // Si el usuario no dijo nada y el reconocimiento se detuvo, volvemos a comandos
+            if (modeManager.isModeActive('dictateTitle')) {
+                modeManager.switchTo(commandModeConfig);
+            }
+        }
+    };
+
     ui.bindMicToggle(() => {
         if (modeManager.isModeActive('dictation')) {
+            modeManager.switchTo(commandModeConfig);
+        } else if (modeManager.isModeActive('dictateTitle')) {
+            // Si cancelan mientras dictan título, volver a comandos
             modeManager.switchTo(commandModeConfig);
         } else {
             commandProcessor.cancelPendingExport({ silent: true });
