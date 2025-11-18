@@ -1007,8 +1007,14 @@ class DocumentDictationHandler {
             return;
         }
 
-        // === MODIFICADO: Lógica corregida para Negrita (Agregar/Poner/Activar) ===
-        if (normalized.includes('activar negrita') || normalized.includes('agregar negrita') || normalized.includes('poner negrita')) {
+        // === LÓGICA CORREGIDA: NO DESTRUCTIVA ===
+        // Si el comando está presente, lo ejecutamos, lo removemos del texto
+        // y permitimos que el resto del texto se escriba.
+
+        // Negrita
+        const boldTriggers = ['activar negrita', 'agregar negrita', 'poner negrita'];
+        const boldCmd = boldTriggers.find(t => normalized.includes(t));
+        if (boldCmd) {
             if (!this.isBoldActive) {
                 this.isBoldActive = true;
                 this.finalHtml += '<b>';
@@ -1016,10 +1022,12 @@ class DocumentDictationHandler {
             } else {
                 this.ui.notifyInfo('La negrita ya está activa');
             }
-            return; // IMPORTANTE: El return evita que se escriba el comando
+            normalized = normalized.replace(boldCmd, '').trim();
         }
 
-        if (normalized.includes('desactivar negrita') || normalized.includes('quitar negrita')) {
+        const unboldTriggers = ['desactivar negrita', 'quitar negrita'];
+        const unboldCmd = unboldTriggers.find(t => normalized.includes(t));
+        if (unboldCmd) {
             if (this.isBoldActive) {
                 this.isBoldActive = false;
                 this.finalHtml += '</b>';
@@ -1027,33 +1035,13 @@ class DocumentDictationHandler {
             } else {
                 this.ui.notifyInfo('La negrita ya está desactivada');
             }
-            return;
+            normalized = normalized.replace(unboldCmd, '').trim();
         }
 
-        // === NUEVO: Lógica implementada para Subrayado (Agregar/Poner/Activar) ===
-        if (normalized.includes('activar subrayado') || normalized.includes('agregar subrayado') || normalized.includes('poner subrayado') || normalized.includes('subrayado')) {
-            if (!this.isUnderlineActive) {
-                this.isUnderlineActive = true;
-                this.finalHtml += '<u>';
-                this.ui.notifySuccess('Subrayado activado');
-            } else {
-                this.ui.notifyInfo('El subrayado ya está activo');
-            }
-            return; // IMPORTANTE: El return evita que se escriba el comando
-        }
-
-        if (normalized.includes('desactivar subrayado') || normalized.includes('quitar subrayado')) {
-            if (this.isUnderlineActive) {
-                this.isUnderlineActive = false;
-                this.finalHtml += '</u>';
-                this.ui.notifySuccess('Subrayado desactivado');
-            } else {
-                this.ui.notifyInfo('El subrayado ya está desactivado');
-            }
-            return;
-        }
-
-        if (normalized.includes('activar cursiva')) {
+        // Cursiva
+        const italicTriggers = ['activar cursiva', 'poner cursiva'];
+        const italicCmd = italicTriggers.find(t => normalized.includes(t));
+        if (italicCmd) {
             if (!this.isItalicActive) {
                 this.isItalicActive = true;
                 this.finalHtml += '<i>';
@@ -1061,10 +1049,12 @@ class DocumentDictationHandler {
             } else {
                 this.ui.notifyInfo('La cursiva ya está activa');
             }
-            return;
+            normalized = normalized.replace(italicCmd, '').trim();
         }
 
-        if (normalized.includes('desactivar cursiva')) {
+        const unitalicTriggers = ['desactivar cursiva', 'quitar cursiva'];
+        const unitalicCmd = unitalicTriggers.find(t => normalized.includes(t));
+        if (unitalicCmd) {
             if (this.isItalicActive) {
                 this.isItalicActive = false;
                 this.finalHtml += '</i>';
@@ -1072,30 +1062,58 @@ class DocumentDictationHandler {
             } else {
                 this.ui.notifyInfo('La cursiva ya está desactivada');
             }
-            return;
+            normalized = normalized.replace(unitalicCmd, '').trim();
         }
 
+        // Subrayado
+        const underlineTriggers = ['activar subrayado', 'agregar subrayado', 'poner subrayado', 'subrayado'];
+        const underlineCmd = underlineTriggers.find(t => normalized.includes(t));
+        if (underlineCmd) {
+            if (!this.isUnderlineActive) {
+                this.isUnderlineActive = true;
+                this.finalHtml += '<u>';
+                this.ui.notifySuccess('Subrayado activado');
+            } else {
+                this.ui.notifyInfo('El subrayado ya está activo');
+            }
+            normalized = normalized.replace(underlineCmd, '').trim();
+        }
+
+        const ununderlineTriggers = ['desactivar subrayado', 'quitar subrayado'];
+        const ununderlineCmd = ununderlineTriggers.find(t => normalized.includes(t));
+        if (ununderlineCmd) {
+            if (this.isUnderlineActive) {
+                this.isUnderlineActive = false;
+                this.finalHtml += '</u>';
+                this.ui.notifySuccess('Subrayado desactivado');
+            } else {
+                this.ui.notifyInfo('El subrayado ya está desactivado');
+            }
+            normalized = normalized.replace(ununderlineCmd, '').trim();
+        }
+
+        // Comandos especiales de edición
         if (normalized.includes('borrar última palabra')) {
             this.removeLastWord();
             this.ui.notifySuccess('Última palabra eliminada');
             return;
         }
 
-        // === MODIFICADO: Implementación real de guardar documento ===
         if (normalized.includes('guardar documento')) {
-            this.ui.saveDocument(); // Llama al nuevo método real
+            this.ui.saveDocument();
             setTextContent(this.ui.statusText, 'Documento guardado');
             return;
         }
 
         if (normalized.includes('exportar')) {
-            // No podemos llamar a this.commandProcessor.executeExport, así que replicamos la lógica
             this.ui.notifyError('Función no disponible en dictado. Di "Terminar redacción" y luego "Exportar".');
-            // O, si commandProcessor fuera accesible:
-            // commandProcessor.handleCommand(normalized);
             return;
         }
 
+        // Si después de procesar comandos queda texto, lo añadimos
+        if (!normalized) {
+            return;
+        }
 
         if (normalized.endsWith('.')) {
             normalized = normalized.slice(0, -1);
@@ -1152,7 +1170,10 @@ class DocumentCommandProcessor {
     }
 
     handleRecognitionEvent(event) {
-        const command = event.results[0][0].transcript.toLowerCase().trim();
+        const raw = event.results[0][0].transcript.toLowerCase().trim();
+        // Remove trailing punctuation (.,;) to ensure commands match exactly
+        const command = raw.replace(/[.,;!]+$/, '').trim();
+
         this.ui.showLastCommand(command);
         this.handleCommand(command);
     }
@@ -1226,17 +1247,18 @@ class DocumentCommandProcessor {
         }
 
         // === MODIFICADO: Lógica inteligente para el título ===
-        // Si el usuario dice EXACTAMENTE "poner título" o "agregar título" -> MODO DICTADO DE TÍTULO
-        if (command === 'poner título' || command === 'agregar título' || command === 'cambiar título') {
+        // Si el usuario dice EXACTAMENTE "poner título", "agregar título" o "cambiar título" -> MODO DICTADO DE TÍTULO
+        if (['poner título', 'agregar título', 'cambiar título'].includes(command)) {
             if (this.onDictateTitle) {
                 this.onDictateTitle();
                 return;
             }
         }
 
-        // Si dice "poner título [algo]", usa la lógica rápida antigua
-        if (command.startsWith('poner título')) {
-            this.applyTitleUpdate(command);
+        // Check for one-shot commands with variable prefixes
+        const titleTrigger = ['poner título', 'agregar título', 'cambiar título'].find(t => command.startsWith(t));
+        if (titleTrigger) {
+            this.applyTitleUpdate(command, titleTrigger);
             return;
         }
 
@@ -1336,8 +1358,8 @@ class DocumentCommandProcessor {
         this.ui.cancelExportPrompt();
     }
 
-    applyTitleUpdate(command) {
-        let newTitle = command.replace('poner título', '').trim();
+    applyTitleUpdate(command, triggerPhrase = 'poner título') {
+        let newTitle = command.replace(triggerPhrase, '').trim();
         newTitle = newTitle.replace(/^[,\.\s]+/, '');
 
         if (!newTitle) {
