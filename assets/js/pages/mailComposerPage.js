@@ -256,26 +256,40 @@ class MailComposerUI {
     }
 
     openAttachmentPicker({ fromCommand = true } = {}) {
-        // MODIFICADO: 'picker' ahora solo apunta al input oculto
         const picker = this.attachmentInput;
-        if (!picker || typeof picker.click !== 'function') {
-            this.setStatusText('No se encontró el selector de archivos');
-            this.setStatusSubtext('Adjunta el archivo manualmente');
-            this.notifyError('No se pudo abrir el explorador de archivos');
+
+        // Validación de seguridad
+        if (!picker) {
+            this.setStatusText('Error técnico');
+            this.setStatusSubtext('No se encuentra el componente de carga');
+            this.notifyError('Error: Input de archivo no encontrado en el DOM');
             return;
         }
 
         try {
+            // 1. Limpiamos el valor previo para permitir seleccionar el mismo archivo si el usuario se equivocó antes
+            picker.value = '';
+
+            // 2. Ejecutamos el clic. 
+            // NOTA DE DISEÑO: Debido a restricciones de seguridad del navegador, 
+            // el comando de voz debe ser muy rápido o el navegador podría bloquear este popup 
+            // considerándolo "no solicitado por el usuario".
             picker.click();
+
+            // 3. Feedback auditivo y visual inmediato
             if (fromCommand) {
-                this.setStatusText('Selecciona el archivo a adjuntar');
-                this.setStatusSubtext('Se abrió el explorador de archivos');
-                this.notifyInfo('Elige el archivo que necesitas adjuntar');
+                this.setStatusText('Abriendo explorador...');
+                this.setStatusSubtext('Selecciona el archivo en la ventana emergente');
+                this.notifyInfo('Abriendo explorador de archivos. Mira tu barra de tareas si no aparece.');
+
+                // Ayuda visual: flashear el chip correspondiente si existe
+                this.flashCommandChip('adjuntar archivo');
             }
         } catch (error) {
-            this.setStatusText('No se pudo abrir el explorador');
-            this.setStatusSubtext('Adjunta el archivo manualmente');
-            this.notifyError('No se pudo abrir el explorador de archivos');
+            console.error('Error al intentar abrir el selector de archivos:', error);
+            this.setStatusText('Acción bloqueada');
+            this.setStatusSubtext('El navegador impidió abrir la ventana');
+            this.notifyError('El navegador bloqueó la ventana. Por favor, haz clic manualmente en el icono de adjuntar.');
         }
     }
 
