@@ -270,6 +270,23 @@
                 <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Acciones
                   principales</h2>
                 <div class="space-y-1">
+
+                  <div data-command-chip data-command-label="Agregar título"
+                    data-command-trigger="agregar título|poner título|cambiar título"
+                    class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agregar título [texto]"</h3>
+                      <button type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        data-command-toggle data-command-label="Agregar título" aria-expanded="false"
+                        aria-label="Mostrar descripción de Agregar título">
+                        <span class="material-symbols-outlined text-sm">help</span>
+                      </button>
+                    </div>
+                    <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">
+                      Define el nombre del documento (ej. "Agregar título Reporte Mensual").</p>
+                  </div>
+
                   <div data-command-chip data-command-label="Abrir documento" data-command-trigger="abrir documento"
                     class="voice-chip rounded-2xl border border-border-light/70 bg-white/70 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                     <div class="flex items-start justify-between gap-3">
@@ -379,7 +396,7 @@
 
               <div id="dictation-quick-command" data-command-chip data-command-label="Terminar redacción"
                 data-command-trigger="terminar redacción|detener dictado|poner punto final"
-                class="voice-chip hidden rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                class="voice-chip hidden rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
                 <div class="flex items-start justify-between gap-3">
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Terminar redacción"</h3>
                   <button type="button"
@@ -400,197 +417,222 @@
                   class="tab-button flex-1 text-center" aria-selected="false">Formato</button>
                 <button id="tab-btn-editing" data-tab-target="tab-panel-editing" class="tab-button flex-1 text-center"
                   aria-selected="false">Corrección</button>
-                <button id="tab-btn-actions" data-tab-target="tab-panel-actions" class="tab-button flex-1 text-center"
-                  aria-selected="false">Acciones</button>
               </div>
 
-              <div data-command-chip data-command-label="Agregar coma" data-command-trigger="agregar coma|insertar coma"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agregar coma"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Agregar coma" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
+              <div id="tab-panel-punctuation" class="space-y-2 tab-panel">
+                <div data-command-chip data-command-label="Agregar coma"
+                  data-command-trigger="agregar coma|insertar coma"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agregar coma"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Agregar coma" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inserta una
+                    coma.</p>
                 </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inserta una
-                  coma.</p>
+
+                <div data-command-chip data-command-label="Agregar punto"
+                  data-command-trigger="agregar punto|insertar punto"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agregar punto"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Agregar punto" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Cierra la
+                    oración actual.</p>
+                </div>
+
+                <div data-command-chip data-command-label="Agregar nuevo párrafo"
+                  data-command-trigger="agregar nuevo párrafo|punto y aparte"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agregar nuevo párrafo"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Agregar nuevo párrafo" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Salta dos
+                    líneas.</p>
+                </div>
               </div>
 
-              <div data-command-chip data-command-label="Agregar punto"
-                data-command-trigger="agregar punto|insertar punto"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agregar punto"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Agregar punto" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
+              <div id="tab-panel-formatting" class="space-y-2 tab-panel hidden">
+                <div data-command-chip data-command-label="Activar negrita"
+                  data-command-trigger="activar negrita|poner negrita"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Activar negrita"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Activar negrita" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">
+                    Resalta el texto siguiente.</p>
                 </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Cierra la
-                  oración actual.</p>
-              </div>
-              <div data-command-chip data-command-label="Agregar nuevo párrafo"
-                data-command-trigger="agregar nuevo párrafo|punto y aparte"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agregar nuevo párrafo"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Agregar nuevo párrafo" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
-                </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Salta dos
-                  líneas.</p>
-              </div>
-            </div>
 
-            <div id="tab-panel-formatting" class="space-y-2 tab-panel hidden">
-              <div data-command-chip data-command-label="Negrita"
-                data-command-trigger="negrita|activar negrita|texto en negrita"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Negrita"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Negrita" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
+                <div data-command-chip data-command-label="Desactivar negrita"
+                  data-command-trigger="desactivar negrita|quitar negrita"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Desactivar negrita"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Desactivar negrita" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">
+                    Vuelve a escribir en texto normal.</p>
                 </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">
-                  Activa/desactiva la negrita.</p>
-              </div>
-              <div data-command-chip data-command-label="Subrayado" data-command-trigger="subrayado|activar subrayado"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Subrayado"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Subrayado" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
-                </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">
-                  Activa/desactiva el subrayado.</p>
-              </div>
-              <div data-command-chip data-command-label="Poner título" data-command-trigger="poner título"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Poner título [texto]"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Poner título" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
-                </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Cambia el
-                  título del documento.</p>
-              </div>
-            </div>
 
-            <div id="tab-panel-editing" class="space-y-2 tab-panel hidden">
-              <div data-command-chip data-command-label="Deshacer" data-command-trigger="deshacer|undo"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Deshacer"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Deshacer" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
+                <div data-command-chip data-command-label="Activar cursiva"
+                  data-command-trigger="activar cursiva|poner cursiva"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Activar cursiva"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Activar cursiva" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">
+                    Inclina el texto siguiente (Itálica).</p>
                 </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Revierte la
-                  última acción.</p>
-              </div>
-              <div data-command-chip data-command-label="Borrar última palabra"
-                data-command-trigger="borrar última palabra|eliminar última palabra"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar última palabra"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Borrar última palabra" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
-                </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Elimina la
-                  última palabra.</p>
-              </div>
-              <div data-command-chip data-command-label="Borrar oración"
-                data-command-trigger="borrar oración|eliminar oración"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar oración"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Borrar oración" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
-                </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Elimina la
-                  oración más reciente.</p>
-              </div>
-              <div data-command-chip data-command-label="Borrar último párrafo"
-                data-command-trigger="borrar último párrafo|eliminar último párrafo"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar último párrafo"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Borrar último párrafo" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
-                </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Quita el
-                  párrafo anterior.</p>
-              </div>
-            </div>
 
-            <div id="tab-panel-actions" class="space-y-2 tab-panel hidden">
-              <div data-command-chip data-command-label="Terminar redacción"
-                data-command-trigger="terminar redacción|detener dictado|parar redacción"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Terminar redacción"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Terminar redacción" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
+                <div data-command-chip data-command-label="Desactivar cursiva"
+                  data-command-trigger="desactivar cursiva|quitar cursiva"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Desactivar cursiva"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Desactivar cursiva" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">
+                    Deja de aplicar cursiva.</p>
                 </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Vuelve al
-                  modo comandos.</p>
-              </div>
-              <div data-command-chip data-command-label="Guardar documento"
-                data-command-trigger="guardar documento|guardar cambios"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Guardar documento"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Guardar documento" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
+
+                <div data-command-chip data-command-label="Activar subrayado"
+                  data-command-trigger="activar subrayado|poner subrayado"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Activar subrayado"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Activar subrayado" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">
+                    Subraya el texto siguiente.</p>
                 </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Guarda tu
-                  progreso.</p>
-              </div>
-              <div data-command-chip data-command-label="Exportar documento" data-command-trigger="exportar documento"
-                class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                <div class="flex items-start justify-between gap-3">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Exportar documento"</h3>
-                  <button type="button"
-                    class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                    data-command-toggle data-command-label="Exportar documento" aria-expanded="false">
-                    <span class="material-symbols-outlined text-sm">help</span>
-                  </button>
+
+                <div data-command-chip data-command-label="Desactivar subrayado"
+                  data-command-trigger="desactivar subrayado|quitar subrayado"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Desactivar subrayado"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Desactivar subrayado" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">
+                    Deja de subrayar el texto.</p>
                 </div>
-                <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inicia la
-                  exportación a PDF/Word.</p>
+
+                <div data-command-chip data-command-label="Poner título" data-command-trigger="poner título"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Poner título [texto]"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Poner título" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Cambia el
+                    título del documento.</p>
+                </div>
               </div>
+
+              <div id="tab-panel-editing" class="space-y-2 tab-panel hidden">
+                <div data-command-chip data-command-label="Deshacer" data-command-trigger="deshacer|undo"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Deshacer"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Deshacer" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Revierte la
+                    última acción.</p>
+                </div>
+
+                <div data-command-chip data-command-label="Borrar última palabra"
+                  data-command-trigger="borrar última palabra|eliminar última palabra"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar última palabra"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Borrar última palabra" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Elimina la
+                    última palabra.</p>
+                </div>
+
+                <div data-command-chip data-command-label="Borrar oración"
+                  data-command-trigger="borrar oración|eliminar oración"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar oración"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Borrar oración" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Elimina la
+                    oración más reciente.</p>
+                </div>
+
+                <div data-command-chip data-command-label="Borrar último párrafo"
+                  data-command-trigger="borrar último párrafo|eliminar último párrafo"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-2 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar último párrafo"</h3>
+                    <button type="button"
+                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      data-command-toggle data-command-label="Borrar último párrafo" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Quita el
+                    párrafo anterior.</p>
+                </div>
+              </div>
+
             </div>
 
           </div>

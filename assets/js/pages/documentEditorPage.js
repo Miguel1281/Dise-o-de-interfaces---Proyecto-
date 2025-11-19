@@ -838,20 +838,43 @@ class DocumentDictationHandler {
 
         for (let index = event.resultIndex; index < event.results.length; index += 1) {
             const result = event.results[index];
-            const transcript = result[0].transcript;
-            const normalized = transcript.toLowerCase();
+            let transcript = result[0].transcript;
 
-            if (normalized.includes('terminar redacción')) {
+            // Normalización robusta: minúsculas y sin puntuación básica para asegurar la detección
+            const normalized = transcript.toLowerCase().replace(/[.,;!¡¿?]/g, '').trim();
+
+            // Comandos de parada definidos
+            const stopCommands = ['terminar redacción', 'detener dictado', 'parar redacción'];
+
+            // Verificamos si ALGUNO de los comandos está presente en lo que dijiste
+            const foundCommand = stopCommands.find(cmd => normalized.includes(cmd));
+
+            if (foundCommand) {
                 shouldStop = true;
+
+                // [MEJORA CRÍTICA] Regex dinámica para limpiar el comando respetando puntuación intermedia
+                // Esto soluciona casos como "terminar, redacción" o "terminar... redacción"
+                // Creamos un patrón que permite caracteres no alfabéticos entre las palabras del comando
+                const words = foundCommand.split(' ');
+                const pattern = words.join('[\\s\\.,;!¡¿?]*');
+                const cleanupRegex = new RegExp(pattern, 'gi');
+
+                // Borramos el comando del texto, dejando solo lo que hayas dicho antes
+                transcript = transcript.replace(cleanupRegex, '').trim();
             }
 
-            if (result.isFinal && !shouldStop) {
-                finalSegment += `${transcript.trim()} `;
-            } else if (!result.isFinal && !shouldStop) {
-                interimTranscript += transcript;
+            if (result.isFinal) {
+                finalSegment += `${transcript} `; // transcript ya está limpio aquí
+            } else {
+                // Solo acumulamos el interim si NO vamos a parar. 
+                // Si vamos a parar, ignoramos el interim del comando para que no se vea "transparente".
+                if (!shouldStop) {
+                    interimTranscript += transcript;
+                }
             }
         }
 
+        // Procesamos solo si quedó texto útil (ej. "Hola mundo" antes de "terminar redacción")
         if (finalSegment.trim()) {
             this.processFinalTranscript(finalSegment);
             if (callbacks.onChange) {
@@ -859,21 +882,30 @@ class DocumentDictationHandler {
             }
         }
 
-        this.ui.updateEditorPreview(this.finalHtml, interimTranscript);
-        this.ui.placeCursorAtEnd();
-
+        // [LÓGICA DE PARADA MEJORADA]
         if (shouldStop) {
-            this.finalHtml = this.ui.captureEditorContent().replace(/terminar redacción/gi, '').trim();
+            // 1. Forzamos la actualización de la vista previa con un string VACÍO para borrar lo "transparente"
+            this.ui.updateEditorPreview(this.finalHtml, '');
+
+            // 2. Confirmamos el contenido final limpio
             this.ui.commitEditorContent(this.finalHtml);
+
+            // 3. Notificamos y apagamos
             this.ui.notifySuccess('Dictado detenido');
             if (callbacks.onStop) {
                 callbacks.onStop();
             }
+        } else {
+            // Comportamiento normal: mostramos lo que estás diciendo
+            this.ui.updateEditorPreview(this.finalHtml, interimTranscript);
+            this.ui.placeCursorAtEnd();
         }
     }
 
+
     processFinalTranscript(transcript) {
-        let normalized = transcript.toLowerCase().trim();
+        let normalized = transcript.toLowerCase().replace(/[.,;]/g, '').trim();
+
         if (!normalized) {
             return;
         }
@@ -899,10 +931,6 @@ class DocumentDictationHandler {
         // Se agrega 'corrección' con tilde
         if (/(mostrar|ver|ir a) correcci[oó]n/.test(normalized) || /(mostrar|ver|ir a) editar/.test(normalized)) {
             this.ui.activateTab('tab-panel-editing', true);
-            return;
-        }
-        if (/(mostrar|ver|ir a) acciones/.test(normalized)) {
-            this.ui.activateTab('tab-panel-actions', true);
             return;
         }
         // ======================================
@@ -1012,7 +1040,7 @@ class DocumentDictationHandler {
         // podría estar contenido dentro de "quitar subrayado".
 
         // --- NEGRITA ---
-        const unboldTriggers = ['desactivar negrita', 'quitar negrita'];
+        const unboldTriggers = ['desactivar negrita'];
         const unboldCmd = unboldTriggers.find(t => normalized.includes(t));
         if (unboldCmd) {
             if (this.isBoldActive) {
@@ -1025,7 +1053,7 @@ class DocumentDictationHandler {
             normalized = normalized.replace(unboldCmd, '').trim();
         }
 
-        const boldTriggers = ['agregar negrita'];
+        const boldTriggers = ['activar negrita'];
         const boldCmd = boldTriggers.find(t => normalized.includes(t));
         if (boldCmd) {
             if (!this.isBoldActive) {
@@ -1039,7 +1067,7 @@ class DocumentDictationHandler {
         }
 
         // --- CURSIVA ---
-        const unitalicTriggers = ['desactivar cursiva', 'quitar cursiva'];
+        const unitalicTriggers = ['desactivar cursiva'];
         const unitalicCmd = unitalicTriggers.find(t => normalized.includes(t));
         if (unitalicCmd) {
             if (this.isItalicActive) {
@@ -1052,7 +1080,7 @@ class DocumentDictationHandler {
             normalized = normalized.replace(unitalicCmd, '').trim();
         }
 
-        const italicTriggers = ['activar cursiva', 'poner cursiva'];
+        const italicTriggers = ['activar cursiva'];
         const italicCmd = italicTriggers.find(t => normalized.includes(t));
         if (italicCmd) {
             if (!this.isItalicActive) {
@@ -1067,7 +1095,7 @@ class DocumentDictationHandler {
 
         // --- SUBRAYADO ---
         // CORRECCIÓN: Primero detectar "quitar subrayado" antes que "subrayado" a secas.
-        const ununderlineTriggers = ['desactivar subrayado', 'quitar subrayado'];
+        const ununderlineTriggers = ['desactivar subrayado'];
         const ununderlineCmd = ununderlineTriggers.find(t => normalized.includes(t));
         if (ununderlineCmd) {
             if (this.isUnderlineActive) {
@@ -1077,10 +1105,12 @@ class DocumentDictationHandler {
             } else {
                 this.ui.notifyInfo('El subrayado ya está desactivado');
             }
+            // Limpiamos el comando del texto para que no se escriba
             normalized = normalized.replace(ununderlineCmd, '').trim();
         }
 
-        const underlineTriggers = ['activar subrayado', 'agregar subrayado', 'poner subrayado', 'subrayado'];
+        // 2. Detectar activación (Incluye "poner" para coincidir con el chip)
+        const underlineTriggers = ['activar subrayado'];
         const underlineCmd = underlineTriggers.find(t => normalized.includes(t));
         if (underlineCmd) {
             if (!this.isUnderlineActive) {
@@ -1090,6 +1120,7 @@ class DocumentDictationHandler {
             } else {
                 this.ui.notifyInfo('El subrayado ya está activo');
             }
+            // Limpiamos el comando del texto para que no se escriba
             normalized = normalized.replace(underlineCmd, '').trim();
         }
 
