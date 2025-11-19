@@ -30,107 +30,113 @@
   </script>
   <style>
     .material-symbols-outlined {
-      font-variation-settings:
-        'FILL' 0,
-        'wght' 400,
-        'GRAD' 0,
-        'opsz' 24
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    
+    /* Scrollbar sutil */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: rgba(156, 163, 175, 0.5);
+      border-radius: 20px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(156, 163, 175, 0.8);
     }
   </style>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark font-display text-[#333333] dark:text-gray-200">
-  <div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
-    <div class="layout-container flex h-full grow flex-col">
-      <div class="flex flex-1 justify-center py-5 sm:px-6 lg:px-8">
-        <div class="layout-content-container flex flex-col w-full max-w-4xl flex-1 px-4">
-          <header
-            class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-700 py-4 mb-8">
-            <div class="flex items-center gap-4 text-gray-800 dark:text-white">
-              <span class="material-symbols-outlined text-primary text-3xl">
-                auto_draw_solid
-              </span>
-              <h1 class="text-[#333333] dark:text-white text-2xl font-bold leading-tight tracking-tight">VozDoc</h1>
-            </div>
-            <div class="flex items-center gap-2">
-              <button aria-label="Ayuda"
-                class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-gray-200 dark:bg-background-dark dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold leading-normal tracking-[0.015em]">
-                <span class="material-symbols-outlined text-xl">
-                  help
-                </span>
-              </button>
-              <button aria-label="Configuración"
-                class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 bg-gray-200 dark:bg-background-dark dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-bold leading-normal tracking-[0.015em]">
-                <span class="material-symbols-outlined text-xl">
-                  settings
-                </span>
-              </button>
-            </div>
-          </header>
-          <main class="flex flex-col gap-10">
-            <div class="flex flex-wrap justify-between gap-3">
-              <div class="flex min-w-72 flex-col gap-2">
-                <h2 class="text-[#333333] dark:text-white text-4xl font-black leading-tight tracking-tight">Hola, ¿qué
-                  te gustaría hacer?</h2>
-                <p class="text-gray-700 dark:text-gray-300 text-lg font-normal leading-normal">Di 'crear documento' o
-                  'crear correo' para empezar.</p>
-              </div>
-            </div>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#333333] dark:text-gray-200 h-screen w-full overflow-hidden flex flex-col">
 
-            <div id="voice-control-container" class="flex items-center justify-center h-16 gap-3 my-4">
-              <div class="relative flex items-center justify-center">
-                <div class="ping-animation absolute h-10 w-10 animate-ping rounded-full bg-green-400 opacity-50"></div>
-                <button aria-label="Activar o desactivar micrófono"
-                  class="mic-button relative flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white">
-                  <span class="material-symbols-outlined">mic</span>
-                </button>
-              </div>
-              <p class="status-text text-base font-medium text-green-700 dark:text-green-300" aria-live="polite"
-                aria-atomic="true">Escuchando...</p>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <a href="CreacionDeDocumentos.html"
-                class="flex flex-1 gap-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 flex-col items-start justify-center cursor-pointer transition-all hover:border-primary hover:shadow-lg dark:hover:border-primary">
-                <div class="text-primary bg-primary/10 rounded-lg p-3">
-                  <span class="material-symbols-outlined text-4xl">
-                    article
-                  </span>
-                </div>
-                <div class="flex flex-col gap-1">
-                  <h2 class="text-[#333333] dark:text-white text-xl font-bold leading-tight">Crear un nuevo documento
-                  </h2>
-                  <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Di "crear documento"
-                  </p>
-                </div>
-              </a>
-              <a href="CreacionDeCorreos.html"
-                class="flex flex-1 gap-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 flex-col items-start justify-center cursor-pointer transition-all hover:border-primary hover:shadow-lg dark:hover:border-primary">
-                <div class="text-primary bg-primary/10 rounded-lg p-3">
-                  <span class="material-symbols-outlined text-4xl">
-                    mail
-                  </span>
-                </div>
-                <div class="flex flex-col gap-1">
-                  <h2 class="text-[#333333] dark:text-white text-xl font-bold leading-tight">Redactar un nuevo correo
-                  </h2>
-                  <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal">Di "crear correo"</p>
-                </div>
-              </a>
-            </div>
-            <div>
-              <h2 class="text-[#333333] dark:text-white text-2xl font-bold leading-tight tracking-tight pb-4 pt-5">Tus
-                Borradores Recientes</h2>
+    <header class="flex-none flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-10">
+      <div class="flex items-center gap-3 text-gray-800 dark:text-white">
+        <span class="material-symbols-outlined text-primary text-3xl">auto_draw_solid</span>
+        <h1 class="text-xl font-bold tracking-tight">VozDoc</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button aria-label="Ayuda" class="flex items-center justify-center rounded-lg h-9 w-9 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 transition-colors">
+          <span class="material-symbols-outlined text-xl">help</span>
+        </button>
+        <button aria-label="Configuración" class="flex items-center justify-center rounded-lg h-9 w-9 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 transition-colors">
+          <span class="material-symbols-outlined text-xl">settings</span>
+        </button>
+      </div>
+    </header>
 
-              <div id="drafts-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              </div>
+    <main class="flex-1 flex flex-col max-w-5xl mx-auto w-full p-6 gap-6 min-h-0">
+      
+      <div class="flex-none flex flex-col gap-6">
+        
+        <div class="text-center space-y-1">
+          <h2 class="text-3xl font-black text-[#333333] dark:text-white">¿Qué deseas hacer hoy?</h2>
+          <p class="text-gray-600 dark:text-gray-400">Usa tu voz o selecciona una opción.</p>
+        </div>
+
+        <div class="flex items-center justify-center gap-6 md:gap-10"> 
+          <a href="CreacionDeDocumentos.html" class="group flex-1 max-w-[200px] min-h-[140px] flex flex-col items-center justify-center gap-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-primary hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer text-center p-4">
+            <div class="text-primary bg-primary/10 rounded-full p-3 group-hover:bg-primary group-hover:text-white transition-colors">
+              <span class="material-symbols-outlined text-3xl">article</span>
             </div>
-          </main>
+            <div class="flex flex-col gap-1">
+                <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Crear Documento</span>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Di "Crear documento"</p>
+            </div>
+          </a>
+
+          <div id="voice-control-container" class="flex flex-col items-center justify-center gap-3 z-10 -mt-2">
+            <div class="relative flex items-center justify-center">
+              <div class="ping-animation absolute h-20 w-20 animate-ping rounded-full bg-green-400 opacity-50 hidden"></div>
+              <button aria-label="Activar micrófono"
+                class="mic-button relative flex h-20 w-20 items-center justify-center rounded-full bg-green-500 text-white shadow-xl hover:scale-105 transition-transform border-4 border-background-light dark:border-background-dark">
+                <span class="material-symbols-outlined text-4xl">mic</span>
+              </button>
+            </div>
+            
+            <div class="text-center w-36 max-w-[150px]"> 
+              <p class="status-text text-sm font-bold text-green-700 dark:text-green-400 whitespace-normal leading-tight" aria-live="polite">
+                Haz clic para hablar
+              </p>
+            </div>
+          </div>
+
+          <a href="CreacionDeCorreos.html" class="group flex-1 max-w-[200px] min-h-[140px] flex flex-col items-center justify-center gap-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-primary hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer text-center p-4">
+            <div class="text-primary bg-primary/10 rounded-full p-3 group-hover:bg-primary group-hover:text-white transition-colors">
+              <span class="material-symbols-outlined text-3xl">mail</span>
+            </div>
+            <div class="flex flex-col gap-1">
+                <span class="font-bold text-sm text-gray-800 dark:text-gray-100">Crear Correo</span>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Di "Crear correo"</p>
+            </div>
+          </a>
+
         </div>
       </div>
-    </div>
 
-  </div>
+      <div class="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm mt-2">
+        
+        <div class="flex-none px-5 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
+          <h3 class="font-bold text-gray-800 dark:text-white flex items-center gap-2">
+            <span class="material-symbols-outlined text-gray-500 text-lg">history</span>
+            Borradores Recientes
+          </h3>
+        </div>
+
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
+          <div id="drafts-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div class="col-span-full text-center py-8 text-gray-400 text-sm flex flex-col items-center">
+                <span class="material-symbols-outlined text-3xl mb-2 opacity-50">folder_open</span>
+                Cargando tus borradores...
+             </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+  <script type="module" src="assets/js/pages/dashboardPage.js"></script>
 </body>
-<script type="module" src="assets/js/pages/dashboardPage.js"></script>
-
 </html>
