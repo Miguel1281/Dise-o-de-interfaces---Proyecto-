@@ -816,10 +816,12 @@ class DocumentDictationHandler {
         this.isBoldActive = false;
         this.isItalicActive = false;
         this.isUnderlineActive = false; // AÑADIDO: Estado para el subrayado
+        this.historyStack = [];
     }
 
     onEnterDictationMode() {
         this.finalHtml = this.ui.captureEditorContent();
+        this.saveToHistory(); // Guardar estado inicial
         if (this.finalHtml.length > 0 && !this.finalHtml.endsWith(' ')) {
             this.finalHtml += ' ';
         }
@@ -829,6 +831,15 @@ class DocumentDictationHandler {
         this.closeOpenTags();
         this.finalHtml = this.finalHtml.trim();
         this.ui.commitEditorContent(this.finalHtml);
+    }
+
+    saveToHistory() {
+        // Limitamos el historial a los últimos 20 estados para no saturar memoria
+        if (this.historyStack.length > 20) {
+            this.historyStack.shift();
+        }
+        // Guardamos una copia del string actual
+        this.historyStack.push(this.finalHtml);
     }
 
     handleDictationEvent(event, callbacks = {}) {
@@ -844,7 +855,7 @@ class DocumentDictationHandler {
             const normalized = transcript.toLowerCase().replace(/[.,;!¡¿?]/g, '').trim();
 
             // Comandos de parada definidos
-            const stopCommands = ['terminar redacción', 'detener dictado', 'parar redacción'];
+            const stopCommands = ['terminar redacción'];
 
             // Verificamos si ALGUNO de los comandos está presente en lo que dijiste
             const foundCommand = stopCommands.find(cmd => normalized.includes(cmd));
@@ -1124,10 +1135,39 @@ class DocumentDictationHandler {
             normalized = normalized.replace(underlineCmd, '').trim();
         }
 
-        // Comandos especiales de edición
+        // 1. DESHACER
+        if (normalized === 'deshacer' || normalized === 'undo') {
+            if (this.historyStack.length > 0) {
+                this.finalHtml = this.historyStack.pop();
+                this.ui.notifySuccess('Deshecho');
+            } else {
+                this.ui.notifyInfo('No hay nada más que deshacer');
+            }
+            return;
+        }
+
+        // Si no es comando de deshacer, guardamos historial antes de modificar el texto
+        // Esto asegura que cualquier dictado o comando de borrado se pueda deshacer
+        this.saveToHistory();
+
+        // 2. BORRAR ÚLTIMA PALABRA
         if (normalized.includes('borrar última palabra')) {
             this.removeLastWord();
             this.ui.notifySuccess('Última palabra eliminada');
+            return;
+        }
+
+        // 3. BORRAR ORACIÓN (detecta . ! ?)
+        if (normalized.includes('borrar oración') || normalized.includes('eliminar oración')) {
+            this.removeLastSentence();
+            this.ui.notifySuccess('Oración eliminada');
+            return;
+        }
+
+        // 4. BORRAR ÚLTIMO PÁRRAFO (detecta <br> o bloques)
+        if (normalized.includes('borrar último párrafo') || normalized.includes('eliminar último párrafo')) {
+            this.removeLastParagraph();
+            this.ui.notifySuccess('Párrafo eliminado');
             return;
         }
 
@@ -1152,6 +1192,8 @@ class DocumentDictationHandler {
         }
 
         this.finalHtml += `${normalized} `;
+
+
     }
 
     closeOpenTags() {
@@ -1173,6 +1215,7 @@ class DocumentDictationHandler {
     }
 
     removeLastWord() {
+        // Elimina espacios finales, luego encuentra el último espacio y corta
         const trimmed = this.finalHtml.trimEnd();
         const lastSpaceIndex = trimmed.lastIndexOf(' ');
 
@@ -1181,6 +1224,46 @@ class DocumentDictationHandler {
         } else {
             this.finalHtml = '';
         }
+    }
+
+    removeLastSentence() {
+        // Busca el último signo de puntuación fuerte (. ! ?)
+        // Regex explicada: Busca cualquier cosa que NO sea .?! al final del string
+        const sentenceRegex = /[^.?!]+[.?!]*\s*$/;
+
+        if (sentenceRegex.test(this.finalHtml)) {
+            this.finalHtml = this.finalHtml.replace(sentenceRegex, '').trim();
+            if (this.finalHtml.length > 0) this.finalHtml += ' ';
+        }
+    }
+
+    removeLastParagraph() {
+        // Nuestros párrafos se crean con <br><br> o <br>
+        // Buscamos la última ocurrencia de etiquetas de salto de línea
+
+        // Normalizamos para manejar inconsistencias
+        let tempHtml = this.finalHtml.trimEnd();
+
+        // Intentamos encontrar el último bloque <br><br>
+        const lastDoubleBreak = tempHtml.lastIndexOf('<br><br>');
+
+        if (lastDoubleBreak > -1) {
+            // Cortamos todo después del último doble break
+            this.finalHtml = tempHtml.substring(0, lastDoubleBreak).trim();
+            // Opcional: mantener los breaks si solo queríamos borrar el TEXTO del párrafo
+            // Pero "Borrar párrafo" usualmente implica borrar el bloque entero.
+        } else {
+            // Si no hay doble break, quizás es el primer párrafo o usa saltos simples
+            const lastSingleBreak = tempHtml.lastIndexOf('<br>');
+            if (lastSingleBreak > -1) {
+                this.finalHtml = tempHtml.substring(0, lastSingleBreak).trim();
+            } else {
+                // Si no hay saltos de línea, borramos todo (es un solo párrafo)
+                this.finalHtml = '';
+            }
+        }
+
+        if (this.finalHtml.length > 0) this.finalHtml += ' ';
     }
 }
 
