@@ -58,6 +58,21 @@ class DocumentUI {
         this.tabPanels = document.querySelectorAll('#sidebar-state-dictating .tab-panel');
         // =========================
 
+        // === SELECTORES DE TOOLBAR ===
+        this.btnUndo = getOptionalElement('#btn-undo');
+        this.btnBold = getOptionalElement('#btn-bold');
+        this.btnItalic = getOptionalElement('#btn-italic');
+        this.btnUnderline = getOptionalElement('#btn-underline');
+        this.btnComma = getOptionalElement('#btn-comma');
+        this.btnPeriod = getOptionalElement('#btn-period');
+        this.btnParagraph = getOptionalElement('#btn-paragraph');
+        this.btnDeleteWord = getOptionalElement('#btn-delete-word');
+        this.btnDeleteSentence = getOptionalElement('#btn-delete-sentence');
+        this.btnDeleteParagraph = getOptionalElement('#btn-delete-paragraph');
+        this.btnSave = getOptionalElement('#btn-save');
+        this.btnExport = getOptionalElement('#btn-export');
+        // =============================
+
         this.saveStatusTimer = null;
         this.commandHighlightTimer = null;
         this.currentSidebarMode = 'inactive';
@@ -82,6 +97,7 @@ class DocumentUI {
 
         this.initializeCommandHelp();
         this.loadDocumentFromURL();
+        this.initToolbarListeners();
     }
 
     injectDictationQuickCommand() {
@@ -151,6 +167,262 @@ class DocumentUI {
 
     bindMicToggle(handler) {
         this.micButton.addEventListener('click', handler);
+    }
+
+    // === TOOLBAR LISTENERS ===
+    initToolbarListeners() {
+        // Grupo 1: Historial - Deshacer
+        if (this.btnUndo) {
+            this.btnUndo.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.execCommand('undo');
+                this.docEditor.focus();
+            });
+        }
+
+        // Grupo 2: Estilo - Negrita, Cursiva, Subrayado
+        if (this.btnBold) {
+            this.btnBold.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.execCommand('bold');
+                this.docEditor.focus();
+            });
+        }
+
+        if (this.btnItalic) {
+            this.btnItalic.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.execCommand('italic');
+                this.docEditor.focus();
+            });
+        }
+
+        if (this.btnUnderline) {
+            this.btnUnderline.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.execCommand('underline');
+                this.docEditor.focus();
+            });
+        }
+
+        // Grupo 3: Puntuación - Coma, Punto, Nuevo Párrafo
+        if (this.btnComma) {
+            this.btnComma.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.insertAtCursor(', ');
+            });
+        }
+
+        if (this.btnPeriod) {
+            this.btnPeriod.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.insertAtCursor('. ');
+            });
+        }
+
+        if (this.btnParagraph) {
+            this.btnParagraph.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.insertAtCursor('\n\n');
+            });
+        }
+
+        // Grupo 4: Corrección - Borrar palabra, oración, párrafo
+        if (this.btnDeleteWord) {
+            this.btnDeleteWord.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.deleteLastWord();
+            });
+        }
+
+        if (this.btnDeleteSentence) {
+            this.btnDeleteSentence.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.deleteLastSentence();
+            });
+        }
+
+        if (this.btnDeleteParagraph) {
+            this.btnDeleteParagraph.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.deleteLastParagraph();
+            });
+        }
+
+        // Grupo 5: Archivo - Guardar, Exportar
+        if (this.btnSave) {
+            this.btnSave.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.saveDocument();
+            });
+        }
+
+        if (this.btnExport) {
+            this.btnExport.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.promptExportFormat();
+            });
+        }
+    }
+
+    // === MÉTODO AUXILIAR: Insertar texto en la posición del cursor ===
+    insertAtCursor(text) {
+        this.docEditor.focus();
+
+        const selection = window.getSelection();
+        if (!selection.rangeCount) {
+            // Si no hay rango, agregar al final
+            this.docEditor.innerHTML += text;
+            this.placeCursorAtEnd();
+            return;
+        }
+
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+
+        // Manejar saltos de línea como <br>
+        if (text.includes('\n')) {
+            const fragment = document.createDocumentFragment();
+            const parts = text.split('\n');
+            parts.forEach((part, index) => {
+                if (part) {
+                    fragment.appendChild(document.createTextNode(part));
+                }
+                if (index < parts.length - 1) {
+                    fragment.appendChild(document.createElement('br'));
+                }
+            });
+            range.insertNode(fragment);
+        } else {
+            const textNode = document.createTextNode(text);
+            range.insertNode(textNode);
+            // Mover cursor al final del texto insertado
+            range.setStartAfter(textNode);
+            range.setEndAfter(textNode);
+        }
+
+        selection.removeAllRanges();
+        selection.addRange(range);
+        range.collapse(false);
+    }
+
+    // === MÉTODOS DE BORRADO ===
+    deleteLastWord() {
+        this.docEditor.focus();
+        const selection = window.getSelection();
+
+        if (selection.rangeCount > 0) {
+            try {
+                selection.modify('extend', 'backward', 'word');
+                document.execCommand('delete');
+            } catch (e) {
+                // Fallback si modify no está soportado
+                document.execCommand('delete');
+            }
+        }
+    }
+
+    deleteLastSentence() {
+        this.docEditor.focus();
+        const selection = window.getSelection();
+
+        if (selection.rangeCount > 0) {
+            try {
+                // Intentar usar sentence granularity (soporte limitado)
+                selection.modify('extend', 'backward', 'sentence');
+                document.execCommand('delete');
+            } catch (e) {
+                // Fallback: extender hacia atrás hasta encontrar un delimitador de oración
+                this.deleteUntilSentenceStart();
+            }
+        }
+    }
+
+    deleteUntilSentenceStart() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        const content = this.docEditor.innerText;
+
+        // Obtener posición actual aproximada
+        const tempRange = range.cloneRange();
+        tempRange.selectNodeContents(this.docEditor);
+        tempRange.setEnd(range.startContainer, range.startOffset);
+        const cursorPos = tempRange.toString().length;
+
+        // Buscar hacia atrás el inicio de la oración
+        const sentenceDelimiters = /[.!?¿¡]/;
+        let startPos = cursorPos - 1;
+
+        while (startPos > 0 && !sentenceDelimiters.test(content[startPos])) {
+            startPos--;
+        }
+
+        // Si encontramos un delimitador, movernos después de él
+        if (sentenceDelimiters.test(content[startPos])) {
+            startPos++;
+        }
+
+        // Calcular cuántos caracteres borrar
+        const charsToDelete = cursorPos - startPos;
+
+        for (let i = 0; i < charsToDelete; i++) {
+            selection.modify('extend', 'backward', 'character');
+        }
+
+        document.execCommand('delete');
+    }
+
+    deleteLastParagraph() {
+        this.docEditor.focus();
+        const selection = window.getSelection();
+
+        if (selection.rangeCount > 0) {
+            try {
+                // Intentar usar paragraph/block granularity
+                selection.modify('extend', 'backward', 'paragraph');
+                document.execCommand('delete');
+            } catch (e) {
+                // Fallback: buscar y eliminar hasta el salto de línea anterior
+                this.deleteUntilParagraphStart();
+            }
+        }
+    }
+
+    deleteUntilParagraphStart() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        const content = this.docEditor.innerText;
+
+        // Obtener posición actual aproximada
+        const tempRange = range.cloneRange();
+        tempRange.selectNodeContents(this.docEditor);
+        tempRange.setEnd(range.startContainer, range.startOffset);
+        const cursorPos = tempRange.toString().length;
+
+        // Buscar hacia atrás el inicio del párrafo (salto de línea)
+        let startPos = cursorPos - 1;
+
+        while (startPos > 0 && content[startPos] !== '\n') {
+            startPos--;
+        }
+
+        // Si encontramos un salto de línea, movernos después de él
+        if (content[startPos] === '\n') {
+            startPos++;
+        }
+
+        // Calcular cuántos caracteres borrar
+        const charsToDelete = cursorPos - startPos;
+
+        for (let i = 0; i < charsToDelete; i++) {
+            selection.modify('extend', 'backward', 'character');
+        }
+
+        document.execCommand('delete');
     }
 
     // === GESTIÓN DE GUARDADO ===
