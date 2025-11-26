@@ -33,6 +33,23 @@ class MailComposerUI {
         this.sidebarDictating = getOptionalElement('#sidebar-state-dictating');
         // =============================
 
+        // === SELECTORES DE TOOLBAR ===
+        this.btnUndo = getOptionalElement('#btn-mail-undo');
+        this.btnBold = getOptionalElement('#btn-mail-bold');
+        this.btnItalic = getOptionalElement('#btn-mail-italic');
+        this.btnUnderline = getOptionalElement('#btn-mail-underline');
+        this.btnComma = getOptionalElement('#btn-mail-comma');
+        this.btnPeriod = getOptionalElement('#btn-mail-period');
+        this.btnParagraph = getOptionalElement('#btn-mail-paragraph');
+        this.btnDeleteWord = getOptionalElement('#btn-mail-delete-word');
+        this.btnDeleteSentence = getOptionalElement('#btn-mail-delete-sentence');
+        this.btnDeleteParagraph = getOptionalElement('#btn-mail-delete-paragraph');
+        this.btnAttach = getOptionalElement('#btn-mail-attach');
+        this.btnSave = getOptionalElement('#btn-mail-save');
+        this.btnDiscard = getOptionalElement('#btn-mail-discard');
+        this.btnSend = getOptionalElement('#btn-mail-send');
+        // =============================
+
         this.commandChips = Array.from(this.sidebarRoot.querySelectorAll('[data-command-chip]'));
         this.commandHighlightClasses = ['ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-surface-dark'];
         this.helpStorageKey = 'vozdoc_mail_help_hidden';
@@ -58,6 +75,7 @@ class MailComposerUI {
 
         this.initCommandChips();
         this.initAttachments(); // Mantenido para el listener del input
+        this.initToolbarListeners(); // NUEVO: Inicializar listeners de la toolbar
 
         // MODIFICADO: Eliminadas las llamadas a init de los botones
         // this.initSendButton();
@@ -230,6 +248,279 @@ class MailComposerUI {
         selection.removeAllRanges();
         selection.addRange(range);
         this.emailBody.focus();
+    }
+
+    // === TOOLBAR LISTENERS ===
+    initToolbarListeners() {
+        // Grupo 1: Historial - Deshacer
+        if (this.btnUndo) {
+            this.btnUndo.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.execCommand('undo');
+                this.emailBody.focus();
+            });
+        }
+
+        // Grupo 2: Formato - Negrita, Cursiva, Subrayado
+        if (this.btnBold) {
+            this.btnBold.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.execCommand('bold');
+                this.emailBody.focus();
+            });
+        }
+
+        if (this.btnItalic) {
+            this.btnItalic.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.execCommand('italic');
+                this.emailBody.focus();
+            });
+        }
+
+        if (this.btnUnderline) {
+            this.btnUnderline.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                document.execCommand('underline');
+                this.emailBody.focus();
+            });
+        }
+
+        // Grupo 3: Puntuación - Coma, Punto, Nuevo Párrafo
+        if (this.btnComma) {
+            this.btnComma.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.insertAtCursor(', ');
+            });
+        }
+
+        if (this.btnPeriod) {
+            this.btnPeriod.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.insertAtCursor('. ');
+            });
+        }
+
+        if (this.btnParagraph) {
+            this.btnParagraph.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.insertAtCursor('\n\n');
+            });
+        }
+
+        // Grupo 4: Corrección - Borrar palabra, oración, párrafo
+        if (this.btnDeleteWord) {
+            this.btnDeleteWord.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.deleteLastWord();
+            });
+        }
+
+        if (this.btnDeleteSentence) {
+            this.btnDeleteSentence.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.deleteLastSentence();
+            });
+        }
+
+        if (this.btnDeleteParagraph) {
+            this.btnDeleteParagraph.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.deleteLastParagraph();
+            });
+        }
+
+        // Grupo 5: Acciones de Correo
+        if (this.btnAttach) {
+            this.btnAttach.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.openAttachmentPicker({ fromCommand: false });
+            });
+        }
+
+        if (this.btnSave) {
+            this.btnSave.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.saveDraft();
+            });
+        }
+
+        if (this.btnDiscard) {
+            this.btnDiscard.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.clearForm();
+                this.setStatusText('Correo descartado');
+                this.setStatusSubtext('Se han borrado todos los campos.');
+                this.notifySuccess('Correo descartado');
+            });
+        }
+
+        if (this.btnSend) {
+            this.btnSend.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                this.sendEmail();
+            });
+        }
+    }
+
+    // === MÉTODO AUXILIAR: Insertar texto en la posición del cursor ===
+    insertAtCursor(text) {
+        this.emailBody.focus();
+
+        const selection = window.getSelection();
+        if (!selection.rangeCount) {
+            // Si no hay rango, agregar al final
+            this.emailBody.innerHTML += text;
+            this.placeCursorAtEnd();
+            return;
+        }
+
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+
+        // Manejar saltos de línea como <br>
+        if (text.includes('\n')) {
+            const fragment = document.createDocumentFragment();
+            const parts = text.split('\n');
+            parts.forEach((part, index) => {
+                if (part) {
+                    fragment.appendChild(document.createTextNode(part));
+                }
+                if (index < parts.length - 1) {
+                    fragment.appendChild(document.createElement('br'));
+                }
+            });
+            range.insertNode(fragment);
+        } else {
+            const textNode = document.createTextNode(text);
+            range.insertNode(textNode);
+            // Mover cursor al final del texto insertado
+            range.setStartAfter(textNode);
+            range.setEndAfter(textNode);
+        }
+
+        selection.removeAllRanges();
+        selection.addRange(range);
+        range.collapse(false);
+    }
+
+    // === MÉTODOS DE BORRADO ===
+    deleteLastWord() {
+        this.emailBody.focus();
+        const selection = window.getSelection();
+
+        if (selection.rangeCount > 0) {
+            try {
+                selection.modify('extend', 'backward', 'word');
+                document.execCommand('delete');
+            } catch (e) {
+                // Fallback si modify no está soportado
+                document.execCommand('delete');
+            }
+        }
+    }
+
+    deleteLastSentence() {
+        this.emailBody.focus();
+        const selection = window.getSelection();
+
+        if (selection.rangeCount > 0) {
+            try {
+                // Intentar usar sentence granularity (soporte limitado)
+                selection.modify('extend', 'backward', 'sentence');
+                document.execCommand('delete');
+            } catch (e) {
+                // Fallback: extender hacia atrás hasta encontrar un delimitador de oración
+                this.deleteUntilSentenceStart();
+            }
+        }
+    }
+
+    deleteUntilSentenceStart() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        const content = this.emailBody.innerText;
+
+        // Obtener posición actual aproximada
+        const tempRange = range.cloneRange();
+        tempRange.selectNodeContents(this.emailBody);
+        tempRange.setEnd(range.startContainer, range.startOffset);
+        const cursorPos = tempRange.toString().length;
+
+        // Buscar hacia atrás el inicio de la oración
+        const sentenceDelimiters = /[.!?¿¡]/;
+        let startPos = cursorPos - 1;
+
+        while (startPos > 0 && !sentenceDelimiters.test(content[startPos])) {
+            startPos--;
+        }
+
+        // Si encontramos un delimitador, movernos después de él
+        if (sentenceDelimiters.test(content[startPos])) {
+            startPos++;
+        }
+
+        // Calcular cuántos caracteres borrar
+        const charsToDelete = cursorPos - startPos;
+
+        for (let i = 0; i < charsToDelete; i++) {
+            selection.modify('extend', 'backward', 'character');
+        }
+
+        document.execCommand('delete');
+    }
+
+    deleteLastParagraph() {
+        this.emailBody.focus();
+        const selection = window.getSelection();
+
+        if (selection.rangeCount > 0) {
+            try {
+                // Intentar usar paragraph/block granularity
+                selection.modify('extend', 'backward', 'paragraph');
+                document.execCommand('delete');
+            } catch (e) {
+                // Fallback: buscar y eliminar hasta el salto de línea anterior
+                this.deleteUntilParagraphStart();
+            }
+        }
+    }
+
+    deleteUntilParagraphStart() {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        const content = this.emailBody.innerText;
+
+        // Obtener posición actual aproximada
+        const tempRange = range.cloneRange();
+        tempRange.selectNodeContents(this.emailBody);
+        tempRange.setEnd(range.startContainer, range.startOffset);
+        const cursorPos = tempRange.toString().length;
+
+        // Buscar hacia atrás el inicio del párrafo (salto de línea)
+        let startPos = cursorPos - 1;
+
+        while (startPos > 0 && content[startPos] !== '\n') {
+            startPos--;
+        }
+
+        // Si encontramos un salto de línea, movernos después de él
+        if (content[startPos] === '\n') {
+            startPos++;
+        }
+
+        // Calcular cuántos caracteres borrar
+        const charsToDelete = cursorPos - startPos;
+
+        for (let i = 0; i < charsToDelete; i++) {
+            selection.modify('extend', 'backward', 'character');
+        }
+
+        document.execCommand('delete');
     }
 
     commitBodyContent(html) {
