@@ -67,6 +67,7 @@ class MailComposerUI {
             this.storage = null;
         }
 
+        this.injectCustomStyles(); // NUEVO: Inyectar estilos para tooltips
         this.initHelpBox();
 
         // Se mantiene la inicialización de pestañas
@@ -91,6 +92,57 @@ class MailComposerUI {
         if (!this.emailSubject || this.emailSubject.tagName !== 'TEXTAREA') return;
         this.emailSubject.style.height = 'auto';
         this.emailSubject.style.height = `${this.emailSubject.scrollHeight}px`;
+    }
+
+    // === INYECCIÓN DE ESTILOS PERSONALIZADOS ===
+    injectCustomStyles() {
+        const styleId = 'vozdoc-mail-custom-styles';
+        if (document.getElementById(styleId)) {
+            return; // Ya inyectado
+        }
+
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+            .force-tooltip-visible {
+                visibility: visible !important;
+                opacity: 1 !important;
+                background-color: #1f2937 !important; /* Gris oscuro elegante */
+                color: white !important;
+                z-index: 50 !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // === SUGERENCIA INTELIGENTE: Mostrar tooltip educativo ===
+    triggerButtonHint(buttonId, hintText) {
+        const button = getOptionalElement(buttonId);
+        if (!button) {
+            return;
+        }
+
+        const tooltip = button.querySelector('.voice-tooltip');
+        if (!tooltip) {
+            return;
+        }
+
+        // Guardar texto original si no existe
+        if (!tooltip.dataset.originalText) {
+            tooltip.dataset.originalText = tooltip.innerText;
+        }
+
+        // Cambiar texto y mostrar tooltip
+        tooltip.innerText = hintText;
+        tooltip.classList.add('force-tooltip-visible');
+
+        // Restaurar después de 3 segundos
+        setTimeout(() => {
+            tooltip.classList.remove('force-tooltip-visible');
+            if (tooltip.dataset.originalText) {
+                tooltip.innerText = tooltip.dataset.originalText;
+            }
+        }, 3000);
     }
 
     notifySuccess(message) {
@@ -1261,7 +1313,56 @@ class MailDictationHandler {
             normalized = normalized.slice(0, -1);
         }
 
+        // === SUGERENCIAS INTELIGENTES ===
+        // Detectar palabras clave y mostrar tooltips educativos
+        // IMPORTANTE: NO hacer return, el texto debe seguir escribiéndose
+        this.detectAndTriggerHints(normalized);
+
         this.finalHtml += `${normalized} `;
+    }
+
+    // === MÉTODO DE DETECCIÓN DE SUGERENCIAS ===
+    detectAndTriggerHints(text) {
+        const lowerText = text.toLowerCase();
+
+        // Estilos (solo si NO es un comando de activar/desactivar)
+        if (lowerText.includes('negrita') && !lowerText.includes('activar') && !lowerText.includes('desactivar')) {
+            this.ui.triggerButtonHint('#btn-mail-bold', "Tip: Di 'Activar negrita'");
+        }
+        if (lowerText.includes('cursiva') && !lowerText.includes('activar') && !lowerText.includes('desactivar')) {
+            this.ui.triggerButtonHint('#btn-mail-italic', "Tip: Di 'Activar cursiva'");
+        }
+        if (lowerText.includes('subrayado') && !lowerText.includes('activar') && !lowerText.includes('desactivar')) {
+            this.ui.triggerButtonHint('#btn-mail-underline', "Tip: Di 'Activar subrayado'");
+        }
+
+        // Puntuación (solo si NO es un comando de agregar)
+        if (lowerText.includes('coma') && !lowerText.includes('agregar')) {
+            this.ui.triggerButtonHint('#btn-mail-comma', "Tip: Di 'Agregar coma'");
+        }
+        // Para punto, evitar falsos positivos con finales de frase
+        if (lowerText.includes('punto') && !lowerText.includes('agregar') && !lowerText.includes('aparte')) {
+            this.ui.triggerButtonHint('#btn-mail-period', "Tip: Di 'Agregar punto'");
+        }
+        if (lowerText.includes('párrafo') && !lowerText.includes('agregar') && !lowerText.includes('nuevo') && !lowerText.includes('borrar') && !lowerText.includes('eliminar')) {
+            this.ui.triggerButtonHint('#btn-mail-paragraph', "Tip: Di 'Agregar nuevo párrafo'");
+        }
+
+        // Acciones de correo
+        if (lowerText.includes('enviar') && !lowerText.includes('correo')) {
+            this.ui.triggerButtonHint('#btn-mail-send', "Tip: Di 'Enviar correo'");
+        }
+        if (lowerText.includes('guardar') && !lowerText.includes('borrador')) {
+            this.ui.triggerButtonHint('#btn-mail-save', "Tip: Di 'Guardar borrador'");
+        }
+
+        // Corrección parcial
+        if (lowerText.includes('borrar') && lowerText.includes('palabra') && !lowerText.includes('última')) {
+            this.ui.triggerButtonHint('#btn-mail-delete-word', "Tip: Di 'Borrar última palabra'");
+        }
+        if (lowerText.includes('borrar') && lowerText.includes('oración') && !lowerText.includes('eliminar')) {
+            this.ui.triggerButtonHint('#btn-mail-delete-sentence', "Tip: Di 'Borrar oración'");
+        }
     }
 
     // === MÉTODOS DE HISTORIAL Y BORRADO ===
