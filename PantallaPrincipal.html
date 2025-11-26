@@ -116,23 +116,41 @@
         </div>
       </div>
 
-      <div class="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm mt-2">
+      <!-- Dos columnas: Documentos y Correos -->
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0 mt-2">
         
-        <div class="flex-none px-5 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
-          <h3 class="font-bold text-gray-800 dark:text-white flex items-center gap-2">
-            <span class="material-symbols-outlined text-gray-500 text-lg">history</span>
-            Borradores Recientes
-          </h3>
-        </div>
-
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
-          <div id="drafts-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div class="col-span-full text-center py-8 text-gray-400 text-sm flex flex-col items-center">
-                <span class="material-symbols-outlined text-3xl mb-2 opacity-50">folder_open</span>
-                Cargando tus borradores...
-             </div>
+        <!-- Columna 1: Mis Documentos -->
+        <div class="flex flex-col min-h-0 bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+          <div class="flex-none px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
+            <h3 class="font-bold text-gray-800 dark:text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-lg">article</span>
+              Mis Documentos
+            </h3>
+          </div>
+          <div id="documents-container" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2 max-h-[280px]">
+            <div class="text-center py-6 text-gray-400 text-sm flex flex-col items-center">
+              <span class="material-symbols-outlined text-2xl mb-1 opacity-50">description</span>
+              Cargando documentos...
+            </div>
           </div>
         </div>
+
+        <!-- Columna 2: Borradores de Correo -->
+        <div class="flex flex-col min-h-0 bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+          <div class="flex-none px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800">
+            <h3 class="font-bold text-gray-800 dark:text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-emerald-600 text-lg">mail</span>
+              Borradores de Correo
+            </h3>
+          </div>
+          <div id="mail-drafts-container" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2 max-h-[280px]">
+            <div class="text-center py-6 text-gray-400 text-sm flex flex-col items-center">
+              <span class="material-symbols-outlined text-2xl mb-1 opacity-50">drafts</span>
+              Cargando correos...
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </main>

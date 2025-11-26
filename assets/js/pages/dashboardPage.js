@@ -11,10 +11,11 @@ class DashboardUI {
         this.statusText = getElement('.status-text', this.voiceContainer);
         this.pingAnimation = getElement('.ping-animation', this.voiceContainer);
 
-        // [MODIFICADO] Contenedor y claves de almacenamiento múltiples
-        this.draftsContainer = getOptionalElement('#drafts-container');
+        // [MODIFICADO] Contenedores separados para documentos y correos
+        this.documentsContainer = getOptionalElement('#documents-container');
+        this.mailDraftsContainer = getOptionalElement('#mail-drafts-container');
         this.mailStorageKey = 'vozdoc_mail_drafts';
-        this.docStorageKey = 'vozdoc_documents'; // Nueva clave para documentos
+        this.docStorageKey = 'vozdoc_documents';
     }
 
     notifySuccess(message) {
@@ -69,87 +70,140 @@ class DashboardUI {
         setTextContent(this.statusText, message);
     }
 
-    // [MODIFICADO] Función unificada para renderizar correos Y documentos
+    // [MODIFICADO] Renderizar documentos y correos en contenedores separados con diseño de lista compacta
     renderRecentDrafts() {
-        if (!this.draftsContainer) {
-            console.warn('No se encontró el contenedor de borradores #drafts-container');
-            return;
-        }
-
         const storage = typeof window !== 'undefined' ? window.localStorage : null;
+        
+        // Renderizar Documentos
+        this.renderDocuments(storage);
+        
+        // Renderizar Correos
+        this.renderMailDrafts(storage);
+    }
+
+    renderDocuments(storage) {
+        if (!this.documentsContainer) {
+            console.warn('No se encontró el contenedor de documentos #documents-container');
+            return;
+        }
+
         if (!storage) {
-            this.draftsContainer.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-full">No se pudo acceder a localStorage.</p>`;
+            this.documentsContainer.innerHTML = this.createEmptyState('No se pudo acceder al almacenamiento', 'error');
             return;
         }
 
-        // 1. Obtener correos
-        const mails = JSON.parse(storage.getItem(this.mailStorageKey) || '[]').map(item => ({
-            type: 'mail',
-            id: item.id,
-            title: item.asunto || 'Sin asunto',
-            snippet: item.cuerpo || 'Correo vacío',
-            dateRaw: item.fecha,
-            link: `CreacionDeCorreos.html?draftId=${item.id}`,
-            icon: 'mail',
-            label: 'Correo'
-        }));
+        const docs = JSON.parse(storage.getItem(this.docStorageKey) || '[]')
+            .map(item => ({
+                id: item.id,
+                title: item.title || 'Documento sin título',
+                dateRaw: item.lastModified,
+                link: `CreacionDeDocumentos.html?docId=${item.id}`
+            }))
+            .sort((a, b) => new Date(b.dateRaw) - new Date(a.dateRaw));
 
-        // 2. Obtener documentos (¡Ahora sí los leemos!)
-        const docs = JSON.parse(storage.getItem(this.docStorageKey) || '[]').map(item => ({
-            type: 'document',
-            id: item.id,
-            title: item.title || 'Documento sin título',
-            snippet: item.contentText || 'Documento vacío', // Usamos el texto plano para la vista previa
-            dateRaw: item.lastModified,
-            link: `CreacionDeDocumentos.html?docId=${item.id}`,
-            icon: 'article',
-            label: 'Documento'
-        }));
+        this.documentsContainer.innerHTML = '';
 
-        // 3. Combinar y Ordenar por fecha (del más reciente al más antiguo)
-        const allItems = [...mails, ...docs].sort((a, b) => {
-            return new Date(b.dateRaw) - new Date(a.dateRaw);
-        });
-
-        this.draftsContainer.innerHTML = ''; // Limpia el contenedor
-
-        if (allItems.length === 0) {
-            this.draftsContainer.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-full">No tienes borradores guardados.</p>`;
+        if (docs.length === 0) {
+            this.documentsContainer.innerHTML = this.createEmptyState('No hay documentos guardados', 'article');
             return;
         }
 
-        // 4. Dibujar las tarjetas
-        allItems.forEach(item => {
-            const snippetText = item.snippet.substring(0, 70);
-
-            const date = new Date(item.dateRaw).toLocaleString('es-ES', {
-                day: 'numeric',
-                month: 'short',
-                hour: 'numeric',
-                minute: '2-digit'
+        docs.forEach(doc => {
+            const date = this.formatDate(doc.dateRaw);
+            const rowHTML = this.createListRow({
+                link: doc.link,
+                icon: 'article',
+                iconBg: 'bg-primary/10',
+                iconColor: 'text-primary',
+                borderColor: 'hover:border-primary',
+                title: doc.title,
+                date: date
             });
+            this.documentsContainer.innerHTML += rowHTML;
+        });
+    }
 
-            // Diferenciar visualmente documentos de correos (opcional, aquí uso el icono)
-            const iconColorClass = item.type === 'mail' ? 'text-primary' : 'text-emerald-600';
-            const iconBgClass = item.type === 'mail' ? 'bg-primary/10' : 'bg-emerald-600/10';
+    renderMailDrafts(storage) {
+        if (!this.mailDraftsContainer) {
+            console.warn('No se encontró el contenedor de correos #mail-drafts-container');
+            return;
+        }
 
-            const cardHTML = `
-            <a href="${item.link}" class="flex flex-col gap-3 pb-3 group cursor-pointer">
-                <div class="w-full bg-gray-200 dark:bg-gray-700 aspect-[4/3] rounded-lg overflow-hidden relative transition-all group-hover:ring-2 group-hover:ring-primary group-hover:ring-offset-2 group-hover:ring-offset-background-light dark:group-hover:ring-offset-background-dark p-4 flex flex-col">
-                    <div class="absolute top-3 right-3 ${iconBgClass} ${iconColorClass} p-1.5 rounded-md">
-                         <span class="material-symbols-outlined text-lg">${item.icon}</span>
-                    </div>
-                    <p class="text-sm text-gray-700 dark:text-gray-300 break-words line-clamp-5">${snippetText}${item.snippet.length > 70 ? '...' : ''}</p>
-                </div>
-                <div>
-                    <p class="text-[#333333] dark:text-white text-base font-bold leading-normal truncate">${item.title}</p>
-                    <p class="text-gray-700 dark:text-gray-300 text-sm font-normal leading-normal flex items-center gap-2">
-                       ${item.label} • ${date}
-                    </p>
-                </div>
-            </a>`;
+        if (!storage) {
+            this.mailDraftsContainer.innerHTML = this.createEmptyState('No se pudo acceder al almacenamiento', 'error');
+            return;
+        }
 
-            this.draftsContainer.innerHTML += cardHTML;
+        const mails = JSON.parse(storage.getItem(this.mailStorageKey) || '[]')
+            .map(item => ({
+                id: item.id,
+                title: item.asunto || 'Sin asunto',
+                recipient: item.para || '',
+                dateRaw: item.fecha,
+                link: `CreacionDeCorreos.html?draftId=${item.id}`
+            }))
+            .sort((a, b) => new Date(b.dateRaw) - new Date(a.dateRaw));
+
+        this.mailDraftsContainer.innerHTML = '';
+
+        if (mails.length === 0) {
+            this.mailDraftsContainer.innerHTML = this.createEmptyState('No hay correos guardados', 'mail');
+            return;
+        }
+
+        mails.forEach(mail => {
+            const date = this.formatDate(mail.dateRaw);
+            const subtitle = mail.recipient ? `Para: ${mail.recipient}` : date;
+            const rowHTML = this.createListRow({
+                link: mail.link,
+                icon: 'mail',
+                iconBg: 'bg-emerald-600/10',
+                iconColor: 'text-emerald-600',
+                borderColor: 'hover:border-emerald-500',
+                title: mail.title,
+                date: mail.recipient ? date : '',
+                subtitle: mail.recipient ? `Para: ${mail.recipient}` : null
+            });
+            this.mailDraftsContainer.innerHTML += rowHTML;
+        });
+    }
+
+    createListRow({ link, icon, iconBg, iconColor, borderColor, title, date, subtitle }) {
+        return `
+        <a href="${link}" 
+           class="group flex items-center gap-3 p-3 min-h-[56px] rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 ${borderColor} hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all cursor-pointer">
+            <!-- Icono -->
+            <div class="flex-none flex items-center justify-center w-10 h-10 rounded-lg ${iconBg} ${iconColor}">
+                <span class="material-symbols-outlined text-xl">${icon}</span>
+            </div>
+            <!-- Contenido -->
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-800 dark:text-white truncate">${title}</p>
+                ${subtitle ? `<p class="text-xs text-gray-500 dark:text-gray-400 truncate">${subtitle}</p>` : ''}
+                <p class="text-xs text-gray-400 dark:text-gray-500">${date}</p>
+            </div>
+            <!-- Chevron -->
+            <div class="flex-none text-gray-300 dark:text-gray-600 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition-colors">
+                <span class="material-symbols-outlined text-xl">chevron_right</span>
+            </div>
+        </a>`;
+    }
+
+    createEmptyState(message, icon) {
+        return `
+        <div class="text-center py-6 text-gray-400 text-sm flex flex-col items-center">
+            <span class="material-symbols-outlined text-2xl mb-1 opacity-50">${icon}</span>
+            ${message}
+        </div>`;
+    }
+
+    formatDate(dateRaw) {
+        if (!dateRaw) return '';
+        return new Date(dateRaw).toLocaleString('es-ES', {
+            day: 'numeric',
+            month: 'short',
+            hour: 'numeric',
+            minute: '2-digit'
         });
     }
 }
