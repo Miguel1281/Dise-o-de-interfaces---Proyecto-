@@ -221,6 +221,127 @@
                 <div class="flex flex-1 flex-col space-y-2">
                   <label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="email-body">Mensaje</label>
 
+                  <!-- Barra de Herramientas Híbrida -->
+                  <div class="flex flex-wrap items-center gap-2 pb-2 mb-1 border-b border-gray-200 dark:border-gray-700">
+
+                    <!-- Grupo 1: Historial -->
+                    <div class="flex items-center gap-1">
+                      <button id="btn-mail-undo" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Deshacer">
+                        <span class="material-symbols-outlined text-xl">undo</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Deshacer</span>
+                      </button>
+                    </div>
+
+                    <!-- Separador -->
+                    <div class="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
+
+                    <!-- Grupo 2: Formato (Texto) -->
+                    <div class="flex items-center gap-1">
+                      <button id="btn-mail-bold" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Activar negrita">
+                        <span class="material-symbols-outlined text-xl">format_bold</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Activar negrita</span>
+                      </button>
+                      <button id="btn-mail-italic" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Activar cursiva">
+                        <span class="material-symbols-outlined text-xl">format_italic</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Activar cursiva</span>
+                      </button>
+                      <button id="btn-mail-underline" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Activar subrayado">
+                        <span class="material-symbols-outlined text-xl">format_underlined</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Activar subrayado</span>
+                      </button>
+                    </div>
+
+                    <!-- Separador -->
+                    <div class="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
+
+                    <!-- Grupo 3: Puntuación -->
+                    <div class="flex items-center gap-1">
+                      <button id="btn-mail-comma" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Agregar coma">
+                        <span class="text-2xl font-bold leading-none">,</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Agregar coma</span>
+                      </button>
+                      <button id="btn-mail-period" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Agregar punto">
+                        <span class="text-2xl font-bold leading-none">.</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Agregar punto</span>
+                      </button>
+                      <button id="btn-mail-paragraph" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Agregar nuevo párrafo">
+                        <span class="material-symbols-outlined text-xl">keyboard_return</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Agregar nuevo párrafo</span>
+                      </button>
+                    </div>
+
+                    <!-- Separador -->
+                    <div class="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
+
+                    <!-- Grupo 4: Corrección -->
+                    <div class="flex items-center gap-1">
+                      <button id="btn-mail-delete-word" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Borrar última palabra">
+                        <span class="material-symbols-outlined text-xl">backspace</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Borrar última palabra</span>
+                      </button>
+                      <button id="btn-mail-delete-sentence" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Borrar oración">
+                        <span class="material-symbols-outlined text-xl">delete_sweep</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Borrar oración</span>
+                      </button>
+                      <button id="btn-mail-delete-paragraph" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Borrar último párrafo">
+                        <span class="material-symbols-outlined text-xl">delete</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Borrar último párrafo</span>
+                      </button>
+                    </div>
+
+                    <!-- Separador -->
+                    <div class="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
+
+                    <!-- Grupo 5: Acciones de Correo (Destacado a la derecha) -->
+                    <div class="flex items-center gap-1 ml-auto">
+                      <button id="btn-mail-attach" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Adjuntar archivo">
+                        <span class="material-symbols-outlined text-xl">attach_file</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Adjuntar archivo</span>
+                      </button>
+                      <button id="btn-mail-save" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300"
+                        aria-label="Guardar borrador">
+                        <span class="material-symbols-outlined text-xl">save</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Guardar borrador</span>
+                      </button>
+                      <button id="btn-mail-discard" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
+                        aria-label="Descartar correo">
+                        <span class="material-symbols-outlined text-xl">delete_forever</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Descartar correo</span>
+                      </button>
+                      <button id="btn-mail-send" type="button"
+                        class="group relative flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-lg hover:bg-primary/10 transition-colors text-primary"
+                        aria-label="Enviar correo">
+                        <span class="material-symbols-outlined text-xl">send</span>
+                        <span class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Enviar correo</span>
+                      </button>
+                    </div>
+
+                  </div>
+
                   <div id="mail-body-wrapper"
                     class="flex flex-1 rounded-2xl border-2 border-transparent bg-white transition dark:bg-surface-dark">
 
