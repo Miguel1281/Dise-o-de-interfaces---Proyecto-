@@ -49,6 +49,13 @@
       transition: border-color 0.25s ease, box-shadow 0.4s ease, background-color 0.25s ease;
     }
 
+    /* Placeholder para contenteditable */
+    #email-body:empty::before {
+      content: attr(data-placeholder);
+      color: #9ca3af;
+      pointer-events: none;
+    }
+
     #mail-body-wrapper.listening-active {
       border-color: rgba(236, 72, 153, 0.45);
       box-shadow: 0 0 0 6px rgba(236, 72, 153, 0.18), 0 0 32px rgba(236, 72, 153, 0.28);
@@ -217,9 +224,9 @@
                   <div id="mail-body-wrapper"
                     class="flex flex-1 rounded-2xl border-2 border-transparent bg-white transition dark:bg-surface-dark">
 
-                    <textarea id="email-body" rows="4"
-                      class="h-full w-full resize-none rounded-2xl bg-transparent px-5 py-5 text-base leading-relaxed text-text-light focus:outline-none dark:text-text-dark"
-                      placeholder="Di 'Comenzar redacción' para dictar el cuerpo del correo..."></textarea>
+                    <div id="email-body" contenteditable="true" role="textbox" aria-multiline="true"
+                      class="h-full w-full overflow-y-auto rounded-2xl bg-transparent px-5 py-5 text-base leading-relaxed text-text-light focus:outline-none dark:text-text-dark"
+                      data-placeholder="Di 'Comenzar redacción' para dictar el cuerpo del correo..."></div>
                   </div>
                 </div>
 
@@ -472,8 +479,10 @@
               </div>
             </div>
 
+            <!-- === PANEL DE DICTADO (Idéntico a Documentos) === -->
             <div id="sidebar-state-dictating" class="hidden space-y-4">
 
+              <!-- Pestañas: Puntuación | Formato | Corrección -->
               <div class="flex border-b border-border-light dark:border-border-dark">
                 <button id="tab-btn-punctuation" data-tab-target="tab-panel-punctuation"
                   class="tab-button active flex-1 text-center" aria-selected="true">Puntuación</button>
@@ -481,160 +490,234 @@
                   class="tab-button flex-1 text-center" aria-selected="false">Formato</button>
                 <button id="tab-btn-editing" data-tab-target="tab-panel-editing" class="tab-button flex-1 text-center"
                   aria-selected="false">Corrección</button>
-                <button id="tab-btn-actions" data-tab-target="tab-panel-actions" class="tab-button flex-1 text-center"
-                  aria-selected="false">Acciones</button>
               </div>
 
+              <!-- Panel 1: Puntuación -->
               <div id="tab-panel-punctuation" class="space-y-2 tab-panel">
-                <div data-command-chip data-command-label="Inserta coma" data-command-trigger="coma|inserta coma"
+                <!-- Agregar coma -->
+                <div data-command-chip data-command-label="Agregar coma"
+                  data-command-trigger="agregar coma|insertar coma|coma"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Coma"</h3>
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">more_horiz</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agregar coma"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                      data-command-toggle data-command-label="Inserta coma" aria-expanded="false">
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Agregar coma" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
                   <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inserta una
-                    coma en la posición actual.</p>
+                    coma en la posición actual del cursor.</p>
                 </div>
 
-                <div data-command-chip data-command-label="Inserta punto" data-command-trigger="punto|inserta punto"
+                <!-- Agregar punto -->
+                <div data-command-chip data-command-label="Agregar punto"
+                  data-command-trigger="agregar punto|insertar punto|punto"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Punto"</h3>
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">fiber_manual_record</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agregar punto"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                      data-command-toggle data-command-label="Inserta punto" aria-expanded="false">
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Agregar punto" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
                   <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Cierra la
-                    oración que estás dictando.</p>
+                    oración actual con un punto.</p>
                 </div>
 
-                <div data-command-chip data-command-label="Nuevo párrafo"
-                  data-command-trigger="nuevo párrafo|punto y aparte"
+                <!-- Agregar nuevo párrafo -->
+                <div data-command-chip data-command-label="Agregar nuevo párrafo"
+                  data-command-trigger="agregar nuevo párrafo|nuevo párrafo|punto y aparte"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Nuevo párrafo"</h3>
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">keyboard_return</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Agregar nuevo párrafo"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                      data-command-toggle data-command-label="Nuevo párrafo" aria-expanded="false">
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Agregar nuevo párrafo" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inserta una
-                    línea en blanco para cambiar de idea.</p>
-                </div>
-
-                <div data-command-chip data-command-label="Nueva línea"
-                  data-command-trigger="nueva línea|salto de línea"
-                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Nueva línea"</h3>
-                    <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                      data-command-toggle data-command-label="Nueva línea" aria-expanded="false">
-                      <span class="material-symbols-outlined text-sm">help</span>
-                    </button>
-                  </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Salta a la
-                    línea siguiente sin separar párrafos.</p>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Inserta un
+                    salto de párrafo para cambiar de idea.</p>
                 </div>
               </div>
 
+              <!-- Panel 2: Formato -->
               <div id="tab-panel-formatting" class="hidden space-y-2 tab-panel">
-                <div data-command-chip data-command-label="Negritas" data-command-trigger="activar negritas|negritas"
+                <!-- Activar negrita -->
+                <div data-command-chip data-command-label="Activar negrita"
+                  data-command-trigger="activar negrita|poner negrita"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Activar negritas"</h3>
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">format_bold</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Activar negrita"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                      data-command-toggle data-command-label="Negritas" aria-expanded="false">
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Activar negrita" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Resalta la
-                    próxima frase que dictes.</p>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">El texto
+                    que dictes a partir de ahora estará en negrita.</p>
                 </div>
 
-                <div data-command-chip data-command-label="Listas" data-command-trigger="crear lista|nueva viñeta"
+                <!-- Desactivar negrita -->
+                <div data-command-chip data-command-label="Desactivar negrita"
+                  data-command-trigger="desactivar negrita|quitar negrita"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Crear lista"</h3>
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">format_bold</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Desactivar negrita"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                      data-command-toggle data-command-label="Listas" aria-expanded="false">
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Desactivar negrita" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Comienza
-                    una lista con viñetas para detallar ideas.</p>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">El texto
+                    dejará de estar en negrita.</p>
+                </div>
+
+                <!-- Activar cursiva -->
+                <div data-command-chip data-command-label="Activar cursiva"
+                  data-command-trigger="activar cursiva|poner cursiva"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">format_italic</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Activar cursiva"</h3>
+                    <button type="button"
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Activar cursiva" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">El texto
+                    que dictes a partir de ahora estará en cursiva.</p>
+                </div>
+
+                <!-- Desactivar cursiva -->
+                <div data-command-chip data-command-label="Desactivar cursiva"
+                  data-command-trigger="desactivar cursiva|quitar cursiva"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">format_italic</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Desactivar cursiva"</h3>
+                    <button type="button"
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Desactivar cursiva" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">El texto
+                    dejará de estar en cursiva.</p>
+                </div>
+
+                <!-- Activar subrayado -->
+                <div data-command-chip data-command-label="Activar subrayado"
+                  data-command-trigger="activar subrayado|poner subrayado"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">format_underlined</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Activar subrayado"</h3>
+                    <button type="button"
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Activar subrayado" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">El texto
+                    que dictes a partir de ahora estará subrayado.</p>
+                </div>
+
+                <!-- Desactivar subrayado -->
+                <div data-command-chip data-command-label="Desactivar subrayado"
+                  data-command-trigger="desactivar subrayado|quitar subrayado"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">format_underlined</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Desactivar subrayado"</h3>
+                    <button type="button"
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Desactivar subrayado" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">El texto
+                    dejará de estar subrayado.</p>
                 </div>
               </div>
 
+              <!-- Panel 3: Corrección -->
               <div id="tab-panel-editing" class="hidden space-y-2 tab-panel">
-                <div data-command-chip data-command-label="Borrar última palabra"
-                  data-command-trigger="borrar última palabra"
+                <!-- Deshacer -->
+                <div data-command-chip data-command-label="Deshacer" data-command-trigger="deshacer|undo"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">undo</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Deshacer"</h3>
+                    <button type="button"
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Deshacer" aria-expanded="false">
+                      <span class="material-symbols-outlined text-sm">help</span>
+                    </button>
+                  </div>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Revierte la
+                    última acción realizada.</p>
+                </div>
+
+                <!-- Borrar última palabra -->
+                <div data-command-chip data-command-label="Borrar última palabra"
+                  data-command-trigger="borrar última palabra|eliminar última palabra"
+                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">backspace</span>
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar última palabra"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
                       data-command-toggle data-command-label="Borrar última palabra" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Corrige
-                    rápidamente dictados erróneos.</p>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Elimina la
+                    última palabra que dictaste.</p>
                 </div>
 
-                <div data-command-chip data-command-label="Reemplazar frase" data-command-trigger="reemplazar frase"
+                <!-- Borrar oración -->
+                <div data-command-chip data-command-label="Borrar oración"
+                  data-command-trigger="borrar oración|eliminar oración"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Reemplazar frase"</h3>
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">delete_sweep</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar oración"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                      data-command-toggle data-command-label="Reemplazar frase" aria-expanded="false">
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Borrar oración" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Sustituye
-                    la última oración que dictaste.</p>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Elimina la
+                    última oración completa.</p>
                 </div>
-              </div>
 
-              <div id="tab-panel-actions" class="hidden space-y-2 tab-panel">
-                <div data-command-chip data-command-label="Terminar redacción"
-                  data-command-trigger="terminar redacción|detener dictado"
+                <!-- Borrar último párrafo -->
+                <div data-command-chip data-command-label="Borrar último párrafo"
+                  data-command-trigger="borrar último párrafo|eliminar último párrafo"
                   class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Terminar redacción"</h3>
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">delete</span>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Borrar último párrafo"</h3>
                     <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                      data-command-toggle data-command-label="Terminar redacción" aria-expanded="false">
+                      class="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400 hover:text-primary transition-colors"
+                      data-command-toggle data-command-label="Borrar último párrafo" aria-expanded="false">
                       <span class="material-symbols-outlined text-sm">help</span>
                     </button>
                   </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Detiene el
-                    dictado y vuelve al modo de comandos.</p>
-                </div>
-
-                <div data-command-chip data-command-label="Reanudar dictado"
-                  data-command-trigger="reanudar dictado|continuar dictado"
-                  class="voice-chip rounded-2xl border border-border-light/70 bg-white/80 p-3 text-left shadow-sm dark:border-border-dark/70 dark:bg-white/5">
-                  <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Reanudar dictado"</h3>
-                    <button type="button"
-                      class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-transparent text-gray-400"
-                      data-command-toggle data-command-label="Reanudar dictado" aria-expanded="false">
-                      <span class="material-symbols-outlined text-sm">help</span>
-                    </button>
-                  </div>
-                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Vuelve al
-                    modo dictado para seguir escribiendo.</p>
+                  <p data-command-description class="mt-1.5 hidden text-xs text-gray-600 dark:text-gray-400">Elimina el
+                    último párrafo completo.</p>
                 </div>
               </div>
 

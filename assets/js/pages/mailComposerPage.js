@@ -28,6 +28,11 @@ class MailComposerUI {
         this.startCommandChip = getOptionalElement('#chip-command-start');
         this.stopCommandChip = getOptionalElement('#chip-command-stop');
 
+        // === SELECTORES DE SIDEBAR ===
+        this.sidebarInactive = getOptionalElement('#sidebar-state-inactive');
+        this.sidebarDictating = getOptionalElement('#sidebar-state-dictating');
+        // =============================
+
         this.commandChips = Array.from(this.sidebarRoot.querySelectorAll('[data-command-chip]'));
         this.commandHighlightClasses = ['ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-surface-dark'];
         this.helpStorageKey = 'vozdoc_mail_help_hidden';
@@ -112,6 +117,7 @@ class MailComposerUI {
         this.updateBadge('Comandos', 'command');
         this.setDictationAura(false);
         this.updatePrimaryCommandChip('start');
+        this.setSidebarMode('inactive');
     }
 
     showDictationMode() {
@@ -122,6 +128,8 @@ class MailComposerUI {
         this.updateBadge('Dictando', 'dictation');
         this.setDictationAura(true);
         this.updatePrimaryCommandChip('stop');
+        this.setSidebarMode('dictating');
+        this.activateTabInDictating('tab-panel-punctuation');
         this.emailBody.focus();
     }
 
@@ -204,17 +212,34 @@ class MailComposerUI {
         setTextContent(this.statusText, message);
     }
 
-    updateBodyPreview(finalText, interimText) {
-        this.emailBody.value = interimText ? `${finalText}${interimText}` : finalText;
-        this.emailBody.scrollTop = this.emailBody.scrollHeight;
+    updateBodyPreview(finalHtml, interimText) {
+        // Para contenteditable: usar innerHTML y mostrar interim en un span de color
+        if (interimText) {
+            this.emailBody.innerHTML = `${finalHtml}<span class="text-gray-400">${interimText}</span>`;
+        } else {
+            this.emailBody.innerHTML = finalHtml;
+        }
+        this.placeCursorAtEnd();
     }
 
-    commitBodyContent(text) {
-        this.emailBody.value = text;
+    placeCursorAtEnd() {
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.selectNodeContents(this.emailBody);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        this.emailBody.focus();
+    }
+
+    commitBodyContent(html) {
+        this.emailBody.innerHTML = html;
     }
 
     captureBodyContent() {
-        return this.emailBody.value;
+        // Eliminar spans de preview (texto gris intermedio) antes de capturar
+        const withoutPreview = this.emailBody.innerHTML.replace(/<span[^>]*class="text-gray-400"[^>]*>.*?<\/span>/gi, '');
+        return withoutPreview.trim();
     }
 
     clearForm() {
@@ -392,6 +417,40 @@ class MailComposerUI {
 
         if (notify && tabLabel) {
             this.notifyInfo(`Mostrando comandos de ${tabLabel.toLowerCase()}`);
+        }
+    }
+
+    // === GESTIÓN DEL MODO DEL SIDEBAR ===
+    setSidebarMode(mode) {
+        const sections = {
+            inactive: this.sidebarInactive,
+            dictating: this.sidebarDictating,
+        };
+
+        Object.entries(sections).forEach(([key, element]) => {
+            if (!element) {
+                return;
+            }
+
+            if (key === mode) {
+                element.classList.remove('hidden');
+            } else {
+                element.classList.add('hidden');
+            }
+        });
+    }
+
+    // === ACTIVAR PESTAÑA EN MODO DICTADO ===
+    activateTabInDictating(targetId) {
+        if (!this.sidebarDictating) {
+            return;
+        }
+
+        const tabButtons = this.sidebarDictating.querySelectorAll('.tab-button');
+        const tabPanels = this.sidebarDictating.querySelectorAll('.tab-panel');
+
+        if (tabButtons.length && tabPanels.length) {
+            this.activateTab(targetId, tabButtons, tabPanels, { notify: false });
         }
     }
 
@@ -646,92 +705,264 @@ class MailComposerUI {
 class MailDictationHandler {
     constructor(ui) {
         this.ui = ui;
-        this.finalText = '';
+        this.finalHtml = '';
+        // Estados de formato
+        this.isBoldActive = false;
+        this.isItalicActive = false;
+        this.isUnderlineActive = false;
+        // Historial para deshacer
+        this.historyStack = [];
     }
 
     onEnterDictationMode() {
-        this.finalText = this.ui.captureBodyContent();
-        if (this.finalText.length > 0 && !/(\s|\n)$/.test(this.finalText)) {
-            this.finalText += ' ';
+        this.finalHtml = this.ui.captureBodyContent();
+        this.saveToHistory(); // Guardar estado inicial
+        if (this.finalHtml.length > 0 && !this.finalHtml.endsWith(' ')) {
+            this.finalHtml += ' ';
         }
         this.ui.showDictationMode();
     }
 
     onEnterCommandMode() {
-        this.finalText = this.ui.captureBodyContent().trim();
-        this.ui.commitBodyContent(this.finalText);
+        this.closeOpenTags();
+        this.finalHtml = this.finalHtml.trim();
+        this.ui.commitBodyContent(this.finalHtml);
         this.ui.showCommandMode();
+    }
+
+    closeOpenTags() {
+        if (this.isBoldActive) {
+            this.finalHtml += '</b>';
+            this.isBoldActive = false;
+        }
+        if (this.isItalicActive) {
+            this.finalHtml += '</i>';
+            this.isItalicActive = false;
+        }
+        if (this.isUnderlineActive) {
+            this.finalHtml += '</u>';
+            this.isUnderlineActive = false;
+        }
     }
 
     handleDictationEvent(event, callbacks = {}) {
         let interimTranscript = '';
-        let finalTranscript = '';
+        let finalSegment = '';
         let shouldStop = false;
 
         for (let index = event.resultIndex; index < event.results.length; index += 1) {
             const result = event.results[index];
-            const transcript = result[0].transcript;
-            const normalized = transcript.toLowerCase();
+            let transcript = result[0].transcript;
 
-            if (normalized.includes('terminar redacción')) {
+            // Normalización robusta para detección de comandos
+            const normalized = transcript.toLowerCase().replace(/[.,;!¡¿?]/g, '').trim();
+
+            // Comandos de parada
+            const stopCommands = ['terminar redacción'];
+            const foundCommand = stopCommands.find(cmd => normalized.includes(cmd));
+
+            if (foundCommand) {
                 shouldStop = true;
+                // Limpiar el comando del texto
+                const words = foundCommand.split(' ');
+                const pattern = words.join('[\\s\\.,;!¡¿?]*');
+                const cleanupRegex = new RegExp(pattern, 'gi');
+                transcript = transcript.replace(cleanupRegex, '').trim();
             }
 
-            if (result.isFinal && !shouldStop) {
-                finalTranscript += `${transcript.trim()} `;
-            } else if (!result.isFinal && !shouldStop) {
+            if (result.isFinal) {
+                finalSegment += `${transcript} `;
+            } else if (!shouldStop) {
                 interimTranscript += transcript;
             }
         }
 
-        if (finalTranscript.trim()) {
-            this.processFinalTranscript(finalTranscript);
+        // Procesar solo si quedó texto útil
+        if (finalSegment.trim()) {
+            this.processFinalTranscript(finalSegment);
             if (callbacks.onChange) {
                 callbacks.onChange();
             }
         }
 
-        this.ui.updateBodyPreview(this.finalText, interimTranscript);
-
+        // Lógica de parada mejorada
         if (shouldStop) {
-            this.finalText = this.ui.captureBodyContent().replace(/terminar redacción/gi, '').trim();
-            this.ui.commitBodyContent(this.finalText);
+            this.ui.updateBodyPreview(this.finalHtml, '');
+            this.ui.commitBodyContent(this.finalHtml);
             this.ui.notifySuccess('Dictado detenido');
             if (callbacks.onStop) {
                 callbacks.onStop();
             }
+        } else {
+            this.ui.updateBodyPreview(this.finalHtml, interimTranscript);
         }
     }
 
     processFinalTranscript(transcript) {
-        let normalized = transcript.toLowerCase().trim();
+        let normalized = transcript.toLowerCase().replace(/[.,;]/g, '').trim();
+
         if (!normalized) {
             return;
         }
 
-        if (normalized.includes('nuevo párrafo') || normalized.includes('punto y aparte')) {
-            this.finalText = this.finalText.trimEnd() + '\n\n';
+        // === NAVEGACIÓN POR VOZ ENTRE PESTAÑAS ===
+        if (/(mostrar|ver|ir a) puntuaci[oó]n/.test(normalized)) {
+            this.ui.activateTabInDictating('tab-panel-punctuation');
+            this.ui.notifyInfo('Mostrando comandos de puntuación');
+            return;
+        }
+        if (/(mostrar|ver|ir a) formato/.test(normalized)) {
+            this.ui.activateTabInDictating('tab-panel-formatting');
+            this.ui.notifyInfo('Mostrando comandos de formato');
+            return;
+        }
+        if (/(mostrar|ver|ir a) correcci[oó]n/.test(normalized) || /(mostrar|ver|ir a) editar/.test(normalized)) {
+            this.ui.activateTabInDictating('tab-panel-editing');
+            this.ui.notifyInfo('Mostrando comandos de corrección');
+            return;
+        }
+
+        // === PUNTUACIÓN ===
+        if (normalized.includes('agregar nuevo párrafo') || normalized.includes('punto y aparte')) {
+            this.finalHtml += '<br><br>';
             return;
         }
 
         if (normalized.includes('nueva línea')) {
-            this.finalText = this.finalText.trimEnd() + '\n';
+            this.finalHtml += '<br>';
             return;
         }
 
-        if (normalized.includes('coma')) {
-            this.finalText = `${this.finalText.trim()}, `;
+        if (normalized.includes('agregar coma')) {
+            this.finalHtml = `${this.finalHtml.trim()}, `;
             return;
         }
 
-        if (normalized.includes('punto')) {
-            this.finalText = `${this.finalText.trim()}. `;
+        if (normalized.includes('agregar punto')) {
+            this.finalHtml = `${this.finalHtml.trim()}. `;
             return;
         }
 
+        // === FORMATO (Lógica estricta: primero desactivar, luego activar) ===
+        // --- NEGRITA ---
+        const unboldTriggers = ['desactivar negrita'];
+        const unboldCmd = unboldTriggers.find(t => normalized.includes(t));
+        if (unboldCmd) {
+            if (this.isBoldActive) {
+                this.isBoldActive = false;
+                this.finalHtml += '</b>';
+                this.ui.notifySuccess('Negrita desactivada');
+            } else {
+                this.ui.notifyInfo('La negrita ya está desactivada');
+            }
+            normalized = normalized.replace(unboldCmd, '').trim();
+        }
+
+        const boldTriggers = ['activar negrita'];
+        const boldCmd = boldTriggers.find(t => normalized.includes(t));
+        if (boldCmd) {
+            if (!this.isBoldActive) {
+                this.isBoldActive = true;
+                this.finalHtml += '<b>';
+                this.ui.notifySuccess('Negrita activada');
+            } else {
+                this.ui.notifyInfo('La negrita ya está activa');
+            }
+            normalized = normalized.replace(boldCmd, '').trim();
+        }
+
+        // --- CURSIVA ---
+        const unitalicTriggers = ['desactivar cursiva'];
+        const unitalicCmd = unitalicTriggers.find(t => normalized.includes(t));
+        if (unitalicCmd) {
+            if (this.isItalicActive) {
+                this.isItalicActive = false;
+                this.finalHtml += '</i>';
+                this.ui.notifySuccess('Cursiva desactivada');
+            } else {
+                this.ui.notifyInfo('La cursiva ya está desactivada');
+            }
+            normalized = normalized.replace(unitalicCmd, '').trim();
+        }
+
+        const italicTriggers = ['activar cursiva'];
+        const italicCmd = italicTriggers.find(t => normalized.includes(t));
+        if (italicCmd) {
+            if (!this.isItalicActive) {
+                this.isItalicActive = true;
+                this.finalHtml += '<i>';
+                this.ui.notifySuccess('Cursiva activada');
+            } else {
+                this.ui.notifyInfo('La cursiva ya está activa');
+            }
+            normalized = normalized.replace(italicCmd, '').trim();
+        }
+
+        // --- SUBRAYADO ---
+        const ununderlineTriggers = ['desactivar subrayado'];
+        const ununderlineCmd = ununderlineTriggers.find(t => normalized.includes(t));
+        if (ununderlineCmd) {
+            if (this.isUnderlineActive) {
+                this.isUnderlineActive = false;
+                this.finalHtml += '</u>';
+                this.ui.notifySuccess('Subrayado desactivado');
+            } else {
+                this.ui.notifyInfo('El subrayado ya está desactivado');
+            }
+            normalized = normalized.replace(ununderlineCmd, '').trim();
+        }
+
+        const underlineTriggers = ['activar subrayado'];
+        const underlineCmd = underlineTriggers.find(t => normalized.includes(t));
+        if (underlineCmd) {
+            if (!this.isUnderlineActive) {
+                this.isUnderlineActive = true;
+                this.finalHtml += '<u>';
+                this.ui.notifySuccess('Subrayado activado');
+            } else {
+                this.ui.notifyInfo('El subrayado ya está activo');
+            }
+            normalized = normalized.replace(underlineCmd, '').trim();
+        }
+
+        // === CORRECCIÓN ===
+        // 1. DESHACER
+        if (normalized === 'deshacer' || normalized === 'undo') {
+            if (this.historyStack.length > 0) {
+                this.finalHtml = this.historyStack.pop();
+                this.ui.notifySuccess('Deshecho');
+            } else {
+                this.ui.notifyInfo('No hay nada más que deshacer');
+            }
+            return;
+        }
+
+        // Si no es comando de deshacer, guardamos historial antes de modificar
+        this.saveToHistory();
+
+        // 2. BORRAR ÚLTIMA PALABRA
         if (normalized.includes('borrar última palabra')) {
             this.removeLastWord();
             this.ui.notifySuccess('Última palabra eliminada');
+            return;
+        }
+
+        // 3. BORRAR ORACIÓN
+        if (normalized.includes('borrar oración') || normalized.includes('eliminar oración')) {
+            this.removeLastSentence();
+            this.ui.notifySuccess('Oración eliminada');
+            return;
+        }
+
+        // 4. BORRAR ÚLTIMO PÁRRAFO
+        if (normalized.includes('borrar último párrafo') || normalized.includes('eliminar último párrafo')) {
+            this.removeLastParagraph();
+            this.ui.notifySuccess('Párrafo eliminado');
+            return;
+        }
+
+        // Si después de procesar comandos queda texto, lo añadimos
+        if (!normalized) {
             return;
         }
 
@@ -739,17 +970,71 @@ class MailDictationHandler {
             normalized = normalized.slice(0, -1);
         }
 
-        this.finalText += `${normalized} `;
+        this.finalHtml += `${normalized} `;
+    }
+
+    // === MÉTODOS DE HISTORIAL Y BORRADO ===
+    saveToHistory() {
+        // Limitamos el historial a los últimos 20 estados
+        if (this.historyStack.length > 20) {
+            this.historyStack.shift();
+        }
+        this.historyStack.push(this.finalHtml);
     }
 
     removeLastWord() {
-        const trimmed = this.finalText.trimEnd();
-        const lastSpaceIndex = trimmed.lastIndexOf(' ');
+        // Crear un elemento temporal para extraer texto plano
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = this.finalHtml;
+        let text = tempDiv.textContent || tempDiv.innerText || '';
+        text = text.trimEnd();
 
+        const lastSpaceIndex = text.lastIndexOf(' ');
         if (lastSpaceIndex > -1) {
-            this.finalText = `${trimmed.substring(0, lastSpaceIndex).trim()} `;
+            const wordToRemove = text.substring(lastSpaceIndex + 1);
+            // Buscar y eliminar la última ocurrencia de la palabra en el HTML
+            const lastWordIndex = this.finalHtml.lastIndexOf(wordToRemove);
+            if (lastWordIndex > -1) {
+                this.finalHtml = this.finalHtml.substring(0, lastWordIndex).trimEnd() + ' ';
+            }
         } else {
-            this.finalText = '';
+            this.finalHtml = '';
+        }
+    }
+
+    removeLastSentence() {
+        const trimmed = this.finalHtml.trimEnd();
+        const sentenceDelimiters = /[.!?¿¡]/;
+        let lastIndex = -1;
+
+        // Buscamos el delimitador ignorando etiquetas HTML
+        for (let i = trimmed.length - 1; i >= 0; i--) {
+            const char = trimmed[i];
+            if (sentenceDelimiters.test(char)) {
+                lastIndex = i;
+                break;
+            }
+        }
+
+        if (lastIndex > 0) {
+            this.finalHtml = trimmed.substring(0, lastIndex + 1) + ' ';
+        } else {
+            this.finalHtml = '';
+        }
+    }
+
+    removeLastParagraph() {
+        const trimmed = this.finalHtml.trimEnd();
+        // Buscar último <br><br> o <br>
+        const lastBrBr = trimmed.lastIndexOf('<br><br>');
+        const lastBr = trimmed.lastIndexOf('<br>');
+
+        if (lastBrBr > 0) {
+            this.finalHtml = trimmed.substring(0, lastBrBr).trimEnd() + '<br><br>';
+        } else if (lastBr > 0) {
+            this.finalHtml = trimmed.substring(0, lastBr).trimEnd() + '<br>';
+        } else {
+            this.finalHtml = '';
         }
     }
 }
@@ -944,7 +1229,7 @@ function bootstrapMailComposer() {
     const modeManager = new RecognitionModeManager(recognition);
     const dictationHandler = new MailDictationHandler(ui);
 
-    dictationHandler.finalText = ui.captureBodyContent();
+    dictationHandler.finalHtml = ui.captureBodyContent();
 
     const speechService = new SpeechSynthesisService({ lang: 'es-ES' });
 
