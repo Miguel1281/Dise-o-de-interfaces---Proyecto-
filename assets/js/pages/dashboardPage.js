@@ -73,10 +73,10 @@ class DashboardUI {
     // [MODIFICADO] Renderizar documentos y correos en contenedores separados con diseño de lista compacta
     renderRecentDrafts() {
         const storage = typeof window !== 'undefined' ? window.localStorage : null;
-        
+
         // Renderizar Documentos
         this.renderDocuments(storage);
-        
+
         // Renderizar Correos
         this.renderMailDrafts(storage);
     }
