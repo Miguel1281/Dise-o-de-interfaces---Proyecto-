@@ -95,9 +95,61 @@ class DocumentUI {
         this.storageKey = 'vozdoc_documents';
         this.currentDocId = null;
 
+        this.injectCustomStyles();
         this.initializeCommandHelp();
         this.loadDocumentFromURL();
         this.initToolbarListeners();
+    }
+
+    // === INYECCIÓN DE ESTILOS PERSONALIZADOS ===
+    injectCustomStyles() {
+        const styleId = 'vozdoc-custom-styles';
+        if (document.getElementById(styleId)) {
+            return; // Ya inyectado
+        }
+
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+            .force-tooltip-visible {
+                visibility: visible !important;
+                opacity: 1 !important;
+                background-color: #1f2937 !important; /* Gris oscuro elegante */
+                color: white !important;
+                z-index: 50 !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // === SUGERENCIA INTELIGENTE: Mostrar tooltip educativo ===
+    triggerButtonHint(buttonId, hintText) {
+        const button = getOptionalElement(buttonId);
+        if (!button) {
+            return;
+        }
+
+        const tooltip = button.querySelector('.voice-tooltip');
+        if (!tooltip) {
+            return;
+        }
+
+        // Guardar texto original si no existe
+        if (!tooltip.dataset.originalText) {
+            tooltip.dataset.originalText = tooltip.innerText;
+        }
+
+        // Cambiar texto y mostrar tooltip
+        tooltip.innerText = hintText;
+        tooltip.classList.add('force-tooltip-visible');
+
+        // Restaurar después de 3 segundos
+        setTimeout(() => {
+            tooltip.classList.remove('force-tooltip-visible');
+            if (tooltip.dataset.originalText) {
+                tooltip.innerText = tooltip.dataset.originalText;
+            }
+        }, 3000);
     }
 
     injectDictationQuickCommand() {
@@ -1463,9 +1515,57 @@ class DocumentDictationHandler {
             normalized = normalized.slice(0, -1);
         }
 
+        // === SUGERENCIAS INTELIGENTES ===
+        // Detectar palabras clave y mostrar tooltips educativos
+        // IMPORTANTE: NO hacer return, el texto debe seguir escribiéndose
+        this.detectAndTriggerHints(normalized);
+
         this.finalHtml += `${normalized} `;
 
 
+    }
+
+    // === MÉTODO DE DETECCIÓN DE SUGERENCIAS ===
+    detectAndTriggerHints(text) {
+        const lowerText = text.toLowerCase();
+
+        // Estilos (solo si NO es un comando de activar/desactivar)
+        if (lowerText.includes('negrita') && !lowerText.includes('activar') && !lowerText.includes('desactivar')) {
+            this.ui.triggerButtonHint('#btn-bold', "Tip: Di 'Activar negrita'");
+        }
+        if (lowerText.includes('cursiva') && !lowerText.includes('activar') && !lowerText.includes('desactivar')) {
+            this.ui.triggerButtonHint('#btn-italic', "Tip: Di 'Activar cursiva'");
+        }
+        if (lowerText.includes('subrayado') && !lowerText.includes('activar') && !lowerText.includes('desactivar')) {
+            this.ui.triggerButtonHint('#btn-underline', "Tip: Di 'Activar subrayado'");
+        }
+
+        // Puntuación (solo si NO es un comando de agregar/insertar)
+        if (lowerText.includes('coma') && !lowerText.includes('agregar') && !lowerText.includes('insertar')) {
+            this.ui.triggerButtonHint('#btn-comma', "Tip: Di 'Agregar coma'");
+        }
+        // Para punto, evitar falsos positivos con finales de frase
+        if (lowerText.includes('punto') && !lowerText.includes('agregar') && !lowerText.includes('insertar') && !lowerText.includes('aparte')) {
+            this.ui.triggerButtonHint('#btn-period', "Tip: Di 'Agregar punto'");
+        }
+        // Para párrafo, evitar si ya es comando
+        if (lowerText.includes('párrafo') && !lowerText.includes('nuevo') && !lowerText.includes('agregar') && !lowerText.includes('borrar') && !lowerText.includes('eliminar')) {
+            this.ui.triggerButtonHint('#btn-paragraph', "Tip: Di 'Agregar nuevo párrafo'");
+        }
+
+        // Borrado (detectar menciones que NO son comandos exactos)
+        if (lowerText.includes('borrar') || lowerText.includes('eliminar')) {
+            // Solo sugerir si mencionan la palabra pero NO el comando completo
+            if (lowerText.includes('palabra') && !lowerText.includes('última palabra')) {
+                this.ui.triggerButtonHint('#btn-delete-word', "Tip: Di 'Borrar última palabra'");
+            }
+            if (lowerText.includes('oración') && !lowerText.includes('borrar oración') && !lowerText.includes('eliminar oración')) {
+                this.ui.triggerButtonHint('#btn-delete-sentence', "Tip: Di 'Borrar oración'");
+            }
+            if (lowerText.includes('párrafo') && !lowerText.includes('último párrafo')) {
+                this.ui.triggerButtonHint('#btn-delete-paragraph', "Tip: Di 'Borrar último párrafo'");
+            }
+        }
     }
 
     closeOpenTags() {
