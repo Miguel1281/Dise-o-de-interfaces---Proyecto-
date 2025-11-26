@@ -206,6 +206,125 @@
           <div
             class="rounded-3xl border border-border-light bg-surface-light p-8 shadow-sm dark:border-border-dark dark:bg-surface-dark flex-1 flex flex-col">
             <div class="space-y-6 flex-1 flex flex-col">
+
+              <!-- Toolbar de Edición Completa -->
+              <div id="doc-toolbar"
+                class="flex flex-wrap items-center gap-2 pb-4 mb-2 border-b border-gray-200 dark:border-border-dark"
+                role="toolbar" aria-label="Herramientas de edición">
+
+                <!-- Grupo 1: Historial -->
+                <div class="flex items-center gap-1">
+                  <button type="button" id="btn-undo" aria-label="Deshacer"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+                    <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">undo</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Deshacer</span>
+                  </button>
+                </div>
+
+                <!-- Separador -->
+                <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1" aria-hidden="true"></div>
+
+                <!-- Grupo 2: Estilo -->
+                <div class="flex items-center gap-1">
+                  <button type="button" id="btn-bold" aria-label="Negrita"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+                    <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">format_bold</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Negrita</span>
+                  </button>
+                  <button type="button" id="btn-italic" aria-label="Cursiva"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+                    <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">format_italic</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Cursiva</span>
+                  </button>
+                  <button type="button" id="btn-underline" aria-label="Subrayado"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+                    <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">format_underlined</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Subrayado</span>
+                  </button>
+                </div>
+
+                <!-- Separador -->
+                <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1" aria-hidden="true"></div>
+
+                <!-- Grupo 3: Puntuación Rápida -->
+                <div class="flex items-center gap-1">
+                  <button type="button" id="btn-comma" aria-label="Insertar coma"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+                    <span class="text-xl font-bold text-gray-700 dark:text-gray-300">,</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Insertar
+                      coma</span>
+                  </button>
+                  <button type="button" id="btn-period" aria-label="Insertar punto"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+                    <span class="text-xl font-bold text-gray-700 dark:text-gray-300">.</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Insertar
+                      punto</span>
+                  </button>
+                  <button type="button" id="btn-paragraph" aria-label="Nuevo párrafo"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+                    <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">keyboard_return</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Nuevo
+                      párrafo</span>
+                  </button>
+                </div>
+
+                <!-- Separador -->
+                <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1" aria-hidden="true"></div>
+
+                <!-- Grupo 4: Corrección -->
+                <div class="flex items-center gap-1">
+                  <button type="button" id="btn-delete-word" aria-label="Borrar última palabra"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 active:bg-amber-100 dark:active:bg-amber-900/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50">
+                    <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">backspace</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Borrar
+                      palabra</span>
+                  </button>
+                  <button type="button" id="btn-delete-sentence" aria-label="Borrar oración"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 active:bg-amber-100 dark:active:bg-amber-900/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50">
+                    <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">delete_sweep</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Borrar
+                      oración</span>
+                  </button>
+                  <button type="button" id="btn-delete-paragraph" aria-label="Borrar último párrafo"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 active:bg-amber-100 dark:active:bg-amber-900/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50">
+                    <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">delete</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Borrar
+                      párrafo</span>
+                  </button>
+                </div>
+
+                <!-- Separador -->
+                <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1" aria-hidden="true"></div>
+
+                <!-- Grupo 5: Archivo (Alineado a la derecha) -->
+                <div class="flex items-center gap-1 ml-auto">
+                  <button type="button" id="btn-save" aria-label="Guardar documento"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+                    <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">save</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Guardar</span>
+                  </button>
+                  <button type="button" id="btn-export" aria-label="Exportar documento"
+                    class="group relative flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+                    <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">download</span>
+                    <span
+                      class="voice-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity z-10">Exportar
+                      PDF/Word</span>
+                  </button>
+                </div>
+
+              </div>
+
               <div>
                 <label class="sr-only" for="doc-title">Título del documento</label>
                 <input id="doc-title" aria-label="Título del documento"
